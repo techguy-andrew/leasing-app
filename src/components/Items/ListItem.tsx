@@ -33,7 +33,7 @@ export default function ListItem({ id, applicant, property, unitNumber, status, 
               {status}
             </span>
           </div>
-          <div className="flex items-center gap-4 text-sm text-gray-600">
+          <div className="flex flex-col gap-1 text-sm text-gray-600">
             <span className="truncate">{property}</span>
             <span>Unit {unitNumber}</span>
             <span>Move-in: {moveInDate}</span>

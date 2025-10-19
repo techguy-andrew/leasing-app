@@ -274,18 +274,10 @@ export default function ApplicationDetailPage({ params }: PageProps) {
         <div className="max-w-4xl mx-auto w-full bg-white border border-gray-200 rounded-lg p-6 md:p-8">
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-gray-900">Application Details</h2>
-                <InlineStatusBadge
-                  status={formData.status}
-                  onChange={(value) => handleFieldChange('status', value)}
-                  options={statusOptions}
-                  isEditMode={isEditMode}
-                />
-              </div>
+              <h2 className="text-2xl font-bold text-gray-900">Application Details</h2>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <AnimatePresence mode="wait">
                   {!isEditMode ? (
                     <motion.div
@@ -315,6 +307,17 @@ export default function ApplicationDetailPage({ params }: PageProps) {
             </div>
 
             <div className="flex flex-col gap-4 pt-4 border-t border-gray-200">
+              {/* Status Badge */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-500">Status:</span>
+                <InlineStatusBadge
+                  status={formData.status}
+                  onChange={(value) => handleFieldChange('status', value)}
+                  options={statusOptions}
+                  isEditMode={isEditMode}
+                />
+              </div>
+
               {/* Applicant Name Field */}
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium text-gray-500">Applicant Name</span>

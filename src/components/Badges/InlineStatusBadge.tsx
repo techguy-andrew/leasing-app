@@ -53,7 +53,7 @@ export default function InlineStatusBadge({
 
   if (!isEditMode) {
     return (
-      <span className={`px-3 py-1 text-sm font-medium rounded ${colorClass}`}>
+      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${colorClass}`}>
         {status}
       </span>
     )
@@ -64,7 +64,7 @@ export default function InlineStatusBadge({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`px-3 py-1 text-sm font-medium rounded ${colorClass}`}
+        className={`px-2 py-0.5 text-xs font-medium rounded-full hover:opacity-80 transition-opacity ${colorClass}`}
       >
         {status}
       </button>
@@ -76,7 +76,7 @@ export default function InlineStatusBadge({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute left-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-20"
+            className="absolute left-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-20"
           >
             <div className="py-1">
               {options.map((option) => {
@@ -85,9 +85,9 @@ export default function InlineStatusBadge({
                   <button
                     key={option.value}
                     onClick={() => handleSelect(option.value)}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
+                    className="w-full text-left px-3 py-1.5 hover:bg-gray-50 transition-colors"
                   >
-                    <span className={`px-2 py-1 text-xs font-medium rounded ${optionColorClass}`}>
+                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${optionColorClass}`}>
                       {option.label}
                     </span>
                   </button>
