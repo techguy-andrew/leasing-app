@@ -22,6 +22,19 @@ const statusOptions = [
   { value: 'Rejected', label: 'Rejected' }
 ]
 
+const propertyOptions = [
+  { value: 'Burbank Village Apartments', label: 'Burbank Village Apartments' },
+  { value: 'Carlisle Apartments', label: 'Carlisle Apartments' },
+  { value: 'Clover Hills Apartments', label: 'Clover Hills Apartments' },
+  { value: 'Legacy Apartments', label: 'Legacy Apartments' },
+  { value: 'Norwalk Village Estates', label: 'Norwalk Village Estates' },
+  { value: 'NW Pine Apartments', label: 'NW Pine Apartments' },
+  { value: 'Orchard Meadows Apartments', label: 'Orchard Meadows Apartments' },
+  { value: 'Parkside Luxury Apartments', label: 'Parkside Luxury Apartments' },
+  { value: 'Prairie Village', label: 'Prairie Village' },
+  { value: 'West Glen Apartments', label: 'West Glen Apartments' }
+]
+
 export default function FormV2() {
   const [formData, setFormData] = useState<FormData>({
     status: '',
@@ -37,11 +50,55 @@ export default function FormV2() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  const formatDate = (value: string) => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '')
+
+    // Add slashes at appropriate positions
+    if (digits.length <= 2) {
+      return digits
+    } else if (digits.length <= 4) {
+      return `${digits.slice(0, 2)}/${digits.slice(2)}`
+    } else {
+      return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`
+    }
+  }
+
+  const formatPhone = (value: string) => {
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '')
+
+    // Add dashes at appropriate positions
+    if (digits.length <= 3) {
+      return digits
+    } else if (digits.length <= 6) {
+      return `${digits.slice(0, 3)}-${digits.slice(3)}`
+    } else {
+      return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`
+    }
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }))
+  }
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatDate(e.target.value)
+    setFormData(prev => ({
+      ...prev,
+      moveInDate: formatted
+    }))
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value)
+    setFormData(prev => ({
+      ...prev,
+      phone: formatted
     }))
   }
 
@@ -94,7 +151,7 @@ export default function FormV2() {
   }
 
   return (
-    <div className="flex flex-col gap-6 border border-gray-300 rounded-lg p-8 w-[80vw]">
+    <div className="flex flex-col gap-6 border border-gray-300 rounded-lg p-6 md:p-8 w-full max-w-2xl">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <SelectField
           name="status"
@@ -104,18 +161,18 @@ export default function FormV2() {
           placeholder="Select Status"
         />
         <TextField
-          type="date"
-          placeholder="Move-In Date"
+          type="text"
+          placeholder="MM/DD/YYYY"
           name="moveInDate"
           value={formData.moveInDate}
-          onChange={handleChange}
+          onChange={handleDateChange}
         />
-        <TextField
-          type="text"
-          placeholder="Property"
+        <SelectField
           name="property"
           value={formData.property}
-          onChange={handleChange}
+          onChange={handleSelectChange}
+          options={propertyOptions}
+          placeholder="Select Property"
         />
         <TextField
           type="text"
@@ -139,11 +196,11 @@ export default function FormV2() {
           onChange={handleChange}
         />
         <TextField
-          type="tel"
+          type="text"
           placeholder="555-123-4567"
           name="phone"
           value={formData.phone}
-          onChange={handleChange}
+          onChange={handlePhoneChange}
         />
         <Submit />
       </form>
