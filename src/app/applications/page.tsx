@@ -1,30 +1,15 @@
 import HeaderCard from '@/components/Cards/HeaderCard'
 import ListItem from '@/components/Items/ListItem'
-
-interface Application {
-  id: number
-  status: string
-  moveInDate: string
-  property: string
-  unitNumber: string
-  applicant: string
-  email: string
-  phone: string
-  createdAt: string
-  updatedAt: string
-}
+import { prisma } from '@/lib/prisma'
 
 async function getApplications() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/applications`, {
-    cache: 'no-store'
+  const applications = await prisma.application.findMany({
+    orderBy: {
+      createdAt: 'desc'
+    }
   })
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch applications')
-  }
-
-  const data = await res.json()
-  return data.data as Application[]
+  return applications
 }
 
 export default async function ApplicationsPage() {
@@ -50,7 +35,7 @@ export default async function ApplicationsPage() {
               property={app.property}
               status={app.status}
               moveInDate={app.moveInDate}
-              createdAt={app.createdAt}
+              createdAt={app.createdAt.toISOString()}
             />
           ))
         )}
