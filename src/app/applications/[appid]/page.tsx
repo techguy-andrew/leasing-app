@@ -405,7 +405,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Delete Confirmation Modal */}
