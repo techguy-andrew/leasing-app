@@ -11,6 +11,7 @@ import EditMenu from '@/components/Buttons/EditMenu/EditMenu'
 import Save from '@/components/Buttons/Save/Save'
 import Cancel from '@/components/Buttons/Cancel/Cancel'
 import Confirm from '@/components/Modals/Confirm'
+import Toast, { ToastType } from '@/components/Toast/Toast'
 
 interface Application {
   id: number
@@ -58,7 +59,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [toastType, setToastType] = useState<ToastType>('success')
 
   const [formData, setFormData] = useState({
     status: '',
@@ -148,7 +150,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   const handleEdit = () => {
     setIsEditMode(true)
     setError(null)
-    setSuccessMessage(null)
+    setToastMessage(null)
   }
 
   const handleCancel = () => {
@@ -165,7 +167,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     }
     setIsEditMode(false)
     setError(null)
-    setSuccessMessage(null)
+    setToastMessage(null)
   }
 
   const handleSave = async () => {
@@ -173,7 +175,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
     setIsSaving(true)
     setError(null)
-    setSuccessMessage(null)
+    setToastMessage(null)
 
     try {
       const response = await fetch(`/api/applications/${application.id}`, {
@@ -190,9 +192,11 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
       setApplication(data.data)
       setIsEditMode(false)
-      setSuccessMessage('Application updated successfully!')
-      setTimeout(() => setSuccessMessage(null), 3000)
+      setToastType('success')
+      setToastMessage('Application updated successfully!')
     } catch (err) {
+      setToastType('error')
+      setToastMessage(err instanceof Error ? err.message : 'An error occurred')
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setIsSaving(false)
@@ -222,6 +226,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
       router.push('/applications')
     } catch (err) {
+      setToastType('error')
+      setToastMessage(err instanceof Error ? err.message : 'An error occurred')
       setError(err instanceof Error ? err.message : 'An error occurred')
       setShowDeleteModal(false)
       setIsDeleting(false)
@@ -266,20 +272,6 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       />
       <div className="flex flex-col w-full p-6 md:p-8">
         <div className="max-w-4xl mx-auto w-full bg-white border border-gray-200 rounded-lg p-6 md:p-8">
-          {/* Success Message */}
-          {successMessage && (
-            <div className="mb-4 p-4 bg-green-100 text-green-800 rounded-lg">
-              {successMessage}
-            </div>
-          )}
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
-              Error: {error}
-            </div>
-          )}
-
           <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -404,6 +396,13 @@ export default function ApplicationDetailPage({ params }: PageProps) {
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
         isDestructive={true}
+      />
+
+      {/* Toast Notification */}
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        onClose={() => setToastMessage(null)}
       />
     </div>
   )

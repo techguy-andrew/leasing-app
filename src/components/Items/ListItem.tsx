@@ -4,6 +4,7 @@ interface ListItemProps {
   id: number
   applicant: string
   property: string
+  unitNumber: string
   status: string
   moveInDate: string
   createdAt: string
@@ -16,13 +17,7 @@ const statusColors: Record<string, string> = {
   Rejected: 'bg-red-100 text-red-800'
 }
 
-export default function ListItem({ id, applicant, property, status, moveInDate, createdAt }: ListItemProps) {
-  const date = new Date(createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  })
-
+export default function ListItem({ id, applicant, property, unitNumber, status, moveInDate, createdAt }: ListItemProps) {
   return (
     <Link
       href={`/applications/${id}`}
@@ -40,12 +35,13 @@ export default function ListItem({ id, applicant, property, status, moveInDate, 
           </div>
           <div className="flex items-center gap-4 text-sm text-gray-600">
             <span className="truncate">{property}</span>
+            <span>Unit {unitNumber}</span>
             <span>Move-in: {moveInDate}</span>
           </div>
         </div>
       </div>
       <div className="flex items-center gap-3 text-sm text-gray-500 ml-4">
-        <span>{date}</span>
+        <span>View Details</span>
         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
