@@ -151,10 +151,17 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     setToastMessage(null)
 
     try {
+      // Convert empty strings to null for email and phone
+      const payload = {
+        ...formData,
+        email: formData.email.trim() || null,
+        phone: formData.phone.trim() || null
+      }
+
       const response = await fetch(`/api/applications/${application.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       })
 
       const data = await response.json()
