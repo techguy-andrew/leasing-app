@@ -17,29 +17,41 @@ const dateSchema = z.string()
            year >= 1900 && year <= 2100
   }, 'Invalid date')
 
-// Email validation - allow empty string or valid email
-const emailSchema = z.string()
-  .refine((val) => {
-    if (!val || val.trim() === '') return true
-    return z.string().email().safeParse(val).success
-  }, 'Invalid email format')
-  .transform(val => val.trim() || null)
-  .nullable()
-  .optional()
+// Email validation - allow empty string, null, or valid email
+const emailSchema = z.preprocess(
+  (val) => {
+    // Convert empty string, null, or undefined to null
+    if (val === '' || val === null || val === undefined) return null
+    // Convert to string and trim
+    return typeof val === 'string' ? val.trim() : val
+  },
+  z.union([
+    z.string().email('Invalid email format'),
+    z.null()
+  ])
+)
 
-// Phone validation - allow empty string or valid phone format
-const phoneSchema = z.string()
-  .refine((val) => {
-    if (!val || val.trim() === '') return true
-    return /^[\d\s\-()]+$/.test(val)
-  }, 'Phone must contain only digits, spaces, dashes, or parentheses')
-  .refine((val) => {
-    if (!val || val.trim() === '') return true
-    return val.replace(/\D/g, '').length >= 10
-  }, 'Phone must be at least 10 digits')
-  .transform(val => val.trim() || null)
-  .nullable()
-  .optional()
+// Phone validation - allow empty string, null, or valid phone format
+const phoneSchema = z.preprocess(
+  (val) => {
+    // Convert empty string, null, or undefined to null
+    if (val === '' || val === null || val === undefined) return null
+    // Convert to string and trim
+    return typeof val === 'string' ? val.trim() : val
+  },
+  z.union([
+    z.string()
+      .refine(
+        (val) => /^[\d\s\-()]+$/.test(val),
+        'Phone must contain only digits, spaces, dashes, or parentheses'
+      )
+      .refine(
+        (val) => val.replace(/\D/g, '').length >= 10,
+        'Phone must be at least 10 digits'
+      ),
+    z.null()
+  ])
+)
 
 // Schema for creating a new application (POST)
 export const applicationCreateSchema = z.object({

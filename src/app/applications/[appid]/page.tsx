@@ -94,6 +94,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
   const formatDate = (value: string) => {
     const digits = value.replace(/\D/g, '')
+    if (digits.length === 0) return ''
     if (digits.length <= 2) return digits
     if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`
     return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`
@@ -151,9 +152,25 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     setToastMessage(null)
 
     try {
+      // Normalize date to ensure MM/DD/YYYY format with leading zeros
+      const normalizeDate = (dateStr: string): string => {
+        const digits = dateStr.replace(/\D/g, '')
+        if (digits.length === 8) {
+          return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`
+        }
+        // If not 8 digits, try to parse and reformat
+        const parts = dateStr.split('/')
+        if (parts.length === 3) {
+          const [month, day, year] = parts
+          return `${month.padStart(2, '0')}/${day.padStart(2, '0')}/${year.padStart(4, '0')}`
+        }
+        return dateStr
+      }
+
       // Convert empty strings to null for email and phone
       const payload = {
         ...formData,
+        moveInDate: normalizeDate(formData.moveInDate),
         email: formData.email.trim() || null,
         phone: formData.phone.trim() || null
       }
