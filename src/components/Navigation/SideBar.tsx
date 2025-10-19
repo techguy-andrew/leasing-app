@@ -22,7 +22,7 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
             animate={{ opacity: 1, backdropFilter: 'blur(20px)' }}
             exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="fixed inset-0 top-[65px] bg-black/20 backdrop-blur-xl z-40"
+            className="fixed inset-0 bg-black/20 backdrop-blur-xl z-40"
             onClick={onClose}
           />
 
@@ -32,7 +32,7 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '-100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed top-[65px] left-0 w-72 sm:w-80 h-[calc(100vh-65px)] bg-white/90 backdrop-blur-xl border-r border-gray-200 z-50 flex flex-col overflow-y-auto shadow-2xl"
+            className="fixed top-[73px] left-0 w-72 sm:w-80 h-[calc(100vh-73px)] bg-white/90 backdrop-blur-xl border-r border-gray-200 z-50 flex flex-col overflow-y-auto shadow-2xl"
           >
             <nav className="flex flex-col gap-1 p-4 sm:p-6">
               <Link

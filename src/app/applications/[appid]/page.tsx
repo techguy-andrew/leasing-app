@@ -240,7 +240,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+      <div className="flex flex-col flex-1 w-full items-center justify-center bg-gradient-to-b from-gray-50 to-white">
         <motion.div
           className="text-lg text-gray-600"
           initial={{ opacity: 0 }}
@@ -255,7 +255,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
   if (error && !application) {
     return (
-      <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+      <div className="flex flex-col flex-1 w-full items-center justify-center bg-gradient-to-b from-gray-50 to-white">
         <motion.div
           className="text-lg text-red-600 px-4 text-center"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -279,12 +279,14 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   })
 
   return (
-    <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto bg-gradient-to-b from-gray-50 to-white">
-      <HeaderCard
-        title={`Application #${application.id}`}
-        description={`Submitted on ${createdDate}`}
-      />
-      <div className="flex flex-col w-full p-4 sm:p-6 md:p-8 lg:p-10">
+    <>
+      <div className="w-full">
+        <HeaderCard
+          title={`Application #${application.id}`}
+          description={`Submitted on ${createdDate}`}
+        />
+      </div>
+      <div className="flex flex-col w-full flex-1 p-4 sm:p-6 md:p-8 lg:p-10 bg-gradient-to-b from-gray-50 to-white">
         <motion.div
           className="max-w-4xl mx-auto w-full bg-white/95 backdrop-blur-lg border border-gray-200 rounded-2xl p-5 sm:p-6 md:p-8 shadow-xl"
           initial={{ opacity: 0, y: 20 }}
@@ -426,6 +428,6 @@ export default function ApplicationDetailPage({ params }: PageProps) {
         type={toastType}
         onClose={() => setToastMessage(null)}
       />
-    </div>
+    </>
   )
 }

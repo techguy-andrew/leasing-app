@@ -6,12 +6,14 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto bg-gradient-to-b from-gray-50 to-white">
-      <HeaderCard
-        title="Leasing Application Portal"
-        description="Manage and submit lease applications with ease"
-      />
-      <div className="flex flex-col items-center justify-center flex-1 p-4 sm:p-6 md:p-8 lg:p-12">
+    <>
+      <div className="w-full">
+        <HeaderCard
+          title="Leasing Application Portal"
+          description="Manage and submit lease applications with ease"
+        />
+      </div>
+      <div className="flex flex-col items-center justify-center flex-1 p-4 sm:p-6 md:p-8 lg:p-12 bg-gradient-to-b from-gray-50 to-white">
         <motion.div
           className="flex flex-col items-center justify-center gap-6 sm:gap-8 w-full max-w-3xl"
           initial={{ opacity: 0, y: 30 }}
@@ -56,6 +58,6 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </div>
-    </div>
+    </>
   )
 }

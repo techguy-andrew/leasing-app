@@ -135,17 +135,20 @@ export default function ApplicationsPage() {
   })
 
   return (
-    <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto">
-      <HeaderCard
-        title="Applications"
-        description="View and manage all lease applications"
-      />
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-6 px-4 sm:px-6 md:px-8 py-5 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm"
-      >
+    <>
+      <div className="w-full">
+        <HeaderCard
+          title="Applications"
+          description="View and manage all lease applications"
+        />
+      </div>
+      <div className="w-full">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-6 px-4 sm:px-6 md:px-8 py-5 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm"
+        >
         {/* Status Filter */}
         <div className="flex flex-col gap-2">
           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</span>
@@ -218,8 +221,9 @@ export default function ApplicationsPage() {
             ))}
           </div>
         </div>
-      </motion.div>
-      <div className="flex flex-col w-full bg-white">
+        </motion.div>
+      </div>
+      <div className="flex flex-col w-full flex-1 bg-white">
         <AnimatePresence mode="wait">
           {isLoading ? (
             <motion.div
@@ -280,6 +284,6 @@ export default function ApplicationsPage() {
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </>
   )
 }

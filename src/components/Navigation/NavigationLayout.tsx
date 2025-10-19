@@ -15,18 +15,18 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
   const closeSidebar = () => setIsSidebarOpen(false)
 
   return (
-    <div className="min-h-screen">
-      {/* Fixed Top Bar */}
-      <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
+    <div className="flex flex-col min-h-screen">
+      {/* Sticky Top Bar - always at the top */}
+      <div className="sticky top-0 z-[100]">
+        <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
+      </div>
 
       {/* Toggleable Sidebar */}
       <SideBar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
-      {/* Main Content Area */}
-      <main className="pt-[65px] min-h-screen">
-        <div className="relative">
-          {children}
-        </div>
+      {/* Main Content Area - stacked directly below TopBar */}
+      <main className="flex-1 flex flex-col">
+        {children}
       </main>
     </div>
   )
