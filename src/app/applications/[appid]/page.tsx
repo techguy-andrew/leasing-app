@@ -286,51 +286,46 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           description={`Submitted on ${createdDate}`}
         />
       </div>
-      <div className="flex flex-col w-full flex-1 p-4 sm:p-6 md:p-8 lg:p-10 bg-gradient-to-b from-gray-50 to-white">
+      <div className="flex flex-col w-full flex-1 p-[3%] sm:p-[4%] md:p-[5%] lg:p-[6%] bg-gradient-to-b from-gray-50 to-white">
         <motion.div
-          className="max-w-4xl mx-auto w-full bg-white/95 backdrop-blur-lg border border-gray-200 rounded-2xl p-5 sm:p-6 md:p-8 shadow-xl"
+          className="max-w-4xl mx-auto w-full bg-white/95 backdrop-blur-lg border border-gray-200 rounded-2xl p-[4%] sm:p-[5%] md:p-[6%] shadow-xl relative"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Application Details</h2>
+          {/* Action Buttons - Positioned in top right corner */}
+          <div className="absolute top-[4%] right-[4%] sm:top-[5%] sm:right-[5%] md:top-[6%] md:right-[6%]">
+            <AnimatePresence mode="wait">
+              {!isEditMode ? (
+                <motion.div
+                  key="edit-menu"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <EditMenu onEdit={handleEdit} onDelete={handleDeleteClick} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="save-cancel"
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex items-center gap-2"
+                >
+                  <Cancel onClick={handleCancel} />
+                  <Save onClick={handleSave} disabled={isSaving} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2 sm:gap-1.5">
-                <AnimatePresence mode="wait">
-                  {!isEditMode ? (
-                    <motion.div
-                      key="edit-menu"
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <EditMenu onEdit={handleEdit} onDelete={handleDeleteClick} />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="save-cancel"
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 10 }}
-                      transition={{ duration: 0.2 }}
-                      className="flex items-center gap-2 sm:gap-2"
-                    >
-                      <Cancel onClick={handleCancel} />
-                      <Save onClick={handleSave} disabled={isSaving} />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-5 pt-4 border-t border-gray-200">
+          <div className="flex flex-col gap-[4%]">
               {/* Status Badge */}
-              <div className="flex items-center gap-3">
-                <span className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide">Status:</span>
+              <div className="flex items-center gap-[2%]">
+                <span className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Status:</span>
                 <InlineStatusBadge
                   status={formData.status}
                   onChange={(value) => handleFieldChange('status', value)}
@@ -340,7 +335,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Applicant Name Field */}
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Applicant Name</span>
                 <InlineTextField
                   value={formData.applicant}
@@ -351,7 +346,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Email Field */}
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Email</span>
                 <InlineTextField
                   value={formData.email}
@@ -363,7 +358,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Phone Field */}
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Phone</span>
                 <InlineTextField
                   value={formData.phone}
@@ -374,7 +369,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Property Field */}
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Property</span>
                 <InlineSelectField
                   value={formData.property}
@@ -385,7 +380,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Unit Number Field */}
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Unit Number</span>
                 <InlineTextField
                   value={formData.unitNumber}
@@ -396,7 +391,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Move-in Date Field */}
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Move-in Date</span>
                 <InlineTextField
                   value={formData.moveInDate}
@@ -406,7 +401,6 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                 />
               </div>
             </div>
-          </div>
         </motion.div>
       </div>
 
