@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
 import { prisma } from '@/lib/prisma'
+import { applicationCreateSchema } from '@/lib/validations/application'
 
 export async function GET() {
   try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const applications = await prisma.application.findMany({
       orderBy: {
         createdAt: 'desc'
@@ -24,27 +35,48 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { status = 'New', moveInDate, property, unitNumber, name, email, phone } = body
+    const { userId } = await auth()
 
-    // Validate required fields (only core fields required)
-    if (!moveInDate || !property || !unitNumber || !name) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Name, property, unit number, and move-in date are required' },
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const body = await request.json()
+
+    // Validate request body with Zod
+    const validationResult = applicationCreateSchema.safeParse(body)
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(err => ({
+        field: err.path.join('.'),
+        message: err.message
+      }))
+
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: errors
+        },
         { status: 400 }
       )
     }
 
+    const { name, moveInDate, property, unitNumber, email, phone, status } = validationResult.data
+
     // Create the application in the database
     const application = await prisma.application.create({
       data: {
-        status,
+        userId,
+        status: status || 'New',
         moveInDate,
         property,
         unitNumber,
         applicant: name, // Map 'name' to 'applicant' field
-        email: email || null,
-        phone: phone || null
+        email,
+        phone
       }
     })
 

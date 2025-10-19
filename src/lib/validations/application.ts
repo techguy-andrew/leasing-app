@@ -1,0 +1,72 @@
+import { z } from 'zod'
+import { STATUS_OPTIONS, PROPERTY_OPTIONS } from '@/lib/constants'
+
+// Extract valid values from options
+const statusValues = STATUS_OPTIONS.map(opt => opt.value) as [string, ...string[]]
+const propertyValues = PROPERTY_OPTIONS.map(opt => opt.value) as [string, ...string[]]
+
+// Date validation helper - validates MM/DD/YYYY format and actual date
+const dateSchema = z.string()
+  .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Date must be in MM/DD/YYYY format')
+  .refine((date) => {
+    const [month, day, year] = date.split('/').map(Number)
+    const dateObj = new Date(year, month - 1, day)
+    return dateObj.getMonth() === month - 1 &&
+           dateObj.getDate() === day &&
+           dateObj.getFullYear() === year &&
+           year >= 1900 && year <= 2100
+  }, 'Invalid date')
+
+// Email validation - allow empty string or valid email
+const emailSchema = z.string()
+  .refine((val) => {
+    if (!val || val.trim() === '') return true
+    return z.string().email().safeParse(val).success
+  }, 'Invalid email format')
+  .transform(val => val.trim() || null)
+  .nullable()
+  .optional()
+
+// Phone validation - allow empty string or valid phone format
+const phoneSchema = z.string()
+  .refine((val) => {
+    if (!val || val.trim() === '') return true
+    return /^[\d\s\-()]+$/.test(val)
+  }, 'Phone must contain only digits, spaces, dashes, or parentheses')
+  .refine((val) => {
+    if (!val || val.trim() === '') return true
+    return val.replace(/\D/g, '').length >= 10
+  }, 'Phone must be at least 10 digits')
+  .transform(val => val.trim() || null)
+  .nullable()
+  .optional()
+
+// Schema for creating a new application (POST)
+export const applicationCreateSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required'),
+  moveInDate: dateSchema,
+  property: z.enum(propertyValues, {
+    errorMap: () => ({ message: 'Please select a valid property' })
+  }),
+  unitNumber: z.string().trim().min(1, 'Unit number is required'),
+  email: emailSchema,
+  phone: phoneSchema,
+  status: z.enum(statusValues).optional().default('New')
+})
+
+// Schema for updating an application (PUT)
+export const applicationUpdateSchema = z.object({
+  applicant: z.string().trim().min(1, 'Applicant name is required'),
+  moveInDate: dateSchema,
+  property: z.enum(propertyValues, {
+    errorMap: () => ({ message: 'Please select a valid property' })
+  }),
+  unitNumber: z.string().trim().min(1, 'Unit number is required'),
+  email: emailSchema,
+  phone: phoneSchema,
+  status: z.enum(statusValues).optional()
+})
+
+// Type exports for TypeScript
+export type ApplicationCreateInput = z.infer<typeof applicationCreateSchema>
+export type ApplicationUpdateInput = z.infer<typeof applicationUpdateSchema>

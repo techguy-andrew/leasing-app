@@ -1,5 +1,6 @@
 'use client'
 
+import { memo } from 'react'
 import { motion } from 'motion/react'
 
 interface HeaderCardProps {
@@ -7,7 +8,7 @@ interface HeaderCardProps {
   description?: string
 }
 
-export default function HeaderCard({ title, description }: HeaderCardProps) {
+const HeaderCard = memo(function HeaderCard({ title, description }: HeaderCardProps) {
   return (
     <motion.header
       className="w-full bg-white/90 backdrop-blur-lg border-b border-gray-200 px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 shadow-sm"
@@ -37,4 +38,6 @@ export default function HeaderCard({ title, description }: HeaderCardProps) {
       </div>
     </motion.header>
   )
-}
+})
+
+export default HeaderCard

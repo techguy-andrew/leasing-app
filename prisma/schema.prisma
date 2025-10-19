@@ -9,6 +9,7 @@ datasource db {
 
 model Application {
   id         Int      @id @default(autoincrement())
+  userId     String?  // Clerk user ID (optional for backward compatibility)
   status     String   @default("New")
   moveInDate String
   property   String
@@ -18,4 +19,9 @@ model Application {
   phone      String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@index([status])
+  @@index([moveInDate])
+  @@index([createdAt])
+  @@index([userId])
 }

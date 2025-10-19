@@ -12,6 +12,7 @@ import Save from '@/components/Buttons/Save/Save'
 import Cancel from '@/components/Buttons/Cancel/Cancel'
 import Confirm from '@/components/Modals/Confirm'
 import Toast, { ToastType } from '@/components/Toast/Toast'
+import { STATUS_OPTIONS, PROPERTY_OPTIONS } from '@/lib/constants'
 
 interface Application {
   id: number
@@ -29,26 +30,6 @@ interface Application {
 interface PageProps {
   params: Promise<{ appid: string }>
 }
-
-const statusOptions = [
-  { value: 'New', label: 'New' },
-  { value: 'Pending', label: 'Pending' },
-  { value: 'Approved', label: 'Approved' },
-  { value: 'Rejected', label: 'Rejected' }
-]
-
-const propertyOptions = [
-  { value: 'Burbank Village Apartments', label: 'Burbank Village Apartments' },
-  { value: 'Carlisle Apartments', label: 'Carlisle Apartments' },
-  { value: 'Clover Hills Apartments', label: 'Clover Hills Apartments' },
-  { value: 'Legacy Apartments', label: 'Legacy Apartments' },
-  { value: 'Norwalk Village Estates', label: 'Norwalk Village Estates' },
-  { value: 'NW Pine Apartments', label: 'NW Pine Apartments' },
-  { value: 'Orchard Meadows Apartments', label: 'Orchard Meadows Apartments' },
-  { value: 'Parkside Luxury Apartments', label: 'Parkside Luxury Apartments' },
-  { value: 'Prairie Village', label: 'Prairie Village' },
-  { value: 'West Glen Apartments', label: 'West Glen Apartments' }
-]
 
 export default function ApplicationDetailPage({ params }: PageProps) {
   const router = useRouter()
@@ -84,30 +65,22 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           return
         }
 
-        const response = await fetch(`/api/applications`)
+        const response = await fetch(`/api/applications/${id}`)
         const data = await response.json()
 
         if (!response.ok) {
-          throw new Error('Failed to fetch application')
+          throw new Error(data.error || 'Failed to fetch application')
         }
 
-        const app = data.data.find((a: Application) => a.id === id)
-
-        if (!app) {
-          setError('Application not found')
-          setIsLoading(false)
-          return
-        }
-
-        setApplication(app)
+        setApplication(data.data)
         setFormData({
-          status: app.status,
-          moveInDate: app.moveInDate,
-          property: app.property,
-          unitNumber: app.unitNumber,
-          applicant: app.applicant,
-          email: app.email || '',
-          phone: app.phone || ''
+          status: data.data.status,
+          moveInDate: data.data.moveInDate,
+          property: data.data.property,
+          unitNumber: data.data.unitNumber,
+          applicant: data.data.applicant,
+          email: data.data.email || '',
+          phone: data.data.phone || ''
         })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
@@ -329,7 +302,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                 <InlineStatusBadge
                   status={formData.status}
                   onChange={(value) => handleFieldChange('status', value)}
-                  options={statusOptions}
+                  options={STATUS_OPTIONS}
                   isEditMode={isEditMode}
                 />
               </div>
@@ -374,7 +347,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                 <InlineSelectField
                   value={formData.property}
                   onChange={(value) => handleFieldChange('property', value)}
-                  options={propertyOptions}
+                  options={PROPERTY_OPTIONS}
                   isEditMode={isEditMode}
                 />
               </div>

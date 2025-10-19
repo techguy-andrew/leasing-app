@@ -4,6 +4,8 @@ import { useState, FormEvent } from 'react'
 import TextField from '../Field/TextField'
 import SelectField from '../Field/SelectField'
 import Submit from '../Buttons/Submit/Submit'
+import { STATUS_OPTIONS, PROPERTY_OPTIONS } from '@/lib/constants'
+import { applicationCreateSchema } from '@/lib/validations/application'
 
 interface FormData {
   status: string
@@ -15,25 +17,9 @@ interface FormData {
   phone: string
 }
 
-const statusOptions = [
-  { value: 'New', label: 'New' },
-  { value: 'Pending', label: 'Pending' },
-  { value: 'Approved', label: 'Approved' },
-  { value: 'Rejected', label: 'Rejected' }
-]
-
-const propertyOptions = [
-  { value: 'Burbank Village Apartments', label: 'Burbank Village Apartments' },
-  { value: 'Carlisle Apartments', label: 'Carlisle Apartments' },
-  { value: 'Clover Hills Apartments', label: 'Clover Hills Apartments' },
-  { value: 'Legacy Apartments', label: 'Legacy Apartments' },
-  { value: 'Norwalk Village Estates', label: 'Norwalk Village Estates' },
-  { value: 'NW Pine Apartments', label: 'NW Pine Apartments' },
-  { value: 'Orchard Meadows Apartments', label: 'Orchard Meadows Apartments' },
-  { value: 'Parkside Luxury Apartments', label: 'Parkside Luxury Apartments' },
-  { value: 'Prairie Village', label: 'Prairie Village' },
-  { value: 'West Glen Apartments', label: 'West Glen Apartments' }
-]
+interface ValidationErrors {
+  [key: string]: string
+}
 
 export default function FormV2() {
   const [formData, setFormData] = useState<FormData>({
@@ -49,6 +35,7 @@ export default function FormV2() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
 
   const formatDate = (value: string) => {
     // Remove all non-digit characters
@@ -115,6 +102,21 @@ export default function FormV2() {
     setIsLoading(true)
     setError(null)
     setSuccess(false)
+    setValidationErrors({})
+
+    // Validate form data with Zod before submitting
+    const validationResult = applicationCreateSchema.safeParse(formData)
+
+    if (!validationResult.success) {
+      const errors: ValidationErrors = {}
+      validationResult.error.errors.forEach(err => {
+        const field = err.path[0] as string
+        errors[field] = err.message
+      })
+      setValidationErrors(errors)
+      setIsLoading(false)
+      return
+    }
 
     try {
       const response = await fetch('/api/applications', {
@@ -153,55 +155,97 @@ export default function FormV2() {
   return (
     <div className="flex flex-col gap-6 border border-gray-300 rounded-lg p-6 md:p-8 w-full max-w-2xl">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <TextField
-          type="text"
-          placeholder="Name *"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-        <TextField
-          type="text"
-          placeholder="MM/DD/YYYY *"
-          name="moveInDate"
-          value={formData.moveInDate}
-          onChange={handleDateChange}
-        />
-        <SelectField
-          name="property"
-          value={formData.property}
-          onChange={handleSelectChange}
-          options={propertyOptions}
-          placeholder="Select Property *"
-        />
-        <TextField
-          type="text"
-          placeholder="Unit Number *"
-          name="unitNumber"
-          value={formData.unitNumber}
-          onChange={handleChange}
-        />
-        <TextField
-          type="email"
-          placeholder="Email (optional)"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <TextField
-          type="text"
-          placeholder="Phone (optional)"
-          name="phone"
-          value={formData.phone}
-          onChange={handlePhoneChange}
-        />
-        <SelectField
-          name="status"
-          value={formData.status}
-          onChange={handleSelectChange}
-          options={statusOptions}
-          placeholder="Select Status (optional)"
-        />
+        <div>
+          <TextField
+            type="text"
+            placeholder="Name *"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+          />
+          {validationErrors.name && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
+          )}
+        </div>
+
+        <div>
+          <TextField
+            type="text"
+            placeholder="MM/DD/YYYY *"
+            name="moveInDate"
+            value={formData.moveInDate}
+            onChange={handleDateChange}
+          />
+          {validationErrors.moveInDate && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.moveInDate}</p>
+          )}
+        </div>
+
+        <div>
+          <SelectField
+            name="property"
+            value={formData.property}
+            onChange={handleSelectChange}
+            options={PROPERTY_OPTIONS}
+            placeholder="Select Property *"
+          />
+          {validationErrors.property && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.property}</p>
+          )}
+        </div>
+
+        <div>
+          <TextField
+            type="text"
+            placeholder="Unit Number *"
+            name="unitNumber"
+            value={formData.unitNumber}
+            onChange={handleChange}
+          />
+          {validationErrors.unitNumber && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.unitNumber}</p>
+          )}
+        </div>
+
+        <div>
+          <TextField
+            type="email"
+            placeholder="Email (optional)"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          {validationErrors.email && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
+          )}
+        </div>
+
+        <div>
+          <TextField
+            type="text"
+            placeholder="Phone (optional)"
+            name="phone"
+            value={formData.phone}
+            onChange={handlePhoneChange}
+          />
+          {validationErrors.phone && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.phone}</p>
+          )}
+        </div>
+
+        <div>
+          <SelectField
+            name="status"
+            value={formData.status}
+            onChange={handleSelectChange}
+            options={STATUS_OPTIONS}
+            placeholder="Select Status (optional)"
+          />
+          {validationErrors.status && (
+            <p className="mt-1 text-sm text-red-600">{validationErrors.status}</p>
+          )}
+        </div>
+
         <Submit />
       </form>
 

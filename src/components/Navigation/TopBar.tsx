@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'motion/react'
+import { UserButton } from '@clerk/nextjs'
 
 interface TopBarProps {
   isOpen: boolean
@@ -46,6 +47,9 @@ export default function TopBar({ isOpen, onToggle }: TopBarProps) {
         />
       </button>
       <h1 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">Leasing App</h1>
+      <div className="ml-auto">
+        <UserButton afterSignOutUrl="/" />
+      </div>
     </motion.div>
   )
 }

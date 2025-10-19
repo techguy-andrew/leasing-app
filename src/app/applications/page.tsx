@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import HeaderCard from '@/components/Cards/HeaderCard'
 import ListItem from '@/components/Items/ListItem'
+import { STATUS_COLORS } from '@/lib/constants'
 
 interface Application {
   id: number
@@ -16,14 +17,6 @@ interface Application {
   phone: string | null
   createdAt: string
   updatedAt: string
-}
-
-const statusColors: Record<string, string> = {
-  All: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
-  New: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-  Pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
-  Approved: 'bg-green-100 text-green-800 hover:bg-green-200',
-  Rejected: 'bg-red-100 text-red-800 hover:bg-red-200'
 }
 
 const statusOptions = ['All', 'New', 'Pending', 'Approved', 'Rejected']
@@ -55,31 +48,34 @@ export default function ApplicationsPage() {
     loadApplications()
   }, [])
 
-  const getStartOfWeek = () => {
+  const getStartOfWeek = useCallback(() => {
     const now = new Date()
     const dayOfWeek = now.getDay()
     const diff = now.getDate() - dayOfWeek
     return new Date(now.setDate(diff))
-  }
+  }, [])
 
-  const getEndOfWeek = () => {
-    const startOfWeek = getStartOfWeek()
+  const getEndOfWeek = useCallback(() => {
+    const now = new Date()
+    const dayOfWeek = now.getDay()
+    const diff = now.getDate() - dayOfWeek
+    const startOfWeek = new Date(now.setDate(diff))
     const endOfWeek = new Date(startOfWeek)
     endOfWeek.setDate(startOfWeek.getDate() + 6)
     return endOfWeek
-  }
+  }, [])
 
-  const getStartOfMonth = () => {
+  const getStartOfMonth = useCallback(() => {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth(), 1)
-  }
+  }, [])
 
-  const getEndOfMonth = () => {
+  const getEndOfMonth = useCallback(() => {
     const now = new Date()
     return new Date(now.getFullYear(), now.getMonth() + 1, 0)
-  }
+  }, [])
 
-  const parseMoveInDate = (dateString: string) => {
+  const parseMoveInDate = useCallback((dateString: string) => {
     // Parse MM/DD/YYYY format
     const parts = dateString.split('/')
     if (parts.length === 3) {
@@ -89,50 +85,52 @@ export default function ApplicationsPage() {
       return new Date(year, month, day)
     }
     return new Date(dateString)
-  }
+  }, [])
 
-  // First filter by status
-  let filteredApplications = statusFilter === 'All'
-    ? applications
-    : applications.filter(app => app.status === statusFilter)
+  const filteredApplications = useMemo(() => {
+    // First filter by status
+    let filtered = statusFilter === 'All'
+      ? applications
+      : applications.filter(app => app.status === statusFilter)
 
-  // Then apply calendar filter
-  const now = new Date()
-  now.setHours(0, 0, 0, 0)
+    // Then apply calendar filter
+    const now = new Date()
+    now.setHours(0, 0, 0, 0)
 
-  if (calendarFilter === 'This Week') {
-    const startOfWeek = getStartOfWeek()
-    const endOfWeek = getEndOfWeek()
-    startOfWeek.setHours(0, 0, 0, 0)
-    endOfWeek.setHours(23, 59, 59, 999)
+    if (calendarFilter === 'This Week') {
+      const startOfWeek = getStartOfWeek()
+      const endOfWeek = getEndOfWeek()
+      startOfWeek.setHours(0, 0, 0, 0)
+      endOfWeek.setHours(23, 59, 59, 999)
 
-    filteredApplications = filteredApplications.filter(app => {
-      const moveInDate = parseMoveInDate(app.moveInDate)
-      return moveInDate >= startOfWeek && moveInDate <= endOfWeek
-    })
-  } else if (calendarFilter === 'This Month') {
-    const startOfMonth = getStartOfMonth()
-    const endOfMonth = getEndOfMonth()
-    startOfMonth.setHours(0, 0, 0, 0)
-    endOfMonth.setHours(23, 59, 59, 999)
+      filtered = filtered.filter(app => {
+        const moveInDate = parseMoveInDate(app.moveInDate)
+        return moveInDate >= startOfWeek && moveInDate <= endOfWeek
+      })
+    } else if (calendarFilter === 'This Month') {
+      const startOfMonth = getStartOfMonth()
+      const endOfMonth = getEndOfMonth()
+      startOfMonth.setHours(0, 0, 0, 0)
+      endOfMonth.setHours(23, 59, 59, 999)
 
-    filteredApplications = filteredApplications.filter(app => {
-      const moveInDate = parseMoveInDate(app.moveInDate)
-      return moveInDate >= startOfMonth && moveInDate <= endOfMonth
-    })
-  }
-
-  // Sort by move-in date based on direction
-  filteredApplications = [...filteredApplications].sort((a, b) => {
-    const dateA = parseMoveInDate(a.moveInDate)
-    const dateB = parseMoveInDate(b.moveInDate)
-
-    if (sortDirection === 'furthest') {
-      return dateB.getTime() - dateA.getTime() // Furthest first (descending)
-    } else {
-      return dateA.getTime() - dateB.getTime() // Closest first (ascending)
+      filtered = filtered.filter(app => {
+        const moveInDate = parseMoveInDate(app.moveInDate)
+        return moveInDate >= startOfMonth && moveInDate <= endOfMonth
+      })
     }
-  })
+
+    // Sort by move-in date based on direction
+    return [...filtered].sort((a, b) => {
+      const dateA = parseMoveInDate(a.moveInDate)
+      const dateB = parseMoveInDate(b.moveInDate)
+
+      if (sortDirection === 'furthest') {
+        return dateB.getTime() - dateA.getTime() // Furthest first (descending)
+      } else {
+        return dateA.getTime() - dateB.getTime() // Closest first (ascending)
+      }
+    })
+  }, [applications, statusFilter, calendarFilter, sortDirection, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
 
   return (
     <>
@@ -159,7 +157,7 @@ export default function ApplicationsPage() {
                 onClick={() => setStatusFilter(status)}
                 className={`px-4 py-1.5 text-sm font-medium rounded-full transition-all ${
                   statusFilter === status
-                    ? statusColors[status]
+                    ? STATUS_COLORS[status]
                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -261,11 +259,11 @@ export default function ApplicationsPage() {
               {filteredApplications.map((app, index) => (
                 <motion.div
                   key={app.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   transition={{
-                    duration: 0.3,
-                    delay: index * 0.05,
+                    duration: 0.15,
+                    delay: Math.min(index * 0.02, 0.3),
                     ease: 'easeOut'
                   }}
                 >

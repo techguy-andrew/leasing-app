@@ -1,7 +1,9 @@
 'use client'
 
+import { memo } from 'react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
+import { STATUS_BADGE_COLORS } from '@/lib/constants'
 
 interface ListItemProps {
   id: number
@@ -13,14 +15,7 @@ interface ListItemProps {
   createdAt: string
 }
 
-const statusColors: Record<string, string> = {
-  New: 'bg-blue-100 text-blue-800',
-  Pending: 'bg-yellow-100 text-yellow-800',
-  Approved: 'bg-green-100 text-green-800',
-  Rejected: 'bg-red-100 text-red-800'
-}
-
-export default function ListItem({ id, applicant, property, unitNumber, status, moveInDate, createdAt }: ListItemProps) {
+const ListItem = memo(function ListItem({ id, applicant, property, unitNumber, status, moveInDate }: ListItemProps) {
   return (
     <Link
       href={`/applications/${id}`}
@@ -32,7 +27,7 @@ export default function ListItem({ id, applicant, property, unitNumber, status, 
             <span className="font-semibold text-base sm:text-lg text-gray-900 truncate">
               {applicant}
             </span>
-            <span className={`px-3 py-1.5 text-xs font-semibold rounded-full w-fit ${statusColors[status] || 'bg-gray-100 text-gray-800'}`}>
+            <span className={`px-3 py-1.5 text-xs font-semibold rounded-full w-fit ${STATUS_BADGE_COLORS[status] || 'bg-gray-100 text-gray-800'}`}>
               {status}
             </span>
           </div>
@@ -57,4 +52,6 @@ export default function ListItem({ id, applicant, property, unitNumber, status, 
       </motion.div>
     </Link>
   )
-}
+})
+
+export default ListItem
