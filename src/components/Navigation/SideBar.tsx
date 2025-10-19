@@ -47,6 +47,17 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
                 Home
               </Link>
               <Link
+                href="/applications"
+                onClick={onClose}
+                className={`flex items-center px-4 py-3 rounded-lg transition-colors text-base font-medium ${
+                  pathname.startsWith('/applications')
+                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Applications
+              </Link>
+              <Link
                 href="/newapp"
                 onClick={onClose}
                 className={`flex items-center px-4 py-3 rounded-lg transition-colors text-base font-medium ${

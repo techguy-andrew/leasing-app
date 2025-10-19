@@ -1,15 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export async function GET() {
+  try {
+    const applications = await prisma.application.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+
+    return NextResponse.json(
+      { success: true, data: applications },
+      { status: 200 }
+    )
+  } catch (error) {
+    console.error('Error fetching applications:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch applications' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { status, moveInDate, property, unitNumber, name, email, phone } = body
+    const { status = 'New', moveInDate, property, unitNumber, name, email, phone } = body
 
-    // Validate required fields
-    if (!status || !moveInDate || !property || !unitNumber || !name || !email || !phone) {
+    // Validate required fields (only core fields required)
+    if (!moveInDate || !property || !unitNumber || !name) {
       return NextResponse.json(
-        { error: 'All fields are required' },
+        { error: 'Name, property, unit number, and move-in date are required' },
         { status: 400 }
       )
     }
@@ -22,9 +43,8 @@ export async function POST(request: NextRequest) {
         property,
         unitNumber,
         applicant: name, // Map 'name' to 'applicant' field
-        email,
-        phone,
-        updatedAt: new Date()
+        email: email || null,
+        phone: phone || null
       }
     })
 

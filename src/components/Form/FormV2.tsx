@@ -153,16 +153,16 @@ export default function FormV2() {
   return (
     <div className="flex flex-col gap-6 border border-gray-300 rounded-lg p-6 md:p-8 w-full max-w-2xl">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <SelectField
-          name="status"
-          value={formData.status}
-          onChange={handleSelectChange}
-          options={statusOptions}
-          placeholder="Select Status"
+        <TextField
+          type="text"
+          placeholder="Name *"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
         />
         <TextField
           type="text"
-          placeholder="MM/DD/YYYY"
+          placeholder="MM/DD/YYYY *"
           name="moveInDate"
           value={formData.moveInDate}
           onChange={handleDateChange}
@@ -172,35 +172,35 @@ export default function FormV2() {
           value={formData.property}
           onChange={handleSelectChange}
           options={propertyOptions}
-          placeholder="Select Property"
+          placeholder="Select Property *"
         />
         <TextField
           type="text"
-          placeholder="Unit Number"
+          placeholder="Unit Number *"
           name="unitNumber"
           value={formData.unitNumber}
           onChange={handleChange}
         />
         <TextField
-          type="text"
-          placeholder="Name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-        />
-        <TextField
           type="email"
-          placeholder="Email"
+          placeholder="Email (optional)"
           name="email"
           value={formData.email}
           onChange={handleChange}
         />
         <TextField
           type="text"
-          placeholder="555-123-4567"
+          placeholder="Phone (optional)"
           name="phone"
           value={formData.phone}
           onChange={handlePhoneChange}
+        />
+        <SelectField
+          name="status"
+          value={formData.status}
+          onChange={handleSelectChange}
+          options={statusOptions}
+          placeholder="Select Status (optional)"
         />
         <Submit />
       </form>
