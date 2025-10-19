@@ -240,16 +240,30 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto items-center justify-center">
-        <div className="text-gray-600">Loading application...</div>
+      <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+        <motion.div
+          className="text-lg text-gray-600"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          Loading application...
+        </motion.div>
       </div>
     )
   }
 
   if (error && !application) {
     return (
-      <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto items-center justify-center">
-        <div className="text-red-600">Error: {error}</div>
+      <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+        <motion.div
+          className="text-lg text-red-600 px-4 text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          Error: {error}
+        </motion.div>
       </div>
     )
   }
@@ -265,19 +279,24 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   })
 
   return (
-    <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto">
+    <div className="flex flex-col h-[calc(100vh-73px)] w-full overflow-y-auto bg-gradient-to-b from-gray-50 to-white">
       <HeaderCard
         title={`Application #${application.id}`}
         description={`Submitted on ${createdDate}`}
       />
-      <div className="flex flex-col w-full p-6 md:p-8">
-        <div className="max-w-4xl mx-auto w-full bg-white border border-gray-200 rounded-lg p-6 md:p-8">
+      <div className="flex flex-col w-full p-4 sm:p-6 md:p-8 lg:p-10">
+        <motion.div
+          className="max-w-4xl mx-auto w-full bg-white/95 backdrop-blur-lg border border-gray-200 rounded-2xl p-5 sm:p-6 md:p-8 shadow-xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           <div className="flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Application Details</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Application Details</h2>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2 sm:gap-1.5">
                 <AnimatePresence mode="wait">
                   {!isEditMode ? (
                     <motion.div
@@ -296,7 +315,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 10 }}
                       transition={{ duration: 0.2 }}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 sm:gap-2"
                     >
                       <Cancel onClick={handleCancel} />
                       <Save onClick={handleSave} disabled={isSaving} />
@@ -306,10 +325,10 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 pt-4 border-t border-gray-200">
+            <div className="flex flex-col gap-5 pt-4 border-t border-gray-200">
               {/* Status Badge */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-gray-500">Status:</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide">Status:</span>
                 <InlineStatusBadge
                   status={formData.status}
                   onChange={(value) => handleFieldChange('status', value)}
@@ -319,8 +338,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Applicant Name Field */}
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-gray-500">Applicant Name</span>
+              <div className="flex flex-col gap-2.5">
+                <span className="text-sm sm:text-base font-semibold text-gray-500">Applicant Name</span>
                 <InlineTextField
                   value={formData.applicant}
                   onChange={(value) => handleFieldChange('applicant', value)}
@@ -330,8 +349,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Email Field */}
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-gray-500">Email</span>
+              <div className="flex flex-col gap-2.5">
+                <span className="text-sm sm:text-base font-semibold text-gray-500">Email</span>
                 <InlineTextField
                   value={formData.email}
                   onChange={(value) => handleFieldChange('email', value)}
@@ -342,8 +361,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Phone Field */}
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-gray-500">Phone</span>
+              <div className="flex flex-col gap-2.5">
+                <span className="text-sm sm:text-base font-semibold text-gray-500">Phone</span>
                 <InlineTextField
                   value={formData.phone}
                   onChange={handlePhoneChange}
@@ -353,8 +372,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Property Field */}
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-gray-500">Property</span>
+              <div className="flex flex-col gap-2.5">
+                <span className="text-sm sm:text-base font-semibold text-gray-500">Property</span>
                 <InlineSelectField
                   value={formData.property}
                   onChange={(value) => handleFieldChange('property', value)}
@@ -364,8 +383,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Unit Number Field */}
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-gray-500">Unit Number</span>
+              <div className="flex flex-col gap-2.5">
+                <span className="text-sm sm:text-base font-semibold text-gray-500">Unit Number</span>
                 <InlineTextField
                   value={formData.unitNumber}
                   onChange={(value) => handleFieldChange('unitNumber', value)}
@@ -375,8 +394,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               </div>
 
               {/* Move-in Date Field */}
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-gray-500">Move-in Date</span>
+              <div className="flex flex-col gap-2.5">
+                <span className="text-sm sm:text-base font-semibold text-gray-500">Move-in Date</span>
                 <InlineTextField
                   value={formData.moveInDate}
                   onChange={handleDateChange}

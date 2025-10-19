@@ -1,3 +1,7 @@
+'use client'
+
+import { motion } from 'motion/react'
+
 interface HeaderCardProps {
   title: string
   description?: string
@@ -5,17 +9,32 @@ interface HeaderCardProps {
 
 export default function HeaderCard({ title, description }: HeaderCardProps) {
   return (
-    <header className="w-full bg-white border-b border-gray-200 px-4 py-6 md:px-6 md:py-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+    <motion.header
+      className="w-full bg-white/90 backdrop-blur-lg border-b border-gray-200 px-4 py-6 sm:px-6 sm:py-8 md:px-8 md:py-10 shadow-sm"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
+      <div className="max-w-5xl mx-auto">
+        <motion.h1
+          className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 tracking-tight"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
           {title}
-        </h1>
+        </motion.h1>
         {description && (
-          <p className="mt-2 text-base md:text-lg text-gray-600">
+          <motion.p
+            className="mt-2 sm:mt-3 text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             {description}
-          </p>
+          </motion.p>
         )}
       </div>
-    </header>
+    </motion.header>
   )
 }

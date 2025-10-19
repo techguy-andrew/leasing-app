@@ -144,7 +144,7 @@ export default function ApplicationsPage() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex flex-wrap gap-6 px-6 py-5 bg-white border-b border-gray-200"
+        className="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-6 px-4 sm:px-6 md:px-8 py-5 bg-white/95 backdrop-blur-lg border-b border-gray-200 shadow-sm"
       >
         {/* Status Filter */}
         <div className="flex flex-col gap-2">

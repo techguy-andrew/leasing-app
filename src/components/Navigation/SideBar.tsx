@@ -18,30 +18,30 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
         <>
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 top-[65px] backdrop-blur-lg z-40"
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(20px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="fixed inset-0 top-[65px] bg-black/20 backdrop-blur-xl z-40"
             onClick={onClose}
           />
 
           {/* Sidebar */}
           <motion.div
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-[65px] left-0 w-64 h-[calc(100vh-65px)] bg-white border-r-2 border-l-2 border-b-2 border-gray-200 z-50 flex flex-col overflow-y-auto shadow-xl"
+            initial={{ x: '-100%', opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '-100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="fixed top-[65px] left-0 w-72 sm:w-80 h-[calc(100vh-65px)] bg-white/90 backdrop-blur-xl border-r border-gray-200 z-50 flex flex-col overflow-y-auto shadow-2xl"
           >
-            <nav className="flex flex-col gap-2 p-4">
+            <nav className="flex flex-col gap-1 p-4 sm:p-6">
               <Link
                 href="/"
                 onClick={onClose}
-                className={`flex items-center px-4 py-3 rounded-lg transition-colors text-base font-medium ${
+                className={`flex items-center px-5 py-4 rounded-xl transition-all duration-200 text-base font-medium ${
                   pathname === '/'
-                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                    : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
                 }`}
               >
                 Home
@@ -49,10 +49,10 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
               <Link
                 href="/applications"
                 onClick={onClose}
-                className={`flex items-center px-4 py-3 rounded-lg transition-colors text-base font-medium ${
+                className={`flex items-center px-5 py-4 rounded-xl transition-all duration-200 text-base font-medium ${
                   pathname.startsWith('/applications')
-                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                    : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
                 }`}
               >
                 Applications
@@ -60,10 +60,10 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
               <Link
                 href="/newapp"
                 onClick={onClose}
-                className={`flex items-center px-4 py-3 rounded-lg transition-colors text-base font-medium ${
+                className={`flex items-center px-5 py-4 rounded-xl transition-all duration-200 text-base font-medium ${
                   pathname === '/newapp'
-                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                    : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
                 }`}
               >
                 New Application
