@@ -46,7 +46,7 @@ export default function ApplicationsError({
             Failed to Load Applications
           </h1>
           <p className="text-gray-600 text-lg mb-4">
-            We couldn't load the applications list. This might be due to a network issue or temporary problem.
+            We couldn&apos;t load the applications list. This might be due to a network issue or temporary problem.
           </p>
           {process.env.NODE_ENV === 'development' && (
             <div className="mt-6 p-4 bg-orange-50 border border-orange-200 rounded-lg text-left">

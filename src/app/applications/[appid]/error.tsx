@@ -46,7 +46,7 @@ export default function ApplicationDetailError({
             Failed to Load Application
           </h1>
           <p className="text-gray-600 text-lg mb-4">
-            We couldn't load this application. It may not exist, or there might be a temporary problem.
+            We couldn&apos;t load this application. It may not exist, or there might be a temporary problem.
           </p>
           {process.env.NODE_ENV === 'development' && (
             <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg text-left">
