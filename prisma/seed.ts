@@ -48,6 +48,10 @@ async function main() {
 
     const fullPropertyName = propertyMap[property] || property
 
+    // Generate createdAt in MM/DD/YYYY format
+    const now = new Date()
+    const createdAt = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}/${now.getFullYear()}`
+
     // Create application
     await prisma.application.create({
       data: {
@@ -57,7 +61,8 @@ async function main() {
         unitNumber: unit,
         status: 'New',
         email: null,
-        phone: null
+        phone: null,
+        createdAt
       }
     })
 
