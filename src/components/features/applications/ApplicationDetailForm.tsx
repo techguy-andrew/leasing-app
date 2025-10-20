@@ -110,7 +110,6 @@ export default function ApplicationDetailForm({
   const [isEditMode, setIsEditMode] = useState(mode === 'create')
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [toastType, setToastType] = useState<ToastType>('success')
@@ -180,7 +179,6 @@ export default function ApplicationDetailForm({
 
     // If in edit mode and onStatusChange callback is provided, update database immediately
     if (mode === 'edit' && onStatusChange) {
-      setIsUpdatingStatus(true)
       setToastMessage(null)
 
       try {
@@ -193,8 +191,6 @@ export default function ApplicationDetailForm({
         setFormData(prev => ({ ...prev, status: originalData.status }))
         setToastType('error')
         setToastMessage(err instanceof Error ? err.message : 'Failed to update status')
-      } finally {
-        setIsUpdatingStatus(false)
       }
     }
   }
