@@ -36,7 +36,7 @@ interface ApplicationsFilterProps {
   onCalendarChange: (filter: string) => void
 }
 
-const statusOptions = ['All', 'New', 'Pending', 'Approved', 'Rejected']
+const statusOptions = ['All', 'New', 'Pending', 'Approved', 'Rejected', 'Archived']
 const calendarOptions = ['All Time', 'This Week', 'This Month']
 
 export default function ApplicationsFilter({

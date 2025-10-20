@@ -86,7 +86,7 @@ export default function ApplicationsPage() {
   const filteredApplications = useMemo(() => {
     // First filter by status
     let filtered = statusFilter === 'All'
-      ? applications
+      ? applications.filter(app => app.status !== 'Archived') // Exclude archived from "All"
       : applications.filter(app => app.status === statusFilter)
 
     // Then apply calendar filter

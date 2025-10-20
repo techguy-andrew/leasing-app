@@ -4,7 +4,8 @@ export const STATUS_OPTIONS = [
   { value: 'New', label: 'New' },
   { value: 'Pending', label: 'Pending' },
   { value: 'Approved', label: 'Approved' },
-  { value: 'Rejected', label: 'Rejected' }
+  { value: 'Rejected', label: 'Rejected' },
+  { value: 'Archived', label: 'Archived' }
 ]
 
 export const PROPERTY_OPTIONS = [
@@ -25,12 +26,14 @@ export const STATUS_COLORS: Record<string, string> = {
   New: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
   Pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
   Approved: 'bg-green-100 text-green-800 hover:bg-green-200',
-  Rejected: 'bg-red-100 text-red-800 hover:bg-red-200'
+  Rejected: 'bg-red-100 text-red-800 hover:bg-red-200',
+  Archived: 'bg-slate-100 text-slate-800 hover:bg-slate-200'
 } as const
 
 export const STATUS_BADGE_COLORS: Record<string, string> = {
   New: 'bg-blue-100 text-blue-800',
   Pending: 'bg-yellow-100 text-yellow-800',
   Approved: 'bg-green-100 text-green-800',
-  Rejected: 'bg-red-100 text-red-800'
+  Rejected: 'bg-red-100 text-red-800',
+  Archived: 'bg-slate-100 text-slate-800'
 } as const
