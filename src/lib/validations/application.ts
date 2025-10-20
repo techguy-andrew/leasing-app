@@ -17,6 +17,18 @@ const dateSchema = z.string()
            year >= 1900 && year <= 2100
   }, 'Invalid date')
 
+// Optional date schema - allows empty string or valid date
+const optionalDateSchema = z.preprocess(
+  (val) => {
+    if (val === '' || val === null || val === undefined) return ''
+    return val
+  },
+  z.union([
+    z.string().length(0),
+    dateSchema
+  ])
+)
+
 // Email validation - allow empty string, null, or valid email
 const emailSchema = z.preprocess(
   (val) => {
@@ -53,32 +65,64 @@ const phoneSchema = z.preprocess(
   ])
 )
 
+// Task schema for individual tasks
+export const taskSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  completed: z.boolean()
+})
+
+// Tasks array schema
+const tasksSchema = z.array(taskSchema).optional().default([])
+
 // Schema for creating a new application (POST)
+// Only name and createdAt are required; all other fields are optional
 export const applicationCreateSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
   createdAt: dateSchema,
-  moveInDate: dateSchema,
-  property: z.enum(propertyValues, {
-    errorMap: () => ({ message: 'Please select a valid property' })
-  }),
-  unitNumber: z.string().trim().min(1, 'Unit number is required'),
+  moveInDate: optionalDateSchema,
+  property: z.preprocess(
+    (val) => val === '' || val === null || val === undefined ? '' : val,
+    z.union([
+      z.string().length(0),
+      z.enum(propertyValues, {
+        errorMap: () => ({ message: 'Please select a valid property' })
+      })
+    ])
+  ),
+  unitNumber: z.preprocess(
+    (val) => val === '' || val === null || val === undefined ? '' : val,
+    z.string().trim()
+  ),
   email: emailSchema,
   phone: phoneSchema,
-  status: z.enum(statusValues).optional().default('New')
+  status: z.enum(statusValues).optional().default('New'),
+  tasks: tasksSchema
 })
 
 // Schema for updating an application (PUT)
+// Only applicant and createdAt are required; all other fields are optional
 export const applicationUpdateSchema = z.object({
   applicant: z.string().trim().min(1, 'Applicant name is required'),
   createdAt: dateSchema,
-  moveInDate: dateSchema,
-  property: z.enum(propertyValues, {
-    errorMap: () => ({ message: 'Please select a valid property' })
-  }),
-  unitNumber: z.string().trim().min(1, 'Unit number is required'),
+  moveInDate: optionalDateSchema,
+  property: z.preprocess(
+    (val) => val === '' || val === null || val === undefined ? '' : val,
+    z.union([
+      z.string().length(0),
+      z.enum(propertyValues, {
+        errorMap: () => ({ message: 'Please select a valid property' })
+      })
+    ])
+  ),
+  unitNumber: z.preprocess(
+    (val) => val === '' || val === null || val === undefined ? '' : val,
+    z.string().trim()
+  ),
   email: emailSchema,
   phone: phoneSchema,
-  status: z.enum(statusValues).optional()
+  status: z.enum(statusValues).optional(),
+  tasks: tasksSchema
 })
 
 // Type exports for TypeScript

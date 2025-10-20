@@ -69,3 +69,12 @@ body {
 * {
   -webkit-overflow-scrolling: touch;
 }
+
+/* Hide Next.js development indicator */
+#__next-build-watcher {
+  display: none !important;
+}
+
+nextjs-portal {
+  display: none !important;
+}

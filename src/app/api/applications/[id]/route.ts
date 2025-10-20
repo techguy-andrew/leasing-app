@@ -29,7 +29,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const application = await prisma.application.findUnique({
-      where: { id: applicationId }
+      where: { id: applicationId },
+      include: {
+        tasks: {
+          orderBy: {
+            createdAt: 'asc'
+          }
+        }
+      }
     })
 
     if (!application) {
@@ -93,11 +100,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { applicant, createdAt, moveInDate, property, unitNumber, email, phone, status } = validationResult.data
+    const { applicant, createdAt, moveInDate, property, unitNumber, email, phone, status, tasks } = validationResult.data
 
     // Verify the application exists
     const existingApplication = await prisma.application.findUnique({
-      where: { id: applicationId }
+      where: { id: applicationId },
+      include: {
+        tasks: true
+      }
     })
 
     if (!existingApplication) {
@@ -107,18 +117,81 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // Prepare update data
+    const updateData: {
+      status: string
+      createdAt: string
+      moveInDate: string
+      property: string
+      unitNumber: string
+      applicant: string
+      email: string | null
+      phone: string | null
+      tasks?: {
+        deleteMany?: { id: { in: string[] } }
+        updateMany: { where: { id: string }; data: { description: string; completed: boolean } }[]
+        create: { id: string; description: string; completed: boolean }[]
+      }
+    } = {
+      status: status || existingApplication.status,
+      createdAt,
+      moveInDate,
+      property,
+      unitNumber,
+      applicant,
+      email,
+      phone
+    }
+
+    // Only process tasks if they are explicitly provided and not empty
+    if (tasks && tasks.length > 0) {
+      // Get existing task IDs
+      const existingTaskIds = new Set(existingApplication.tasks.map(t => t.id))
+      const newTaskIds = new Set(tasks.map(t => t.id))
+
+      // Find tasks to delete (exist in DB but not in new data)
+      const tasksToDelete = existingApplication.tasks
+        .filter(t => !newTaskIds.has(t.id))
+        .map(t => t.id)
+
+      // Find tasks to update (exist in both)
+      const tasksToUpdate = tasks.filter(t => existingTaskIds.has(t.id))
+
+      // Find tasks to create (in new data but not in DB)
+      const tasksToCreate = tasks.filter(t => !existingTaskIds.has(t.id))
+
+      updateData.tasks = {
+        // Delete removed tasks
+        deleteMany: tasksToDelete.length > 0 ? {
+          id: { in: tasksToDelete }
+        } : undefined,
+        // Update existing tasks
+        updateMany: tasksToUpdate.map(task => ({
+          where: { id: task.id },
+          data: {
+            description: task.description,
+            completed: task.completed
+          }
+        })),
+        // Create new tasks
+        create: tasksToCreate.map(task => ({
+          id: task.id,
+          description: task.description,
+          completed: task.completed
+        }))
+      }
+    }
+
     // Update the application in the database
     const application = await prisma.application.update({
       where: { id: applicationId },
-      data: {
-        status: status || existingApplication.status,
-        createdAt,
-        moveInDate,
-        property,
-        unitNumber,
-        applicant,
-        email,
-        phone
+      data: updateData,
+      include: {
+        tasks: {
+          orderBy: {
+            createdAt: 'asc'
+          }
+        }
       }
     })
 

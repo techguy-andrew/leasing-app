@@ -19,9 +19,22 @@ model Application {
   phone      String?
   createdAt  String   // Application date in MM/DD/YYYY format
   updatedAt  DateTime @updatedAt
+  tasks      Task[]   // One-to-many relationship with tasks
 
   @@index([status])
   @@index([moveInDate])
   @@index([createdAt])
   @@index([userId])
+}
+
+model Task {
+  id            String      @id @default(cuid())
+  description   String
+  completed     Boolean     @default(false)
+  applicationId Int
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([applicationId])
 }

@@ -1,0 +1,361 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import TaskMenuButton from './TaskMenuButton'
+import InlineTextField from '@/components/shared/fields/InlineTextField'
+import SaveButton from '@/components/shared/buttons/SaveButton'
+import CancelButton from '@/components/shared/buttons/CancelButton'
+import Toast, { ToastType } from '@/components/shared/feedback/Toast'
+import ConfirmModal from '@/components/shared/modals/ConfirmModal'
+import IconPack from '@/components/shared/icons/IconPack'
+
+interface Task {
+  id: string
+  description: string
+  completed: boolean
+  createdAt: string
+  updatedAt: string
+  clientId?: string // Stable ID for React keys to prevent remounting
+}
+
+interface TasksListProps {
+  applicationId: number
+  initialTasks?: Task[]
+}
+
+export default function TasksList({ applicationId, initialTasks = [] }: TasksListProps) {
+  // Add clientId to initial tasks for stable keys
+  const [tasks, setTasks] = useState<Task[]>(() =>
+    initialTasks.map(task => ({
+      ...task,
+      clientId: task.clientId || task.id
+    }))
+  )
+  const [isLoading] = useState(false)
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
+  const [editingDescription, setEditingDescription] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [toastType, setToastType] = useState<ToastType>('success')
+
+  // Update tasks when initialTasks changes
+  useEffect(() => {
+    setTasks(
+      initialTasks.map(task => ({
+        ...task,
+        clientId: task.clientId || task.id
+      }))
+    )
+  }, [initialTasks])
+
+  // Add new task
+  const handleAddTask = () => {
+    // Create a temporary task with a temporary ID
+    const tempId = `temp-${Date.now()}`
+    const newTask: Task = {
+      id: tempId,
+      clientId: tempId,
+      description: '',
+      completed: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+
+    // Add to beginning of list and set it to edit mode
+    setTasks(prev => [newTask, ...prev])
+    setEditingTaskId(tempId)
+    setEditingDescription('')
+  }
+
+  // Edit existing task
+  const handleEditTask = (task: Task) => {
+    setEditingTaskId(task.clientId || task.id)
+    setEditingDescription(task.description)
+  }
+
+  const handleCancelEdit = () => {
+    // If canceling a temporary task (new task), remove it from the list
+    if (editingTaskId?.startsWith('temp-')) {
+      setTasks(prev => prev.filter(task => task.id !== editingTaskId))
+    }
+
+    setEditingTaskId(null)
+    setEditingDescription('')
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingTaskId) return
+
+    if (!editingDescription.trim()) {
+      setToastType('error')
+      setToastMessage('Task description is required')
+      return
+    }
+
+    setIsSaving(true)
+    setToastMessage(null)
+
+    // Check if this is a new task (temporary ID)
+    const isNewTask = editingTaskId.startsWith('temp-')
+
+    try {
+      if (isNewTask) {
+        // Create new task
+        const response = await fetch(`/api/applications/${applicationId}/tasks`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description: editingDescription.trim() })
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to create task')
+        }
+
+        // Replace temporary task with real task from server
+        setTasks(prev =>
+          prev.map(task =>
+            task.id === editingTaskId
+              ? { ...data.data, clientId: data.data.id }
+              : task
+          )
+        )
+        setToastType('success')
+        setToastMessage('Task added successfully!')
+      } else {
+        // Update existing task
+        const response = await fetch(
+          `/api/applications/${applicationId}/tasks/${editingTaskId}`,
+          {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ description: editingDescription.trim() })
+          }
+        )
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to update task')
+        }
+
+        setTasks(prev =>
+          prev.map(task => (task.id === editingTaskId ? data.data : task))
+        )
+        setToastType('success')
+        setToastMessage('Task updated successfully!')
+      }
+
+      setEditingTaskId(null)
+      setEditingDescription('')
+    } catch (error) {
+      setToastType('error')
+      setToastMessage(
+        error instanceof Error
+          ? error.message
+          : isNewTask
+          ? 'Failed to create task'
+          : 'Failed to update task'
+      )
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Delete task
+  const handleDeleteTask = (taskId: string) => {
+    setDeletingTaskId(taskId)
+    setShowDeleteModal(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingTaskId) return
+
+    try {
+      const response = await fetch(
+        `/api/applications/${applicationId}/tasks/${deletingTaskId}`,
+        {
+          method: 'DELETE'
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete task')
+      }
+
+      setTasks(prev => prev.filter(task => task.id !== deletingTaskId))
+      setToastType('success')
+      setToastMessage('Task deleted successfully!')
+    } catch (error) {
+      setToastType('error')
+      setToastMessage(error instanceof Error ? error.message : 'Failed to delete task')
+    } finally {
+      setShowDeleteModal(false)
+      setDeletingTaskId(null)
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false)
+    setDeletingTaskId(null)
+  }
+
+  // Toggle task completion
+  const handleToggleTask = async (task: Task) => {
+    const newCompletedStatus = !task.completed
+
+    // Optimistically update UI
+    setTasks(prev =>
+      prev.map(t => (t.id === task.id ? { ...t, completed: newCompletedStatus } : t))
+    )
+
+    try {
+      const response = await fetch(
+        `/api/applications/${applicationId}/tasks/${task.id}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ completed: newCompletedStatus })
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to toggle task')
+      }
+
+      // Update with server response
+      setTasks(prev => prev.map(t => (t.id === task.id ? data.data : t)))
+    } catch (error) {
+      // Revert on error
+      setTasks(prev =>
+        prev.map(t => (t.id === task.id ? { ...t, completed: task.completed } : t))
+      )
+      setToastType('error')
+      setToastMessage(error instanceof Error ? error.message : 'Failed to toggle task')
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <>
+        <div className="flex items-center gap-[2%]">
+          <span className="text-sm sm:text-base font-semibold text-gray-500">Tasks</span>
+        </div>
+        <div className="text-sm sm:text-base text-gray-600">
+          Loading tasks...
+        </div>
+      </>
+    )
+  }
+
+  return (
+    <>
+      {/* Header with Add Task Icon - matches other field labels */}
+      <div className="flex items-center gap-[2%]">
+        <span className="text-sm sm:text-base font-semibold text-gray-500">
+          Tasks
+        </span>
+        <IconPack.Add
+          onClick={handleAddTask}
+          size="small"
+        />
+      </div>
+
+      {/* Tasks List */}
+      <div className="flex flex-col gap-[2%]">
+              {/* All Tasks (including new tasks in edit mode) */}
+              {tasks.map((task) => (
+                <div
+                  key={task.clientId || task.id}
+                  className="flex items-start gap-3"
+                >
+                  {/* Checkbox */}
+                  {task.completed ? (
+                    <IconPack.CheckboxChecked
+                      onClick={() => handleToggleTask(task)}
+                      size="small"
+                      disabled={editingTaskId === (task.clientId || task.id)}
+                      className="flex-shrink-0 mt-[2px]"
+                    />
+                  ) : (
+                    <IconPack.CheckboxEmpty
+                      onClick={() => handleToggleTask(task)}
+                      size="small"
+                      disabled={editingTaskId === (task.clientId || task.id)}
+                      className="flex-shrink-0 mt-[2px]"
+                    />
+                  )}
+
+                  {/* Task Description */}
+                  <div className="flex-1 flex flex-col gap-[2%]">
+                      {editingTaskId === (task.clientId || task.id) ? (
+                        <div>
+                          <InlineTextField
+                            value={editingDescription}
+                            onChange={setEditingDescription}
+                            isEditMode={true}
+                            placeholder="Task description"
+                          />
+                        </div>
+                      ) : (
+                        <span
+                          className={`text-base sm:text-lg ${task.completed ? 'line-through text-gray-400' : 'text-gray-900'}`}
+                        >
+                          {task.description}
+                        </span>
+                      )}
+                  </div>
+
+                  {/* Action Buttons */}
+                    {editingTaskId === (task.clientId || task.id) ? (
+                      <div className="flex items-center gap-2">
+                        <CancelButton onClick={handleCancelEdit} size="small" />
+                        <SaveButton onClick={handleSaveEdit} disabled={isSaving} size="small" />
+                      </div>
+                    ) : (
+                      <div>
+                        <TaskMenuButton
+                          onEdit={() => handleEditTask(task)}
+                          onDelete={() => handleDeleteTask(task.id)}
+                        />
+                      </div>
+                    )}
+                </div>
+              ))}
+
+            {/* Empty State */}
+            {tasks.length === 0 && (
+              <div className="text-sm sm:text-base text-gray-400">
+                No tasks yet.
+              </div>
+            )}
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Delete Task"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        isDestructive={true}
+      />
+
+      {/* Toast Notification */}
+      <Toast
+        message={toastMessage}
+        type={toastType}
+        onClose={() => setToastMessage(null)}
+      />
+    </>
+  )
+}

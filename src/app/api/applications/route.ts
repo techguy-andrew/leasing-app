@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { name, createdAt, moveInDate, property, unitNumber, email, phone, status } = validationResult.data
+    const { name, createdAt, moveInDate, property, unitNumber, email, phone, status, tasks } = validationResult.data
 
     // Create the application in the database
     const application = await prisma.application.create({
@@ -77,7 +77,17 @@ export async function POST(request: NextRequest) {
         unitNumber,
         applicant: name, // Map 'name' to 'applicant' field
         email,
-        phone
+        phone,
+        tasks: {
+          create: tasks.map(task => ({
+            id: task.id,
+            description: task.description,
+            completed: task.completed
+          }))
+        }
+      },
+      include: {
+        tasks: true
       }
     })
 

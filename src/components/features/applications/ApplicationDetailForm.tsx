@@ -10,10 +10,11 @@ import SaveButton from '@/components/shared/buttons/SaveButton'
 import CancelButton from '@/components/shared/buttons/CancelButton'
 import ConfirmModal from '@/components/shared/modals/ConfirmModal'
 import Toast, { ToastType } from '@/components/shared/feedback/Toast'
+import TasksList from './TasksList'
 import { STATUS_OPTIONS, PROPERTY_OPTIONS } from '@/lib/constants'
 
 /**
- * ApplicationForm Component
+ * ApplicationDetailForm Component
  *
  * A fully self-contained, reusable form component for creating and editing applications.
  * Supports both create and edit modes with inline editing, field validation, and toast notifications.
@@ -27,14 +28,14 @@ import { STATUS_OPTIONS, PROPERTY_OPTIONS } from '@/lib/constants'
  * @example
  * ```tsx
  * // Create mode
- * <ApplicationForm
+ * <ApplicationDetailForm
  *   mode="create"
  *   onSave={(data) => createApplication(data)}
  *   onCancel={() => router.push('/')}
  * />
  *
  * // Edit mode
- * <ApplicationForm
+ * <ApplicationDetailForm
  *   mode="edit"
  *   initialData={applicationData}
  *   applicationId={123}
@@ -64,9 +65,18 @@ interface FormData {
   createdAt: string
 }
 
-interface ApplicationFormProps {
+interface Task {
+  id: string
+  description: string
+  completed: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+interface ApplicationDetailFormProps {
   mode: 'create' | 'edit'
   initialData?: Partial<FormData>
+  initialTasks?: Task[]
   applicationId?: number
   onSave: (data: FormData) => Promise<void>
   onCancel: () => void
@@ -86,16 +96,17 @@ const defaultFormData: FormData = {
   createdAt: ''
 }
 
-export default function ApplicationForm({
+export default function ApplicationDetailForm({
   mode,
   initialData,
+  initialTasks = [],
   applicationId,
   onSave,
   onCancel,
   onDelete,
   showDeleteButton = true,
   onStatusChange
-}: ApplicationFormProps) {
+}: ApplicationDetailFormProps) {
   const [isEditMode, setIsEditMode] = useState(mode === 'create')
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -277,11 +288,12 @@ export default function ApplicationForm({
     setShowDeleteModal(false)
   }
 
+
   return (
     <>
-      <div className="flex flex-col w-full flex-1 p-[3%] sm:p-[4%] md:p-[5%] lg:p-[6%] pb-0 bg-white">
+      <div className="flex flex-col w-full flex-1 p-[3%] sm:p-[4%] md:p-[5%] lg:p-[6%] bg-white">
         <motion.div
-          className="max-w-4xl mx-auto w-full p-[4%] sm:p-[5%] md:p-[6%] pb-[4%] relative"
+          className="max-w-4xl mx-auto w-full p-[4%] sm:p-[5%] md:p-[6%] relative"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -422,6 +434,13 @@ export default function ApplicationForm({
                 placeholder="MM/DD/YYYY"
               />
             </div>
+
+            {/* Tasks Section - Integrated as a field */}
+            {applicationId && (
+              <div className="flex flex-col gap-[2%]">
+                <TasksList applicationId={applicationId} initialTasks={initialTasks} />
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

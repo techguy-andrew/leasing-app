@@ -1,9 +1,10 @@
-import Image from 'next/image'
+import IconPack from '@/components/shared/icons/IconPack'
 
 /**
  * CancelButton Component
  *
  * A reusable cancel button with an icon. Displays a close circle icon.
+ * Uses standardized IconPack with consistent hover animation (scale-110).
  *
  * @example
  * ```tsx
@@ -11,24 +12,20 @@ import Image from 'next/image'
  * ```
  *
  * To adapt for new projects:
- * 1. Replace /close-circle.svg with your own icon path
- * 2. Adjust size (w-8 h-8) as needed
- * 3. Customize hover/active states
+ * 1. Adjust size as needed ('small' | 'default' | 'large')
+ * 2. Customize behavior
  */
 
 interface CancelButtonProps {
   onClick: () => void
+  size?: 'small' | 'default' | 'large'
 }
 
-export default function CancelButton({ onClick }: CancelButtonProps) {
+export default function CancelButton({ onClick, size = 'large' }: CancelButtonProps) {
   return (
-    <Image
-      src="/close-circle.svg"
-      alt="Cancel"
-      width={32}
-      height={32}
+    <IconPack.Cancel
       onClick={onClick}
-      className="w-8 h-8 cursor-pointer"
+      size={size}
     />
   )
 }

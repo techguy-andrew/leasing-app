@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import Image from 'next/image'
+import IconPack from '@/components/shared/icons/IconPack'
 
 /**
  * EditMenuButton Component
  *
  * A dropdown menu button with Edit and Delete options. Auto-closes on outside click.
+ * Uses standardized IconPack with consistent hover animation (scale-110).
  *
  * @example
  * ```tsx
@@ -15,11 +16,10 @@ import Image from 'next/image'
  * ```
  *
  * To adapt for new projects:
- * 1. Replace /menu-dots-circle.svg with your own icon path
- * 2. Modify menu items (currently Edit/Delete) in the dropdown
- * 3. Adjust animation timing (duration: 0.12) as needed
- * 4. Customize menu item colors and styles
- * 5. Add more menu options by copying the button pattern
+ * 1. Modify menu items (currently Edit/Delete) in the dropdown
+ * 2. Adjust animation timing (duration: 0.12) as needed
+ * 3. Customize menu item colors and styles
+ * 4. Add more menu options by copying the button pattern
  */
 
 interface EditMenuProps {
@@ -56,13 +56,9 @@ export default function EditMenuButton({ onEdit, onDelete }: EditMenuProps) {
 
   return (
     <div className="relative inline-block ml-auto" ref={menuRef}>
-      <Image
-        src="/menu-dots-circle.svg"
-        alt="Menu"
-        width={32}
-        height={32}
+      <IconPack.Menu
         onClick={() => setIsOpen(!isOpen)}
-        className="w-8 h-8 cursor-pointer"
+        size="large"
       />
 
       <AnimatePresence>

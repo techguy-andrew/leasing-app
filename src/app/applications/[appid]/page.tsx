@@ -4,7 +4,15 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import Breadcrumb from '@/components/shared/navigation/Breadcrumb'
-import ApplicationForm from '@/components/features/applications/ApplicationForm'
+import ApplicationDetailForm from '@/components/features/applications/ApplicationDetailForm'
+
+interface Task {
+  id: string
+  description: string
+  completed: boolean
+  createdAt: string
+  updatedAt: string
+}
 
 interface Application {
   id: number
@@ -17,6 +25,7 @@ interface Application {
   phone: string | null
   createdAt: string
   updatedAt: string
+  tasks: Task[]
 }
 
 interface FormData {
@@ -126,6 +135,49 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     router.push('/applications')
   }
 
+  const handleStatusChange = async (status: string) => {
+    if (!appId || !application) throw new Error('No application ID')
+
+    // Normalize date to ensure MM/DD/YYYY format with leading zeros
+    const normalizeDate = (dateStr: string): string => {
+      const digits = dateStr.replace(/\D/g, '')
+      if (digits.length === 8) {
+        return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`
+      }
+      const parts = dateStr.split('/')
+      if (parts.length === 3) {
+        const [month, day, year] = parts
+        return `${month.padStart(2, '0')}/${day.padStart(2, '0')}/${year.padStart(4, '0')}`
+      }
+      return dateStr
+    }
+
+    const payload = {
+      applicant: application.applicant,
+      createdAt: normalizeDate(application.createdAt),
+      moveInDate: normalizeDate(application.moveInDate),
+      property: application.property,
+      unitNumber: application.unitNumber,
+      email: application.email?.trim() || null,
+      phone: application.phone?.trim() || null,
+      status
+    }
+
+    const response = await fetch(`/api/applications/${appId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to update status')
+    }
+
+    setApplication(data.data)
+  }
+
   const handleCancel = () => {
     // Cancel is handled within ApplicationForm for edit mode
   }
@@ -171,7 +223,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           { label: 'Application Details', href: `/applications/${application.id}` }
         ]}
       />
-      <ApplicationForm
+      <ApplicationDetailForm
         mode="edit"
         initialData={{
           status: application.status,
@@ -183,10 +235,12 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           phone: application.phone || '',
           createdAt: application.createdAt || ''
         }}
+        initialTasks={application.tasks || []}
         applicationId={appId}
         onSave={handleSave}
         onCancel={handleCancel}
         onDelete={handleDelete}
+        onStatusChange={handleStatusChange}
         showDeleteButton={true}
       />
     </>
