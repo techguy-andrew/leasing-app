@@ -17,7 +17,7 @@ model Application {
   applicant  String
   email      String?
   phone      String?
-  createdAt  DateTime @default(now())
+  createdAt  String   // Application date in MM/DD/YYYY format
   updatedAt  DateTime @updatedAt
 
   @@index([status])

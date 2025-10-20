@@ -93,7 +93,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { applicant, moveInDate, property, unitNumber, email, phone, status } = validationResult.data
+    const { applicant, createdAt, moveInDate, property, unitNumber, email, phone, status } = validationResult.data
 
     // Verify the application exists
     const existingApplication = await prisma.application.findUnique({
@@ -112,6 +112,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       where: { id: applicationId },
       data: {
         status: status || existingApplication.status,
+        createdAt,
         moveInDate,
         property,
         unitNumber,

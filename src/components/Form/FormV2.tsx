@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import TextField from '../Field/TextField'
-import SelectField from '../Field/SelectField'
+import MinimalTextField from '../Field/MinimalTextField'
+import MinimalSelectField from '../Field/MinimalSelectField'
 import Submit from '../Buttons/Submit/Submit'
 import { STATUS_OPTIONS, PROPERTY_OPTIONS } from '@/lib/constants'
 import { applicationCreateSchema } from '@/lib/validations/application'
@@ -15,6 +15,7 @@ interface FormData {
   name: string
   email: string
   phone: string
+  createdAt: string
 }
 
 interface ValidationErrors {
@@ -29,7 +30,8 @@ export default function FormV2() {
     unitNumber: '',
     name: '',
     email: '',
-    phone: ''
+    phone: '',
+    createdAt: ''
   })
 
   const [isLoading, setIsLoading] = useState(false)
@@ -65,24 +67,31 @@ export default function FormV2() {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+  const handleFieldChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [field]: value
     }))
   }
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatDate(e.target.value)
+  const handleDateChange = (value: string) => {
+    const formatted = formatDate(value)
     setFormData(prev => ({
       ...prev,
       moveInDate: formatted
     }))
   }
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhone(e.target.value)
+  const handleCreatedAtChange = (value: string) => {
+    const formatted = formatDate(value)
+    setFormData(prev => ({
+      ...prev,
+      createdAt: formatted
+    }))
+  }
+
+  const handlePhoneChange = (value: string) => {
+    const formatted = formatPhone(value)
     setFormData(prev => ({
       ...prev,
       phone: formatted
@@ -143,7 +152,8 @@ export default function FormV2() {
         unitNumber: '',
         name: '',
         email: '',
-        phone: ''
+        phone: '',
+        createdAt: ''
       })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -153,98 +163,67 @@ export default function FormV2() {
   }
 
   return (
-    <div className="flex flex-col gap-6 border border-gray-300 rounded-lg p-6 md:p-8 w-full max-w-2xl">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <TextField
-            type="text"
-            placeholder="Name *"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-          />
-          {validationErrors.name && (
-            <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
-          )}
-        </div>
+    <div className="flex flex-col gap-6 w-full max-w-2xl">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <MinimalTextField
+          placeholder="Name *"
+          value={formData.name}
+          onChange={(value) => handleFieldChange('name', value)}
+          error={validationErrors.name}
+        />
 
-        <div>
-          <TextField
-            type="text"
-            placeholder="MM/DD/YYYY *"
-            name="moveInDate"
-            value={formData.moveInDate}
-            onChange={handleDateChange}
-          />
-          {validationErrors.moveInDate && (
-            <p className="mt-1 text-sm text-red-600">{validationErrors.moveInDate}</p>
-          )}
-        </div>
+        <MinimalTextField
+          placeholder="Application Date (MM/DD/YYYY) *"
+          value={formData.createdAt}
+          onChange={handleCreatedAtChange}
+          error={validationErrors.createdAt}
+        />
 
-        <div>
-          <SelectField
-            name="property"
-            value={formData.property}
-            onChange={handleSelectChange}
-            options={PROPERTY_OPTIONS}
-            placeholder="Select Property *"
-          />
-          {validationErrors.property && (
-            <p className="mt-1 text-sm text-red-600">{validationErrors.property}</p>
-          )}
-        </div>
+        <MinimalTextField
+          placeholder="Move-in Date (MM/DD/YYYY) *"
+          value={formData.moveInDate}
+          onChange={handleDateChange}
+          error={validationErrors.moveInDate}
+        />
 
-        <div>
-          <TextField
-            type="text"
-            placeholder="Unit Number *"
-            name="unitNumber"
-            value={formData.unitNumber}
-            onChange={handleChange}
-          />
-          {validationErrors.unitNumber && (
-            <p className="mt-1 text-sm text-red-600">{validationErrors.unitNumber}</p>
-          )}
-        </div>
+        <MinimalSelectField
+          name="property"
+          value={formData.property}
+          onChange={handleSelectChange}
+          options={PROPERTY_OPTIONS}
+          placeholder="Select Property *"
+          error={validationErrors.property}
+        />
 
-        <div>
-          <TextField
-            type="email"
-            placeholder="Email (optional)"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-          />
-          {validationErrors.email && (
-            <p className="mt-1 text-sm text-red-600">{validationErrors.email}</p>
-          )}
-        </div>
+        <MinimalTextField
+          placeholder="Unit Number *"
+          value={formData.unitNumber}
+          onChange={(value) => handleFieldChange('unitNumber', value)}
+          error={validationErrors.unitNumber}
+        />
 
-        <div>
-          <TextField
-            type="text"
-            placeholder="Phone (optional)"
-            name="phone"
-            value={formData.phone}
-            onChange={handlePhoneChange}
-          />
-          {validationErrors.phone && (
-            <p className="mt-1 text-sm text-red-600">{validationErrors.phone}</p>
-          )}
-        </div>
+        <MinimalTextField
+          placeholder="Email (optional)"
+          value={formData.email}
+          onChange={(value) => handleFieldChange('email', value)}
+          error={validationErrors.email}
+        />
 
-        <div>
-          <SelectField
-            name="status"
-            value={formData.status}
-            onChange={handleSelectChange}
-            options={STATUS_OPTIONS}
-            placeholder="Select Status (optional)"
-          />
-          {validationErrors.status && (
-            <p className="mt-1 text-sm text-red-600">{validationErrors.status}</p>
-          )}
-        </div>
+        <MinimalTextField
+          placeholder="Phone (optional)"
+          value={formData.phone}
+          onChange={handlePhoneChange}
+          error={validationErrors.phone}
+        />
+
+        <MinimalSelectField
+          name="status"
+          value={formData.status}
+          onChange={handleSelectChange}
+          options={STATUS_OPTIONS}
+          placeholder="Select Status (optional)"
+          error={validationErrors.status}
+        />
 
         <Submit />
       </form>

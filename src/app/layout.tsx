@@ -1,12 +1,31 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import NavigationLayout from "@/components/Navigation/NavigationLayout";
 import { ClerkProvider } from "@clerk/nextjs";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/**
+ * Google Font Configuration
+ *
+ * To change the font throughout the entire app:
+ * 1. Replace "Inter" with any Google Font name (e.g., "Roboto", "Poppins", "Open_Sans")
+ * 2. Browse fonts at: https://fonts.google.com
+ * 3. Save the file - that's it!
+ *
+ * Popular options:
+ * - Inter (current) - Modern, clean, professional
+ * - Roboto - Google's signature font
+ * - Poppins - Geometric, friendly
+ * - Open_Sans - Highly readable
+ * - Montserrat - Bold, impactful
+ * - Lato - Warm, friendly
+ * - Source_Sans_3 - Clean, readable
+ * - Work_Sans - Contemporary
+ */
+const appFont = Inter({
+  variable: "--font-app",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +41,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${geistSans.variable} antialiased`}>
+        <body className={`${appFont.variable} antialiased`}>
           <NavigationLayout>
             {children}
           </NavigationLayout>

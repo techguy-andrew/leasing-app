@@ -56,6 +56,7 @@ const phoneSchema = z.preprocess(
 // Schema for creating a new application (POST)
 export const applicationCreateSchema = z.object({
   name: z.string().trim().min(1, 'Name is required'),
+  createdAt: dateSchema,
   moveInDate: dateSchema,
   property: z.enum(propertyValues, {
     errorMap: () => ({ message: 'Please select a valid property' })
@@ -69,6 +70,7 @@ export const applicationCreateSchema = z.object({
 // Schema for updating an application (PUT)
 export const applicationUpdateSchema = z.object({
   applicant: z.string().trim().min(1, 'Applicant name is required'),
+  createdAt: dateSchema,
   moveInDate: dateSchema,
   property: z.enum(propertyValues, {
     errorMap: () => ({ message: 'Please select a valid property' })

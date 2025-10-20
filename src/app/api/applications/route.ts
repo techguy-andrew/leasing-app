@@ -64,13 +64,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { name, moveInDate, property, unitNumber, email, phone, status } = validationResult.data
+    const { name, createdAt, moveInDate, property, unitNumber, email, phone, status } = validationResult.data
 
     // Create the application in the database
     const application = await prisma.application.create({
       data: {
         userId,
         status: status || 'New',
+        createdAt,
         moveInDate,
         property,
         unitNumber,

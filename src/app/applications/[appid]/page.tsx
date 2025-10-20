@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'motion/react'
-import HeaderCard from '@/components/Cards/HeaderCard'
-import InlineTextField from '@/components/Field/InlineTextField'
+import Breadcrumb from '@/components/Breadcrumb/Breadcrumb'
+import MinimalInlineTextField from '@/components/Field/MinimalInlineTextField'
 import InlineSelectField from '@/components/Field/InlineSelectField'
 import InlineStatusBadge from '@/components/Badges/InlineStatusBadge'
 import EditMenu from '@/components/Buttons/EditMenu/EditMenu'
@@ -50,7 +50,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     unitNumber: '',
     applicant: '',
     email: '',
-    phone: ''
+    phone: '',
+    createdAt: ''
   })
 
   useEffect(() => {
@@ -80,7 +81,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           unitNumber: data.data.unitNumber,
           applicant: data.data.applicant,
           email: data.data.email || '',
-          phone: data.data.phone || ''
+          phone: data.data.phone || '',
+          createdAt: data.data.createdAt || ''
         })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
@@ -116,9 +118,49 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     setFormData(prev => ({ ...prev, moveInDate: formatted }))
   }
 
+  const handleCreatedAtChange = (value: string) => {
+    const formatted = formatDate(value)
+    setFormData(prev => ({ ...prev, createdAt: formatted }))
+  }
+
   const handlePhoneChange = (value: string) => {
     const formatted = formatPhone(value)
     setFormData(prev => ({ ...prev, phone: formatted }))
+  }
+
+  const handleStatusChange = async (value: string) => {
+    if (!application) return
+
+    // Update local state immediately for optimistic UI
+    setFormData(prev => ({ ...prev, status: value }))
+
+    try {
+      const response = await fetch(`/api/applications/${application.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          status: value
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update status')
+      }
+
+      setApplication(data.data)
+      setToastType('success')
+      setToastMessage('Status updated successfully!')
+    } catch (err) {
+      // Revert on error
+      if (application) {
+        setFormData(prev => ({ ...prev, status: application.status }))
+      }
+      setToastType('error')
+      setToastMessage(err instanceof Error ? err.message : 'Failed to update status')
+    }
   }
 
   const handleEdit = () => {
@@ -136,7 +178,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
         unitNumber: application.unitNumber,
         applicant: application.applicant,
         email: application.email || '',
-        phone: application.phone || ''
+        phone: application.phone || '',
+        createdAt: application.createdAt || ''
       })
     }
     setIsEditMode(false)
@@ -267,25 +310,18 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
   if (!application) return null
 
-  const createdDate = new Date(application.createdAt).toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-
   return (
     <>
-      <div className="w-full">
-        <HeaderCard
-          title={`Application #${application.id}`}
-          description={`Submitted on ${createdDate}`}
-        />
-      </div>
-      <div className="flex flex-col w-full flex-1 p-[3%] sm:p-[4%] md:p-[5%] lg:p-[6%] bg-gradient-to-b from-gray-50 to-white">
+      <Breadcrumb
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Applications', href: '/applications' },
+          { label: 'Application Details', href: `/applications/${application.id}` }
+        ]}
+      />
+      <div className="flex flex-col w-full flex-1 p-[3%] sm:p-[4%] md:p-[5%] lg:p-[6%] bg-white">
         <motion.div
-          className="max-w-4xl mx-auto w-full bg-white/95 backdrop-blur-lg border border-gray-200 rounded-2xl p-[4%] sm:p-[5%] md:p-[6%] shadow-xl relative"
+          className="max-w-4xl mx-auto w-full p-[4%] sm:p-[5%] md:p-[6%] relative"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -325,16 +361,26 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                 <span className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Status:</span>
                 <InlineStatusBadge
                   status={formData.status}
-                  onChange={(value) => handleFieldChange('status', value)}
+                  onChange={handleStatusChange}
                   options={STATUS_OPTIONS}
+                />
+              </div>
+
+              {/* Application Date Field */}
+              <div className="flex flex-col gap-[2%]">
+                <span className="text-sm sm:text-base font-semibold text-gray-500">Application Date</span>
+                <MinimalInlineTextField
+                  value={formData.createdAt}
+                  onChange={handleCreatedAtChange}
                   isEditMode={isEditMode}
+                  placeholder="MM/DD/YYYY"
                 />
               </div>
 
               {/* Applicant Name Field */}
               <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Applicant Name</span>
-                <InlineTextField
+                <MinimalInlineTextField
                   value={formData.applicant}
                   onChange={(value) => handleFieldChange('applicant', value)}
                   isEditMode={isEditMode}
@@ -345,11 +391,10 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               {/* Email Field */}
               <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Email</span>
-                <InlineTextField
+                <MinimalInlineTextField
                   value={formData.email}
                   onChange={(value) => handleFieldChange('email', value)}
                   isEditMode={isEditMode}
-                  type="email"
                   placeholder="Email"
                 />
               </div>
@@ -357,7 +402,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               {/* Phone Field */}
               <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Phone</span>
-                <InlineTextField
+                <MinimalInlineTextField
                   value={formData.phone}
                   onChange={handlePhoneChange}
                   isEditMode={isEditMode}
@@ -373,13 +418,14 @@ export default function ApplicationDetailPage({ params }: PageProps) {
                   onChange={(value) => handleFieldChange('property', value)}
                   options={PROPERTY_OPTIONS}
                   isEditMode={isEditMode}
+                  placeholder="Property"
                 />
               </div>
 
               {/* Unit Number Field */}
               <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Unit Number</span>
-                <InlineTextField
+                <MinimalInlineTextField
                   value={formData.unitNumber}
                   onChange={(value) => handleFieldChange('unitNumber', value)}
                   isEditMode={isEditMode}
@@ -390,7 +436,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
               {/* Move-in Date Field */}
               <div className="flex flex-col gap-[2%]">
                 <span className="text-sm sm:text-base font-semibold text-gray-500">Move-in Date</span>
-                <InlineTextField
+                <MinimalInlineTextField
                   value={formData.moveInDate}
                   onChange={handleDateChange}
                   isEditMode={isEditMode}
@@ -405,7 +451,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       <Confirm
         isOpen={showDeleteModal}
         title="Delete Application"
-        message={`Are you sure you want to delete application #${application.id}? This action cannot be undone.`}
+        message="Are you sure you want to delete this application? This action cannot be undone."
         confirmText={isDeleting ? 'Deleting...' : 'Delete'}
         cancelText="Cancel"
         onConfirm={handleDeleteConfirm}

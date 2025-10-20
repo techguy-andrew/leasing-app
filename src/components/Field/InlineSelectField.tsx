@@ -8,6 +8,7 @@ interface InlineSelectFieldProps {
   onChange: (value: string) => void
   options: { value: string; label: string }[]
   isEditMode: boolean
+  placeholder?: string
   className?: string
 }
 
@@ -16,6 +17,7 @@ export default function InlineSelectField({
   onChange,
   options,
   isEditMode,
+  placeholder = 'Select',
   className = ''
 }: InlineSelectFieldProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -40,27 +42,27 @@ export default function InlineSelectField({
   }
 
   const selectedLabel = options.find(opt => opt.value === value)?.label || value
-
-  if (!isEditMode) {
-    return (
-      <span className={`text-base text-gray-900 ${className}`}>
-        {selectedLabel}
-      </span>
-    )
-  }
+  const isShowingPlaceholder = !selectedLabel
+  const displayValue = selectedLabel || (isEditMode ? placeholder : 'N/A')
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className={`text-base text-gray-900 bg-transparent border-none outline-none text-left ${className}`}
-      >
-        {selectedLabel}
-      </button>
+      {isEditMode ? (
+        <button
+          type="button"
+          onClick={() => setIsOpen(!isOpen)}
+          className={`text-base sm:text-lg ${isShowingPlaceholder ? 'text-gray-400' : 'text-gray-900'} bg-transparent border-none outline-none text-left font-sans p-0 cursor-pointer hover:opacity-70 ${className}`}
+        >
+          {displayValue}
+        </button>
+      ) : (
+        <div className={`text-base sm:text-lg ${isShowingPlaceholder ? 'text-gray-400' : 'text-gray-900'} bg-transparent outline-none text-left font-sans p-0 cursor-text select-text ${className}`}>
+          {displayValue}
+        </div>
+      )}
 
       <AnimatePresence>
-        {isOpen && (
+        {isEditMode && isOpen && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -73,7 +75,7 @@ export default function InlineSelectField({
                 <button
                   key={option.value}
                   onClick={() => handleSelect(option.value)}
-                  className={`w-full text-left px-4 py-2 text-sm hover:bg-blue-50 transition-colors ${
+                  className={`w-full text-left px-4 py-2 text-sm sm:text-base font-sans hover:bg-blue-50 transition-colors ${
                     option.value === value ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
                   }`}
                 >

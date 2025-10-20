@@ -12,7 +12,6 @@ interface InlineStatusBadgeProps {
   status: string
   onChange: (status: string) => void
   options: StatusOption[]
-  isEditMode: boolean
 }
 
 const statusColors: Record<string, string> = {
@@ -25,8 +24,7 @@ const statusColors: Record<string, string> = {
 export default function InlineStatusBadge({
   status,
   onChange,
-  options,
-  isEditMode
+  options
 }: InlineStatusBadgeProps) {
   const [isOpen, setIsOpen] = useState(false)
   const badgeRef = useRef<HTMLDivElement>(null)
@@ -49,24 +47,17 @@ export default function InlineStatusBadge({
     setIsOpen(false)
   }
 
+  const displayStatus = status || 'N/A'
   const colorClass = statusColors[status] || 'bg-gray-100 text-gray-800'
-
-  if (!isEditMode) {
-    return (
-      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${colorClass}`}>
-        {status}
-      </span>
-    )
-  }
 
   return (
     <div className="relative inline-block" ref={badgeRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`px-2 py-0.5 text-xs font-medium rounded-full hover:opacity-80 transition-opacity ${colorClass}`}
+        className={`px-2 py-0.5 text-xs font-sans font-medium rounded-full hover:opacity-80 transition-opacity select-text ${colorClass}`}
       >
-        {status}
+        {displayStatus}
       </button>
 
       <AnimatePresence>
@@ -85,9 +76,9 @@ export default function InlineStatusBadge({
                   <button
                     key={option.value}
                     onClick={() => handleSelect(option.value)}
-                    className="w-full text-left px-3 py-1.5 hover:bg-gray-50 transition-colors"
+                    className="w-full text-left px-3 py-1.5 hover:bg-gray-50 transition-colors font-sans"
                   >
-                    <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${optionColorClass}`}>
+                    <span className={`px-2 py-0.5 text-xs font-sans font-medium rounded-full ${optionColorClass}`}>
                       {option.label}
                     </span>
                   </button>
