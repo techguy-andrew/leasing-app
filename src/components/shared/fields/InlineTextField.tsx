@@ -2,28 +2,53 @@
 
 import { useRef, useEffect } from 'react'
 
-interface MinimalTextFieldProps {
+/**
+ * InlineTextField Component
+ *
+ * A sophisticated inline editable text field with cursor position preservation
+ * and automatic formatting support. Displays as plain text when not in edit mode.
+ *
+ * @example
+ * ```tsx
+ * <InlineTextField
+ *   value={formData.applicant}
+ *   onChange={(value) => setFormData({ ...formData, applicant: value })}
+ *   isEditMode={isEditMode}
+ *   placeholder="Enter name"
+ * />
+ * ```
+ *
+ * To adapt for new projects:
+ * 1. Use as-is for any inline text editing needs
+ * 2. Displays "N/A" when value is empty and not in edit mode
+ * 3. Supports formatted values (e.g., dates, phone numbers) with cursor preservation
+ * 4. Customize placeholder and className as needed
+ * 5. Works seamlessly with formatDate/formatPhone functions
+ */
+
+interface InlineTextFieldProps {
   value: string
   onChange: (value: string) => void
+  isEditMode: boolean
   placeholder?: string
   className?: string
-  error?: string
 }
 
-export default function MinimalTextField({
+export default function InlineTextField({
   value,
   onChange,
+  isEditMode,
   placeholder = '',
-  className = '',
-  error
-}: MinimalTextFieldProps) {
+  className = ''
+}: InlineTextFieldProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const cursorPositionRef = useRef<number | null>(null)
   const previousValueRef = useRef<string>('')
 
   // Update contentEditable when value changes externally
   useEffect(() => {
-    if (contentRef.current && contentRef.current.textContent !== value) {
+    const displayValue = value || (!isEditMode ? 'N/A' : '')
+    if (contentRef.current && contentRef.current.textContent !== displayValue) {
       const selection = window.getSelection()
       const hadFocus = document.activeElement === contentRef.current
 
@@ -38,9 +63,9 @@ export default function MinimalTextField({
 
       // If we have a saved cursor position and the value changed due to formatting
       // (e.g., date formatting added slashes), we need to intelligently reposition
-      if (targetCursorPos !== null && previousValueRef.current !== value) {
-        const oldValue = previousValueRef.current
-        const newValue = value
+      if (targetCursorPos !== null && contentRef.current.textContent !== displayValue) {
+        const oldValue = contentRef.current.textContent || ''
+        const newValue = displayValue
 
         // Count non-formatting characters (digits) before cursor in old value
         let digitsBeforeCursor = 0
@@ -76,11 +101,11 @@ export default function MinimalTextField({
       }
 
       // Update the content
-      contentRef.current.textContent = value
-      previousValueRef.current = value
+      contentRef.current.textContent = displayValue
+      previousValueRef.current = displayValue
 
-      // Restore cursor position
-      if (hadFocus && targetCursorPos !== null && contentRef.current.firstChild) {
+      // Restore cursor position (only in edit mode and if we had focus)
+      if (isEditMode && hadFocus && targetCursorPos !== null && contentRef.current.firstChild) {
         try {
           const newRange = document.createRange()
           const textNode = contentRef.current.firstChild
@@ -101,9 +126,11 @@ export default function MinimalTextField({
       // Clear saved cursor position after use
       cursorPositionRef.current = null
     }
-  }, [value])
+  }, [value, isEditMode])
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    if (!isEditMode) return
+
     // Get cursor position BEFORE onChange is called
     const selection = window.getSelection()
     if (selection?.rangeCount) {
@@ -117,24 +144,19 @@ export default function MinimalTextField({
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="relative">
-        {value === '' && (
-          <div className="absolute inset-0 px-0 py-2 text-gray-400 font-sans pointer-events-none">
-            {placeholder}
-          </div>
-        )}
-        <div
-          ref={contentRef}
-          contentEditable
-          suppressContentEditableWarning
-          onInput={handleInput}
-          className={`w-full px-0 py-2 bg-transparent transition-all duration-200 outline-none text-black font-sans cursor-text ${className}`}
-        />
-      </div>
-      {error && (
-        <p className="text-sm text-red-600 font-sans">{error}</p>
+    <div className="relative">
+      {isEditMode && value === '' && (
+        <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none">
+          {placeholder}
+        </div>
       )}
+      <div
+        ref={contentRef}
+        contentEditable={isEditMode}
+        suppressContentEditableWarning
+        onInput={handleInput}
+        className={`text-base sm:text-lg text-gray-900 font-sans bg-transparent outline-none ${isEditMode ? 'cursor-text' : 'cursor-text select-text'} ${className}`}
+      />
     </div>
   )
 }

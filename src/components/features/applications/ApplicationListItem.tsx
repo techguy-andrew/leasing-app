@@ -5,7 +5,34 @@ import Link from 'next/link'
 import { motion } from 'motion/react'
 import { STATUS_BADGE_COLORS } from '@/lib/constants'
 
-interface ListItemProps {
+/**
+ * ApplicationListItem Component
+ *
+ * A list item component for displaying application summary information.
+ * Clickable card that links to the application detail page.
+ *
+ * @example
+ * ```tsx
+ * <ApplicationListItem
+ *   id={123}
+ *   applicant="John Doe"
+ *   property="Sunset Apartments"
+ *   unitNumber="101"
+ *   status="Pending"
+ *   moveInDate="12/01/2024"
+ *   createdAt="11/15/2024"
+ * />
+ * ```
+ *
+ * To adapt for new projects:
+ * 1. Update STATUS_BADGE_COLORS in lib/constants.ts to match your statuses
+ * 2. Modify displayed fields to match your data structure
+ * 3. Change link destination (/applications/${id}) to your detail route
+ * 4. Adjust responsive breakpoints (sm:, md:) as needed
+ * 5. Customize hover effects (hover:bg-gray-50) to your design
+ */
+
+interface ApplicationListItemProps {
   id: number
   applicant: string
   property: string
@@ -15,7 +42,7 @@ interface ListItemProps {
   createdAt: string
 }
 
-const ListItem = memo(function ListItem({ id, applicant, property, unitNumber, status, moveInDate }: ListItemProps) {
+const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, property, unitNumber, status, moveInDate }: ApplicationListItemProps) {
   return (
     <Link
       href={`/applications/${id}`}
@@ -54,4 +81,4 @@ const ListItem = memo(function ListItem({ id, applicant, property, unitNumber, s
   )
 })
 
-export default ListItem
+export default ApplicationListItem

@@ -13,7 +13,7 @@ interface ConfirmModalProps {
   isDestructive?: boolean
 }
 
-export default function Confirm({
+export default function ConfirmModal({
   isOpen,
   title,
   message,

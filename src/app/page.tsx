@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'motion/react'
-import HeaderCard from '@/components/Cards/HeaderCard'
+import HeaderCard from '@/components/shared/cards/HeaderCard'
 import Link from 'next/link'
 
 export default function Home() {

@@ -4,12 +4,30 @@ import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 
+/**
+ * EditMenuButton Component
+ *
+ * A dropdown menu button with Edit and Delete options. Auto-closes on outside click.
+ *
+ * @example
+ * ```tsx
+ * <EditMenuButton onEdit={handleEdit} onDelete={handleDelete} />
+ * ```
+ *
+ * To adapt for new projects:
+ * 1. Replace /menu-dots-circle.svg with your own icon path
+ * 2. Modify menu items (currently Edit/Delete) in the dropdown
+ * 3. Adjust animation timing (duration: 0.12) as needed
+ * 4. Customize menu item colors and styles
+ * 5. Add more menu options by copying the button pattern
+ */
+
 interface EditMenuProps {
   onEdit: () => void
   onDelete: () => void
 }
 
-export default function EditMenu({ onEdit, onDelete }: EditMenuProps) {
+export default function EditMenuButton({ onEdit, onDelete }: EditMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 

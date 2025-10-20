@@ -3,6 +3,27 @@
 import { memo } from 'react'
 import { motion } from 'motion/react'
 
+/**
+ * HeaderCard Component
+ *
+ * A page header with title and optional description. Features animation on mount.
+ *
+ * @example
+ * ```tsx
+ * <HeaderCard
+ *   title="Applications"
+ *   description="View and manage all lease applications"
+ * />
+ * ```
+ *
+ * To adapt for new projects:
+ * 1. Use for any page header needs
+ * 2. Description is optional - omit if not needed
+ * 3. Customize animation timing (duration: 0.4) as needed
+ * 4. Adjust text sizes (text-2xl sm:text-3xl md:text-4xl) for your design
+ * 5. Modify max-width (max-w-5xl) to control content width
+ */
+
 interface HeaderCardProps {
   title: string
   description?: string

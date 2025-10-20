@@ -3,6 +3,35 @@
 import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 
+/**
+ * InlineStatusBadge Component
+ *
+ * A clickable status badge with dropdown selection. Displays status with colored badges.
+ * Auto-closes on outside click.
+ *
+ * @example
+ * ```tsx
+ * const STATUS_OPTIONS = [
+ *   { value: 'New', label: 'New' },
+ *   { value: 'Pending', label: 'Pending' },
+ *   { value: 'Approved', label: 'Approved' }
+ * ]
+ *
+ * <InlineStatusBadge
+ *   status={formData.status}
+ *   onChange={(value) => setFormData({ ...formData, status: value })}
+ *   options={STATUS_OPTIONS}
+ * />
+ * ```
+ *
+ * To adapt for new projects:
+ * 1. Update statusColors object with your status types and colors
+ * 2. Use Tailwind color classes (bg-blue-100 text-blue-800)
+ * 3. Modify options array to match your workflow statuses
+ * 4. Always clickable - no read-only mode
+ * 5. Add more status colors by extending statusColors object
+ */
+
 interface StatusOption {
   value: string
   label: string
