@@ -4,10 +4,21 @@ import { useRouter } from 'next/navigation'
 import Breadcrumb from '@/components/shared/navigation/Breadcrumb'
 import ApplicationForm from '@/components/features/applications/ApplicationForm'
 
+interface FormData {
+  status: string
+  moveInDate: string
+  property: string
+  unitNumber: string
+  applicant: string
+  email: string
+  phone: string
+  createdAt: string
+}
+
 export default function NewApplicationPage() {
   const router = useRouter()
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: FormData) => {
     // Normalize date to ensure MM/DD/YYYY format with leading zeros
     const normalizeDate = (dateStr: string): string => {
       const digits = dateStr.replace(/\D/g, '')

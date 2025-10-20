@@ -19,6 +19,17 @@ interface Application {
   updatedAt: string
 }
 
+interface FormData {
+  status: string
+  moveInDate: string
+  property: string
+  unitNumber: string
+  applicant: string
+  email: string
+  phone: string
+  createdAt: string
+}
+
 interface PageProps {
   params: Promise<{ appid: string }>
 }
@@ -62,7 +73,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     loadApplication()
   }, [params])
 
-  const handleSave = async (formData: any) => {
+  const handleSave = async (formData: FormData) => {
     if (!appId) throw new Error('No application ID')
 
     // Normalize date to ensure MM/DD/YYYY format with leading zeros
