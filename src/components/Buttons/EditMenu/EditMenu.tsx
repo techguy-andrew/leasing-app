@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import Image from 'next/image'
 
 interface EditMenuProps {
   onEdit: () => void
@@ -37,16 +38,14 @@ export default function EditMenu({ onEdit, onDelete }: EditMenuProps) {
 
   return (
     <div className="relative inline-block ml-auto" ref={menuRef}>
-      <button
-        type="button"
+      <Image
+        src="/menu-dots-circle.svg"
+        alt="Menu"
+        width={32}
+        height={32}
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-center w-9 h-9 p-[4.5%] text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all duration-150"
-        aria-label="Edit menu"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-        </svg>
-      </button>
+        className="w-8 h-8 cursor-pointer"
+      />
 
       <AnimatePresence>
         {isOpen && (
