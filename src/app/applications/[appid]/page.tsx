@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
-import NavBar from '@/components/shared/navigation/NavBar'
+import { useToolBar } from '@/contexts/ToolBarContext'
 import ApplicationDetailForm from '@/components/features/applications/ApplicationDetailForm'
 import PopUp1 from '@/components/shared/modals/PopUp1'
 
@@ -51,6 +51,13 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   const [error, setError] = useState<string | null>(null)
   const [appId, setAppId] = useState<number | null>(null)
   const [showStatusModal, setShowStatusModal] = useState(false)
+  const { setOnSendStatusMessage } = useToolBar()
+
+  // Set up toolbar callback
+  useEffect(() => {
+    setOnSendStatusMessage(() => () => setShowStatusModal(true))
+    return () => setOnSendStatusMessage(null)
+  }, [setOnSendStatusMessage])
 
   useEffect(() => {
     async function loadApplication() {
@@ -228,17 +235,6 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
   return (
     <>
-      <NavBar />
-
-      {/* Send Status Message Pill Button */}
-      <button
-        onClick={() => setShowStatusModal(true)}
-        className="fixed top-[140px] right-6 z-40 px-4 py-2 text-sm font-medium text-white rounded-full transition-opacity hover:opacity-90 cursor-pointer"
-        style={{ backgroundColor: '#457b9d' }}
-      >
-        Send Status Message
-      </button>
-
       <ApplicationDetailForm
         mode="edit"
         initialData={{

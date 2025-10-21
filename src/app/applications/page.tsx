@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import NavBar from '@/components/shared/navigation/NavBar'
-import FilterBar from '@/components/features/applications/FilterBar'
+import { useFilter } from '@/contexts/FilterContext'
 import ApplicationsList from '@/components/features/applications/ApplicationsList'
 
 interface Application {
@@ -21,9 +20,7 @@ interface Application {
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [statusFilter, setStatusFilter] = useState('All')
-  const [sortDirection, setSortDirection] = useState<'soonest' | 'furthest'>('soonest')
-  const [calendarFilter, setCalendarFilter] = useState('All Time')
+  const { statusFilter, sortDirection, calendarFilter } = useFilter()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -137,25 +134,14 @@ export default function ApplicationsPage() {
   }, [applications, statusFilter, calendarFilter, sortDirection, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
 
   return (
-    <>
-      <NavBar />
-      <FilterBar
+    <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
+      <ApplicationsList
+        applications={filteredApplications}
+        isLoading={isLoading}
         statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        sortDirection={sortDirection}
-        onSortChange={setSortDirection}
         calendarFilter={calendarFilter}
-        onCalendarChange={setCalendarFilter}
+        sortDirection={sortDirection}
       />
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-        <ApplicationsList
-          applications={filteredApplications}
-          isLoading={isLoading}
-          statusFilter={statusFilter}
-          calendarFilter={calendarFilter}
-          sortDirection={sortDirection}
-        />
-      </div>
-    </>
+    </div>
   )
 }

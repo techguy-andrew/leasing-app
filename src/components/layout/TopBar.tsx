@@ -11,7 +11,8 @@ interface TopBarProps {
 export default function TopBar({ isOpen, onToggle }: TopBarProps) {
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 flex flex-row items-center gap-4 px-4 sm:px-6 py-4 bg-white/85 backdrop-blur-xl border-b border-gray-200 shadow-sm z-50"
+      data-topbar
+      className="fixed top-0 left-0 right-0 w-full h-fit flex flex-row items-center gap-4 px-4 sm:px-6 py-4 bg-white/85 backdrop-blur-xl border-b border-gray-200 shadow-sm z-50"
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}

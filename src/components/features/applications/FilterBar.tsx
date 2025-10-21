@@ -49,10 +49,12 @@ export default function FilterBar({
 }: FilterBarProps) {
   return (
     <motion.div
+      data-filterbar
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className="w-full flex flex-col gap-4 px-6 py-4 bg-white border-b border-gray-200"
+      className="fixed left-0 right-0 w-full h-fit flex flex-col gap-4 px-6 py-4 bg-white border-b border-gray-200 z-30"
+      style={{ top: 'calc(var(--topbar-height, 0px) + var(--navbar-height, 0px))' }}
     >
       {/* Filter Sections Container */}
       <div className="flex flex-row flex-wrap gap-6 w-full">

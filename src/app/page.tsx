@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { STATUS_BADGE_COLORS } from '@/lib/constants'
 import { staggerContainer, staggerItem } from '@/lib/animations/variants'
-import NavBar from '@/components/shared/navigation/NavBar'
 
 interface Application {
   id: number
@@ -66,19 +65,14 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <>
-        <NavBar />
-        <div className="flex items-center justify-center min-h-screen bg-white">
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </>
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <p className="text-gray-600">Loading...</p>
+      </div>
     )
   }
 
   return (
-    <>
-      <NavBar />
-      <div className="flex items-center justify-center min-h-screen bg-white p-8">
+    <div className="flex items-center justify-center min-h-screen bg-white p-8">
       <motion.div
         className="flex flex-col gap-6"
         variants={staggerContainer}
@@ -99,6 +93,5 @@ export default function Home() {
         ))}
       </motion.div>
     </div>
-    </>
   )
 }
