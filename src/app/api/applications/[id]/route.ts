@@ -46,8 +46,29 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // Try to fetch property details if the property name matches
+    let propertyDetails = null
+    if (application.property) {
+      propertyDetails = await prisma.property.findFirst({
+        where: { name: application.property }
+      })
+    }
+
+    // Add property details to the response if found
+    // Format: Street Apartment #Unit
+    //         City, State ZIP
+    const propertyAddress = propertyDetails
+      ? `${propertyDetails.street}${application.unitNumber ? ` Apartment #${application.unitNumber}` : ''}\n${propertyDetails.city}, ${propertyDetails.state} ${propertyDetails.zip}`
+      : null
+
+    const responseData = {
+      ...application,
+      propertyAddress,
+      energyProvider: propertyDetails?.energyProvider || null
+    }
+
     return NextResponse.json(
-      { success: true, data: application },
+      { success: true, data: responseData },
       { status: 200 }
     )
   } catch (error) {

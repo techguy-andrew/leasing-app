@@ -9,6 +9,8 @@ interface FilterContextType {
   setSortDirection: (direction: 'soonest' | 'furthest') => void
   calendarFilter: string
   setCalendarFilter: (filter: string) => void
+  propertyFilter: string
+  setPropertyFilter: (property: string) => void
 }
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined)
@@ -17,6 +19,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const [statusFilter, setStatusFilter] = useState('All')
   const [sortDirection, setSortDirection] = useState<'soonest' | 'furthest'>('soonest')
   const [calendarFilter, setCalendarFilter] = useState('All Time')
+  const [propertyFilter, setPropertyFilter] = useState('All')
 
   return (
     <FilterContext.Provider
@@ -27,6 +30,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         setSortDirection,
         calendarFilter,
         setCalendarFilter,
+        propertyFilter,
+        setPropertyFilter,
       }}
     >
       {children}

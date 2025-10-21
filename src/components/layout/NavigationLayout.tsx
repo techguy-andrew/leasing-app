@@ -27,6 +27,8 @@ function LayoutContent({ children }: NavigationLayoutProps) {
     setSortDirection,
     calendarFilter,
     setCalendarFilter,
+    propertyFilter,
+    setPropertyFilter,
   } = useFilter()
 
   const { onSendStatusMessage } = useToolBar()
@@ -102,6 +104,8 @@ function LayoutContent({ children }: NavigationLayoutProps) {
           onSortChange={setSortDirection}
           calendarFilter={calendarFilter}
           onCalendarChange={setCalendarFilter}
+          propertyFilter={propertyFilter}
+          onPropertyChange={setPropertyFilter}
         />
       )}
 

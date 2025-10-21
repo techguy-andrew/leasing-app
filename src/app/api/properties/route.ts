@@ -64,14 +64,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { name, address, energyProvider } = validationResult.data
+    const { name, street, city, state, zip, energyProvider } = validationResult.data
 
     // Create the property in the database
     const property = await prisma.property.create({
       data: {
         userId,
         name,
-        address,
+        street,
+        city,
+        state,
+        zip,
         energyProvider
       }
     })

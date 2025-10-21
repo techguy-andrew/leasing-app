@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import IconPack from '@/components/shared/icons/IconPack'
+import { generateEmailTemplate } from './PopUp1-template'
 
 interface Task {
   id: string
@@ -10,35 +11,38 @@ interface Task {
   completed: boolean
 }
 
+interface ApplicationData {
+  applicant: string
+  property: string
+  propertyAddress?: string
+  energyProvider?: string
+  moveInDate: string
+  deposit: string | null
+  rent: string | null
+  petFee: string | null
+  rentersInsurance: string | null
+  adminFee: string | null
+  tasks: Task[]
+}
+
 interface PopUp1Props {
   isOpen: boolean
-  tasks: Task[]
+  applicationData: ApplicationData
   onClose: () => void
 }
 
 export default function PopUp1({
   isOpen,
-  tasks,
+  applicationData,
   onClose
 }: PopUp1Props) {
   const [copied, setCopied] = useState(false)
 
-  // Filter to only incomplete tasks
-  const incompleteTasks = tasks.filter(task => !task.completed)
-
-  // Generate markdown text
-  const generateMarkdown = () => {
-    if (incompleteTasks.length === 0) {
-      return 'No outstanding tasks'
-    }
-    return incompleteTasks.map(task => `- ${task.description}`).join('\n')
-  }
-
   // Copy to clipboard
   const handleCopy = async () => {
-    const markdownText = generateMarkdown()
+    const emailTemplate = generateEmailTemplate(applicationData)
     try {
-      await navigator.clipboard.writeText(markdownText)
+      await navigator.clipboard.writeText(emailTemplate)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
@@ -95,20 +99,14 @@ export default function PopUp1({
 
               {/* Title */}
               <h3 className="text-base font-bold text-gray-900 mb-3">
-                Outstanding Tasks
+                Status Message Template
               </h3>
 
-              {/* Tasks Display */}
+              {/* Email Template Display */}
               <div className="p-4 rounded-xl mb-6 border-l-4 bg-blue-50/50 border-blue-500 max-h-96 overflow-y-auto">
-                {incompleteTasks.length === 0 ? (
-                  <p className="text-base text-gray-500 leading-relaxed">
-                    No outstanding tasks
-                  </p>
-                ) : (
-                  <div className="text-base text-gray-700 leading-relaxed font-mono whitespace-pre-wrap">
-                    {generateMarkdown()}
-                  </div>
-                )}
+                <div className="text-sm text-gray-700 leading-relaxed font-mono whitespace-pre-wrap">
+                  {generateEmailTemplate(applicationData)}
+                </div>
               </div>
 
               {/* Copy Button */}

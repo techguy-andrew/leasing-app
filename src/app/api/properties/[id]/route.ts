@@ -93,7 +93,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { name, address, energyProvider } = validationResult.data
+    const { name, street, city, state, zip, energyProvider } = validationResult.data
 
     // Verify the property exists
     const existingProperty = await prisma.property.findUnique({
@@ -112,7 +112,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       where: { id: propertyId },
       data: {
         name,
-        address,
+        street,
+        city,
+        state,
+        zip,
         energyProvider
       }
     })

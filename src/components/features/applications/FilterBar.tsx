@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { STATUS_COLORS } from '@/lib/constants'
 import { fadeIn, listStagger, slideUp } from '@/lib/animations/variants'
@@ -35,6 +36,8 @@ interface FilterBarProps {
   onSortChange: (direction: 'soonest' | 'furthest') => void
   calendarFilter: string
   onCalendarChange: (filter: string) => void
+  propertyFilter: string
+  onPropertyChange: (property: string) => void
 }
 
 const statusOptions = ['All', 'New', 'Pending', 'Approved', 'Rejected', 'Archived']
@@ -46,8 +49,31 @@ export default function FilterBar({
   sortDirection,
   onSortChange,
   calendarFilter,
-  onCalendarChange
+  onCalendarChange,
+  propertyFilter,
+  onPropertyChange
 }: FilterBarProps) {
+  const [propertyOptions, setPropertyOptions] = useState<string[]>(['All'])
+
+  // Fetch properties from database
+  useEffect(() => {
+    async function fetchProperties() {
+      try {
+        const response = await fetch('/api/properties')
+        const data = await response.json()
+
+        if (response.ok && data.success) {
+          const properties = data.data.map((property: { name: string }) => property.name)
+          setPropertyOptions(['All', ...properties])
+        }
+      } catch (error) {
+        console.error('Failed to fetch properties:', error)
+        setPropertyOptions(['All'])
+      }
+    }
+
+    fetchProperties()
+  }, [])
   return (
     <motion.div
       data-filterbar
@@ -129,6 +155,26 @@ export default function FilterBar({
                 className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
                   calendarFilter === option
                     ? 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Property Filter Section */}
+        <motion.div className="flex flex-col gap-2" variants={slideUp}>
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Property</span>
+          <div className="flex flex-row flex-wrap gap-2">
+            {propertyOptions.map((option) => (
+              <button
+                key={option}
+                onClick={() => onPropertyChange(option)}
+                className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
+                  propertyFilter === option
+                    ? 'bg-teal-100 text-teal-800 hover:bg-teal-200'
                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                 }`}
               >

@@ -10,7 +10,7 @@ import SaveButton from '@/components/shared/buttons/SaveButton'
 import CancelButton from '@/components/shared/buttons/CancelButton'
 import ConfirmModal from '@/components/shared/modals/ConfirmModal'
 import Toast, { ToastType } from '@/components/shared/feedback/Toast'
-import { STATUS_OPTIONS, PROPERTY_OPTIONS } from '@/lib/constants'
+import { STATUS_OPTIONS } from '@/lib/constants'
 import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animations/variants'
 
 /**
@@ -113,6 +113,7 @@ export default function ApplicationForm({
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [toastType, setToastType] = useState<ToastType>('success')
+  const [propertyOptions, setPropertyOptions] = useState<{ value: string; label: string }[]>([])
 
   const [formData, setFormData] = useState<FormData>(() => ({
     ...defaultFormData,
@@ -123,6 +124,30 @@ export default function ApplicationForm({
     ...defaultFormData,
     ...initialData
   }))
+
+  // Fetch properties from database
+  useEffect(() => {
+    async function fetchProperties() {
+      try {
+        const response = await fetch('/api/properties')
+        const data = await response.json()
+
+        if (response.ok && data.success) {
+          const options = data.data.map((property: { name: string }) => ({
+            value: property.name,
+            label: property.name
+          }))
+          setPropertyOptions(options)
+        }
+      } catch (error) {
+        console.error('Failed to fetch properties:', error)
+        // Fallback to empty array if fetch fails
+        setPropertyOptions([])
+      }
+    }
+
+    fetchProperties()
+  }, [])
 
   // Update form when initialData changes (edit mode)
   useEffect(() => {
@@ -428,7 +453,7 @@ export default function ApplicationForm({
               <InlineSelectField
                 value={formData.property}
                 onChange={(value) => handleFieldChange('property', value)}
-                options={PROPERTY_OPTIONS}
+                options={propertyOptions}
                 isEditMode={isEditMode}
                 placeholder="Property"
               />

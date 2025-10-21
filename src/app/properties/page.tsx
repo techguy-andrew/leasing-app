@@ -10,7 +10,10 @@ import { fadeIn } from '@/lib/animations/variants'
 interface Property {
   id: number
   name: string
-  address: string
+  street: string
+  city: string
+  state: string
+  zip: string
   energyProvider: string
   createdAt: Date
   updatedAt: Date

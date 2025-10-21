@@ -52,7 +52,10 @@ model Property {
   id             Int      @id @default(autoincrement())
   userId         String?  // Clerk user ID (optional for backward compatibility)
   name           String   // Property name
-  address        String   // Full property address
+  street         String   // Street address
+  city           String   // City
+  state          String   // State
+  zip            String   // ZIP code
   energyProvider String   // Utility/energy company name and contact info
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

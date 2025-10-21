@@ -35,6 +35,8 @@ interface Application {
   petFee: string | null
   rentersInsurance: string | null
   adminFee: string | null
+  propertyAddress?: string | null
+  energyProvider?: string | null
 }
 
 interface FormData {
@@ -277,7 +279,19 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       {/* Outstanding Tasks Popup */}
       <PopUp1
         isOpen={showStatusModal}
-        tasks={application.tasks || []}
+        applicationData={{
+          applicant: application.applicant,
+          property: application.property,
+          propertyAddress: application.propertyAddress ?? undefined,
+          energyProvider: application.energyProvider ?? undefined,
+          moveInDate: application.moveInDate,
+          deposit: application.deposit,
+          rent: application.rent,
+          petFee: application.petFee,
+          rentersInsurance: application.rentersInsurance,
+          adminFee: application.adminFee,
+          tasks: application.tasks || []
+        }}
         onClose={() => setShowStatusModal(false)}
       />
     </>

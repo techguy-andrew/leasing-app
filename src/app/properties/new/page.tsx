@@ -5,7 +5,10 @@ import PropertyDetailForm from '@/components/features/properties/PropertyDetailF
 
 interface FormData {
   name: string
-  address: string
+  street: string
+  city: string
+  state: string
+  zip: string
   energyProvider: string
 }
 

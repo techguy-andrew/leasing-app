@@ -10,7 +10,10 @@ import { fadeIn } from '@/lib/animations/variants'
 interface Property {
   id: number
   name: string
-  address: string
+  street: string
+  city: string
+  state: string
+  zip: string
   energyProvider: string
   createdAt: string
   updatedAt: string
@@ -18,7 +21,10 @@ interface Property {
 
 interface FormData {
   name: string
-  address: string
+  street: string
+  city: string
+  state: string
+  zip: string
   energyProvider: string
 }
 
@@ -127,7 +133,10 @@ export default function PropertyDetailPage({ params }: PageProps) {
       mode="edit"
       initialData={{
         name: property.name,
-        address: property.address,
+        street: property.street,
+        city: property.city,
+        state: property.state,
+        zip: property.zip,
         energyProvider: property.energyProvider
       }}
       propertyId={propertyId}

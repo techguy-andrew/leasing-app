@@ -4,7 +4,10 @@ import { z } from 'zod'
 // All fields are required
 export const propertyCreateSchema = z.object({
   name: z.string().trim().min(1, 'Property name is required'),
-  address: z.string().trim().min(1, 'Property address is required'),
+  street: z.string().trim().min(1, 'Street address is required'),
+  city: z.string().trim().min(1, 'City is required'),
+  state: z.string().trim().min(1, 'State is required'),
+  zip: z.string().trim().min(1, 'ZIP code is required'),
   energyProvider: z.string().trim().min(1, 'Energy provider is required')
 })
 
@@ -12,7 +15,10 @@ export const propertyCreateSchema = z.object({
 // All fields are required
 export const propertyUpdateSchema = z.object({
   name: z.string().trim().min(1, 'Property name is required'),
-  address: z.string().trim().min(1, 'Property address is required'),
+  street: z.string().trim().min(1, 'Street address is required'),
+  city: z.string().trim().min(1, 'City is required'),
+  state: z.string().trim().min(1, 'State is required'),
+  zip: z.string().trim().min(1, 'ZIP code is required'),
   energyProvider: z.string().trim().min(1, 'Energy provider is required')
 })
 

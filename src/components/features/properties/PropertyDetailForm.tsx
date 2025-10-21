@@ -12,7 +12,10 @@ import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animation
 
 interface FormData {
   name: string
-  address: string
+  street: string
+  city: string
+  state: string
+  zip: string
   energyProvider: string
 }
 
@@ -28,7 +31,10 @@ interface PropertyDetailFormProps {
 
 const defaultFormData: FormData = {
   name: '',
-  address: '',
+  street: '',
+  city: '',
+  state: '',
+  zip: '',
   energyProvider: ''
 }
 
@@ -98,9 +104,27 @@ export default function PropertyDetailForm({
       return
     }
 
-    if (!formData.address.trim()) {
+    if (!formData.street.trim()) {
       setToastType('error')
-      setToastMessage('Property address is required')
+      setToastMessage('Street address is required')
+      return
+    }
+
+    if (!formData.city.trim()) {
+      setToastType('error')
+      setToastMessage('City is required')
+      return
+    }
+
+    if (!formData.state.trim()) {
+      setToastType('error')
+      setToastMessage('State is required')
+      return
+    }
+
+    if (!formData.zip.trim()) {
+      setToastType('error')
+      setToastMessage('ZIP code is required')
       return
     }
 
@@ -219,18 +243,58 @@ export default function PropertyDetailForm({
               />
             </motion.div>
 
-            {/* Property Address Field */}
+            {/* Street Address Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Property Address
+                Street Address
               </span>
               <InlineTextField
-                value={formData.address}
-                onChange={(value) => handleFieldChange('address', value)}
+                value={formData.street}
+                onChange={(value) => handleFieldChange('street', value)}
                 isEditMode={isEditMode}
-                placeholder="Full Address"
+                placeholder="Street Address"
               />
             </motion.div>
+
+            {/* City Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                City
+              </span>
+              <InlineTextField
+                value={formData.city}
+                onChange={(value) => handleFieldChange('city', value)}
+                isEditMode={isEditMode}
+                placeholder="City"
+              />
+            </motion.div>
+
+            {/* State and ZIP Fields - Side by side */}
+            <div className="flex gap-4">
+              <motion.div className="flex flex-col gap-1 flex-1" variants={formFieldItem}>
+                <span className="text-xs font-semibold text-gray-500">
+                  State
+                </span>
+                <InlineTextField
+                  value={formData.state}
+                  onChange={(value) => handleFieldChange('state', value)}
+                  isEditMode={isEditMode}
+                  placeholder="State"
+                />
+              </motion.div>
+
+              <motion.div className="flex flex-col gap-1 flex-1" variants={formFieldItem}>
+                <span className="text-xs font-semibold text-gray-500">
+                  ZIP Code
+                </span>
+                <InlineTextField
+                  value={formData.zip}
+                  onChange={(value) => handleFieldChange('zip', value)}
+                  isEditMode={isEditMode}
+                  placeholder="ZIP Code"
+                />
+              </motion.div>
+            </div>
 
             {/* Energy Provider Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>

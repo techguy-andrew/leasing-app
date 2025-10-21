@@ -8,7 +8,10 @@ import { listStagger, staggerItem } from '@/lib/animations/variants'
 interface Property {
   id: number
   name: string
-  address: string
+  street: string
+  city: string
+  state: string
+  zip: string
   energyProvider: string
   createdAt: Date
   updatedAt: Date
@@ -108,7 +111,10 @@ export default function PropertiesList({ properties }: PropertiesListProps) {
                 <PropertyListItem
                   id={property.id}
                   name={property.name}
-                  address={property.address}
+                  street={property.street}
+                  city={property.city}
+                  state={property.state}
+                  zip={property.zip}
                   energyProvider={property.energyProvider}
                 />
               </motion.div>

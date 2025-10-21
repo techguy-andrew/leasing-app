@@ -35,6 +35,7 @@ export default function NavBar() {
 
   return (
     <motion.nav
+      key={`navbar-${pathname}`}
       data-navbar
       className="fixed left-0 right-0 w-full h-fit flex items-center gap-4 text-base font-sans text-gray-600 px-6 md:px-8 py-6 bg-white border-b border-gray-200 z-40"
       style={{ top: 'var(--topbar-height, 0px)' }}
@@ -43,6 +44,7 @@ export default function NavBar() {
       animate="animate"
     >
       <motion.div
+        key={`nav-links-${pathname}`}
         className="flex items-center gap-4"
         variants={listStagger}
         initial="hidden"

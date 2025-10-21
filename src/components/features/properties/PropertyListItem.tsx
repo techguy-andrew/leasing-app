@@ -7,11 +7,15 @@ import { motion } from 'motion/react'
 interface PropertyListItemProps {
   id: number
   name: string
-  address: string
+  street: string
+  city: string
+  state: string
+  zip: string
   energyProvider: string
 }
 
-const PropertyListItem = memo(function PropertyListItem({ id, name, address, energyProvider }: PropertyListItemProps) {
+const PropertyListItem = memo(function PropertyListItem({ id, name, street, city, state, zip, energyProvider }: PropertyListItemProps) {
+  const formattedAddress = `${street} ${city}, ${state} ${zip}`
   return (
     <Link
       href={`/properties/${id}`}
@@ -25,7 +29,7 @@ const PropertyListItem = memo(function PropertyListItem({ id, name, address, ene
             </span>
           </div>
           <div className="flex flex-col gap-2 text-base text-gray-600">
-            <span className="truncate font-medium">{address}</span>
+            <span className="truncate font-medium">{formattedAddress}</span>
             <div className="flex flex-col sm:flex-row sm:gap-6">
               <span className="text-gray-500">Energy: {energyProvider}</span>
             </div>
