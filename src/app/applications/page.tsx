@@ -147,7 +147,7 @@ export default function ApplicationsPage() {
         calendarFilter={calendarFilter}
         onCalendarChange={setCalendarFilter}
       />
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pt-[120px]">
+      <div ref={scrollContainerRef} className="pt-[76px]">
         <ApplicationsList
           applications={filteredApplications}
           isLoading={isLoading}

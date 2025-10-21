@@ -21,9 +21,10 @@ interface Task {
 interface TasksListProps {
   applicationId: number
   initialTasks?: Task[]
+  onTasksChange?: (tasks: Task[]) => void
 }
 
-export default function TasksList({ applicationId, initialTasks = [] }: TasksListProps) {
+export default function TasksList({ applicationId, initialTasks = [], onTasksChange }: TasksListProps) {
   // Add clientId to initial tasks for stable keys
   const [tasks, setTasks] = useState<Task[]>(() =>
     initialTasks.map(task => ({
@@ -116,13 +117,15 @@ export default function TasksList({ applicationId, initialTasks = [] }: TasksLis
         }
 
         // Replace temporary task with real task from server
-        setTasks(prev =>
-          prev.map(task =>
+        setTasks(prev => {
+          const updatedTasks = prev.map(task =>
             task.id === editingTaskId
               ? { ...data.data, clientId: data.data.id }
               : task
           )
-        )
+          onTasksChange?.(updatedTasks)
+          return updatedTasks
+        })
         setToastType('success')
         setToastMessage('Task added successfully!')
       } else {
@@ -142,9 +145,11 @@ export default function TasksList({ applicationId, initialTasks = [] }: TasksLis
           throw new Error(data.error || 'Failed to update task')
         }
 
-        setTasks(prev =>
-          prev.map(task => (task.id === editingTaskId ? data.data : task))
-        )
+        setTasks(prev => {
+          const updatedTasks = prev.map(task => (task.id === editingTaskId ? data.data : task))
+          onTasksChange?.(updatedTasks)
+          return updatedTasks
+        })
         setToastType('success')
         setToastMessage('Task updated successfully!')
       }
@@ -188,7 +193,11 @@ export default function TasksList({ applicationId, initialTasks = [] }: TasksLis
         throw new Error(data.error || 'Failed to delete task')
       }
 
-      setTasks(prev => prev.filter(task => task.id !== deletingTaskId))
+      setTasks(prev => {
+        const updatedTasks = prev.filter(task => task.id !== deletingTaskId)
+        onTasksChange?.(updatedTasks)
+        return updatedTasks
+      })
       setToastType('success')
       setToastMessage('Task deleted successfully!')
     } catch (error) {
@@ -231,7 +240,11 @@ export default function TasksList({ applicationId, initialTasks = [] }: TasksLis
       }
 
       // Update with server response
-      setTasks(prev => prev.map(t => (t.id === task.id ? data.data : t)))
+      setTasks(prev => {
+        const updatedTasks = prev.map(t => (t.id === task.id ? data.data : t))
+        onTasksChange?.(updatedTasks)
+        return updatedTasks
+      })
     } catch (error) {
       // Revert on error
       setTasks(prev =>

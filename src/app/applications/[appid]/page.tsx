@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import NavBar from '@/components/shared/navigation/NavBar'
 import ApplicationDetailForm from '@/components/features/applications/ApplicationDetailForm'
+import PopUp1 from '@/components/shared/modals/PopUp1'
 
 interface Task {
   id: string
@@ -49,6 +50,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [appId, setAppId] = useState<number | null>(null)
+  const [showStatusModal, setShowStatusModal] = useState(false)
 
   useEffect(() => {
     async function loadApplication() {
@@ -182,6 +184,16 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     // Cancel is handled within ApplicationForm for edit mode
   }
 
+  const handleTasksChange = (updatedTasks: Task[]) => {
+    setApplication(prev => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        tasks: updatedTasks
+      }
+    })
+  }
+
   if (isLoading) {
     return (
       <div className="flex flex-col flex-1 w-full items-center justify-center bg-gradient-to-b from-gray-50 to-white">
@@ -217,6 +229,16 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   return (
     <>
       <NavBar />
+
+      {/* Send Status Message Pill Button */}
+      <button
+        onClick={() => setShowStatusModal(true)}
+        className="fixed top-[140px] right-6 z-40 px-4 py-2 text-sm font-medium text-white rounded-full transition-opacity hover:opacity-90 cursor-pointer"
+        style={{ backgroundColor: '#457b9d' }}
+      >
+        Send Status Message
+      </button>
+
       <ApplicationDetailForm
         mode="edit"
         initialData={{
@@ -235,7 +257,15 @@ export default function ApplicationDetailPage({ params }: PageProps) {
         onCancel={handleCancel}
         onDelete={handleDelete}
         onStatusChange={handleStatusChange}
+        onTasksChange={handleTasksChange}
         showDeleteButton={true}
+      />
+
+      {/* Outstanding Tasks Popup */}
+      <PopUp1
+        isOpen={showStatusModal}
+        tasks={application.tasks || []}
+        onClose={() => setShowStatusModal(false)}
       />
     </>
   )

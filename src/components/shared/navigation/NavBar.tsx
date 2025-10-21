@@ -33,7 +33,7 @@ export default function NavBar() {
 
   return (
     <motion.nav
-      className="fixed top-[73px] left-0 right-0 flex items-center gap-2 text-sm font-sans text-gray-600 px-4 sm:px-6 py-4 bg-white/90 backdrop-blur-lg border-b border-gray-200 z-40"
+      className="fixed top-[73px] left-0 right-0 flex items-center gap-4 text-sm font-sans text-gray-600 px-6 md:px-8 py-6 bg-white/90 backdrop-blur-lg border-b border-gray-200 z-40"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -45,8 +45,8 @@ export default function NavBar() {
             : pathname.startsWith(link.href)
 
         return (
-          <div key={link.href} className="flex items-center gap-2">
-            {index > 0 && <span className="text-gray-400">/</span>}
+          <div key={link.href} className="flex items-center gap-3">
+            {index > 0 && <span className="text-gray-300 select-none">/</span>}
             <Link
               href={link.href}
               className={`transition-colors font-sans ${

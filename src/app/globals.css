@@ -78,3 +78,23 @@ body {
 nextjs-portal {
   display: none !important;
 }
+
+/* Remove all focus outlines for minimal, flat design */
+*:focus,
+*:focus-visible {
+  outline: none !important;
+}
+
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible,
+input:focus,
+input:focus-visible,
+select:focus,
+select:focus-visible,
+textarea:focus,
+textarea:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}

@@ -64,19 +64,19 @@ export default function ApplicationsList({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="flex items-center justify-center py-12 text-gray-500"
+            transition={{ duration: 0.15 }}
+            className="flex items-center justify-center py-16 text-gray-500 text-sm"
           >
             Loading applications...
           </motion.div>
         ) : applications.length === 0 ? (
           <motion.div
             key="empty"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-            className="flex items-center justify-center py-12 text-gray-500"
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            className="flex items-center justify-center py-16 text-gray-500 text-sm"
           >
             {statusFilter === 'All' && calendarFilter === 'All Time'
               ? 'No applications found'
@@ -88,7 +88,7 @@ export default function ApplicationsList({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.15 }}
             className="flex flex-col w-full"
           >
             {applications.map((app, index) => (
@@ -97,8 +97,8 @@ export default function ApplicationsList({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{
-                  duration: 0.15,
-                  delay: Math.min(index * 0.02, 0.3),
+                  duration: 0.1,
+                  delay: Math.min(index * 0.015, 0.2),
                   ease: 'easeOut'
                 }}
               >

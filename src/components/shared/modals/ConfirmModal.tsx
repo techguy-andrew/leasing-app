@@ -1,6 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'motion/react'
+import SubmitButton from '@/components/shared/buttons/SubmitButton'
 
 interface ConfirmModalProps {
   isOpen: boolean
@@ -48,32 +49,66 @@ export default function ConfirmModal({
               stiffness: 300,
               duration: 0.3
             }}
-            className="relative z-10 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6 sm:p-8 border border-gray-200"
+            className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden border border-gray-100"
           >
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
-              {title}
-            </h3>
-            <p className="text-base text-gray-600 mb-8 leading-relaxed">
-              {message}
-            </p>
+            {/* Accent Border */}
+            <div className={`h-1.5 w-full ${
+              isDestructive
+                ? 'bg-gradient-to-r from-red-500 via-red-600 to-red-500'
+                : 'bg-gradient-to-r from-blue-500 via-purple-600 to-blue-500'
+            }`} />
 
-            <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
-              <button
-                onClick={onCancel}
-                className="px-5 py-3 text-base font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 active:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
-              >
-                {cancelText}
-              </button>
-              <button
-                onClick={onConfirm}
-                className={`px-5 py-3 text-base font-medium text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 ${
-                  isDestructive
-                    ? 'bg-red-500 hover:bg-red-600 active:bg-red-700 focus:ring-red-500 shadow-lg shadow-red-500/30'
-                    : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 focus:ring-blue-500 shadow-lg shadow-blue-500/30'
-                }`}
-              >
-                {confirmText}
-              </button>
+            {/* Content */}
+            <div className="p-6 sm:p-8">
+              {/* Icon Section */}
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${
+                isDestructive
+                  ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                  : 'bg-gradient-to-br from-blue-50 to-purple-100 border border-purple-200'
+              }`}>
+                {isDestructive ? (
+                  <svg className="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                ) : (
+                  <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+              </div>
+
+              {/* Title */}
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                {title}
+              </h3>
+
+              {/* Message */}
+              <div className={`p-4 rounded-xl mb-6 border-l-4 ${
+                isDestructive
+                  ? 'bg-red-50/50 border-red-500'
+                  : 'bg-blue-50/50 border-blue-500'
+              }`}>
+                <p className="text-base text-gray-700 leading-relaxed">
+                  {message}
+                </p>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="px-6 py-3 text-base font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                >
+                  {cancelText}
+                </button>
+                <SubmitButton
+                  onClick={onConfirm}
+                  variant={isDestructive ? 'destructive' : 'primary'}
+                >
+                  {confirmText}
+                </SubmitButton>
+              </div>
             </div>
           </motion.div>
         </div>

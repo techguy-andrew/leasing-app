@@ -83,6 +83,7 @@ interface ApplicationDetailFormProps {
   onDelete?: (id: number) => Promise<void>
   showDeleteButton?: boolean
   onStatusChange?: (status: string) => Promise<void>
+  onTasksChange?: (tasks: Task[]) => void
 }
 
 const defaultFormData: FormData = {
@@ -105,7 +106,8 @@ export default function ApplicationDetailForm({
   onCancel,
   onDelete,
   showDeleteButton = true,
-  onStatusChange
+  onStatusChange,
+  onTasksChange
 }: ApplicationDetailFormProps) {
   const [isEditMode, setIsEditMode] = useState(mode === 'create')
   const [isSaving, setIsSaving] = useState(false)
@@ -434,7 +436,11 @@ export default function ApplicationDetailForm({
             {/* Tasks Section - Integrated as a field */}
             {applicationId && (
               <div className="flex flex-col gap-[2%]">
-                <TasksList applicationId={applicationId} initialTasks={initialTasks} />
+                <TasksList
+                  applicationId={applicationId}
+                  initialTasks={initialTasks}
+                  onTasksChange={onTasksChange}
+                />
               </div>
             )}
           </div>

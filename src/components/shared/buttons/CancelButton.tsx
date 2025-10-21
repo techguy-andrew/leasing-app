@@ -4,7 +4,7 @@ import IconPack from '@/components/shared/icons/IconPack'
  * CancelButton Component
  *
  * A reusable cancel button with an icon. Displays a close circle icon.
- * Uses standardized IconPack with consistent hover animation (scale-110).
+ * Uses flat design with no animations - just cursor change.
  *
  * @example
  * ```tsx
