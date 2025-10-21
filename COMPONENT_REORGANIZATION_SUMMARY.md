@@ -18,7 +18,7 @@ src/components/
 │   └── applications/
 │       ├── ApplicationForm.tsx          # Unified create/edit form
 │       ├── ApplicationListItem.tsx      # Individual list item
-│       ├── ApplicationsFilter.tsx       # Filter controls
+│       ├── FilterBar.tsx                # Filter controls
 │       └── ApplicationsList.tsx         # List display with states
 │
 └── shared/                      # Reusable UI components
@@ -95,7 +95,7 @@ src/components/
 />
 ```
 
-### 2. ApplicationsFilter.tsx
+### 2. FilterBar.tsx
 **Purpose:** Reusable filter controls for applications list
 
 **Features:**
@@ -106,7 +106,7 @@ src/components/
 
 **Usage:**
 ```tsx
-<ApplicationsFilter
+<FilterBar
   statusFilter={statusFilter}
   onStatusChange={setStatusFilter}
   sortDirection={sortDirection}
@@ -167,7 +167,7 @@ src/components/
 **Reduction:** ~44% reduction
 
 **Changes:**
-- Extracted filter UI to `ApplicationsFilter`
+- Extracted filter UI to `FilterBar`
 - Extracted list rendering to `ApplicationsList`
 - Cleaner, more maintainable page structure
 
@@ -230,7 +230,7 @@ src/components/
 - ✅ Clear database field mapping in comments
 - ✅ Copy to new project → Update database fields → Works
 
-### ApplicationsList + ApplicationsFilter + ApplicationListItem
+### ApplicationsList + FilterBar + ApplicationListItem
 - ✅ Complete list implementation
 - ✅ All filtering/sorting logic included
 - ✅ Update Application interface → Update constants → Works

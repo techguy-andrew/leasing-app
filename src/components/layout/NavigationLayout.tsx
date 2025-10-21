@@ -16,14 +16,14 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Top Bar */}
+      {/* Top Bar - only fixed element */}
       <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
 
       {/* Toggleable Sidebar */}
       <SideBar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
-      {/* Main Content Area - stacked directly below TopBar and Breadcrumb */}
-      <main className="flex-1 flex flex-col pt-[121px]">
+      {/* Main Content Area - padded for TopBar only */}
+      <main className="flex-1 flex flex-col pt-[73px]">
         {children}
       </main>
     </div>

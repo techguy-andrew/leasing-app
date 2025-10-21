@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import NavBar from '@/components/shared/navigation/NavBar'
-import ApplicationsFilter from '@/components/features/applications/ApplicationsFilter'
+import FilterBar from '@/components/features/applications/FilterBar'
 import ApplicationsList from '@/components/features/applications/ApplicationsList'
 
 interface Application {
@@ -139,7 +139,7 @@ export default function ApplicationsPage() {
   return (
     <>
       <NavBar />
-      <ApplicationsFilter
+      <FilterBar
         statusFilter={statusFilter}
         onStatusChange={setStatusFilter}
         sortDirection={sortDirection}
@@ -147,7 +147,7 @@ export default function ApplicationsPage() {
         calendarFilter={calendarFilter}
         onCalendarChange={setCalendarFilter}
       />
-      <div ref={scrollContainerRef} className="pt-[76px]">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         <ApplicationsList
           applications={filteredApplications}
           isLoading={isLoading}
