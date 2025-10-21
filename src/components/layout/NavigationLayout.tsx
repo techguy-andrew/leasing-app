@@ -16,16 +16,14 @@ export default function NavigationLayout({ children }: NavigationLayoutProps) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Sticky Top Bar - always at the top */}
-      <div className="sticky top-0 z-[100]">
-        <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
-      </div>
+      {/* Top Bar */}
+      <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
 
       {/* Toggleable Sidebar */}
       <SideBar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
-      {/* Main Content Area - stacked directly below TopBar */}
-      <main className="flex-1 flex flex-col">
+      {/* Main Content Area - stacked directly below TopBar and Breadcrumb */}
+      <main className="flex-1 flex flex-col pt-[121px]">
         {children}
       </main>
     </div>

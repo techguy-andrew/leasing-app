@@ -56,7 +56,7 @@ export default function ApplicationsList({
   sortDirection
 }: ApplicationsListProps) {
   return (
-    <div className="flex flex-col w-full flex-1 bg-white">
+    <div className="flex flex-col w-full bg-white">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div

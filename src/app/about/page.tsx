@@ -2,12 +2,15 @@
 
 import { motion } from 'motion/react'
 import { staggerContainer, staggerItem, fadeInUp } from '@/lib/animations/variants'
+import NavBar from '@/components/shared/navigation/NavBar'
 
 export default function AboutVersion2() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 w-full">
-      {/* Main Container */}
-      <div className="flex flex-col w-full gap-8 p-6">
+    <>
+      <NavBar />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 w-full">
+        {/* Main Container */}
+        <div className="flex flex-col w-full gap-8 p-6">
 
         {/* Header */}
         <motion.div
@@ -797,7 +800,8 @@ export default function AboutVersion2() {
           </div>
         </motion.section>
 
+        </div>
       </div>
-    </div>
+    </>
   )
 }

@@ -1,63 +1,104 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
-import HeaderCard from '@/components/shared/cards/HeaderCard'
-import Link from 'next/link'
+import { STATUS_BADGE_COLORS } from '@/lib/constants'
+import { staggerContainer, staggerItem } from '@/lib/animations/variants'
+import NavBar from '@/components/shared/navigation/NavBar'
+
+interface Application {
+  id: number
+  status: string
+}
+
+interface StatusCount {
+  status: string
+  count: number
+  colorClass: string
+}
 
 export default function Home() {
+  const [statusCounts, setStatusCounts] = useState<StatusCount[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadApplications() {
+      try {
+        const response = await fetch('/api/applications')
+        const data = await response.json()
+
+        if (response.ok) {
+          const applications: Application[] = data.data
+
+          // Count applications by status (excluding Archived)
+          const counts = {
+            New: 0,
+            Pending: 0,
+            Approved: 0,
+            Rejected: 0
+          }
+
+          applications.forEach((app) => {
+            if (app.status in counts) {
+              counts[app.status as keyof typeof counts]++
+            }
+          })
+
+          // Create status count array with colors
+          const statusCountsArray: StatusCount[] = [
+            { status: 'New', count: counts.New, colorClass: STATUS_BADGE_COLORS.New },
+            { status: 'Pending', count: counts.Pending, colorClass: STATUS_BADGE_COLORS.Pending },
+            { status: 'Approved', count: counts.Approved, colorClass: STATUS_BADGE_COLORS.Approved },
+            { status: 'Rejected', count: counts.Rejected, colorClass: STATUS_BADGE_COLORS.Rejected }
+          ]
+
+          setStatusCounts(statusCountsArray)
+        }
+      } catch (err) {
+        console.error('Failed to fetch applications:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadApplications()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <>
+        <NavBar />
+        <div className="flex items-center justify-center min-h-screen bg-white">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
-      <div className="w-full">
-        <HeaderCard
-          title="Leasing Application Portal"
-          description="Manage and submit lease applications with ease"
-        />
-      </div>
-      <div className="flex flex-col items-center justify-center flex-1 p-4 sm:p-6 md:p-8 lg:p-12 bg-gradient-to-b from-gray-50 to-white">
-        <motion.div
-          className="flex flex-col items-center justify-center gap-6 sm:gap-8 w-full max-w-3xl"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-        >
-          <motion.h2
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 text-center"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            Welcome to Leasing App
-          </motion.h2>
-          <motion.p
-            className="text-base sm:text-lg md:text-xl text-gray-600 text-center max-w-xl"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            Use the menu to navigate through applications
-          </motion.p>
-
+      <NavBar />
+      <div className="flex items-center justify-center min-h-screen bg-white p-8">
+      <motion.div
+        className="flex flex-col gap-6"
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        {statusCounts.map(({ status, count, colorClass }) => (
           <motion.div
-            className="flex flex-col sm:flex-row gap-4 mt-8 w-full sm:w-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            key={status}
+            className="flex items-center gap-4"
+            variants={staggerItem}
           >
-            <Link
-              href="/applications"
-              className="px-8 py-4 text-base font-medium text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-xl shadow-lg shadow-blue-600/30 transition-all duration-200 text-center"
-            >
-              View Applications
-            </Link>
-            <Link
-              href="/newapp"
-              className="px-8 py-4 text-base font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 border border-gray-300 rounded-xl shadow-sm transition-all duration-200 text-center"
-            >
-              New Application
-            </Link>
+            <span className="text-2xl font-semibold text-gray-900">{count}</span>
+            <span className={`px-3 py-1 text-sm font-medium rounded-full ${colorClass}`}>
+              {status}
+            </span>
           </motion.div>
-        </motion.div>
-      </div>
+        ))}
+      </motion.div>
+    </div>
     </>
   )
 }

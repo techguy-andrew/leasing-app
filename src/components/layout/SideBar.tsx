@@ -44,7 +44,7 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
                     : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
                 }`}
               >
-                Home
+                Dashboard
               </Link>
               <Link
                 href="/applications"
@@ -67,6 +67,17 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
                 }`}
               >
                 New Application
+              </Link>
+              <Link
+                href="/about"
+                onClick={onClose}
+                className={`flex items-center px-5 py-4 rounded-xl transition-all duration-200 text-base font-medium ${
+                  pathname === '/about'
+                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                    : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
+                }`}
+              >
+                About
               </Link>
             </nav>
           </motion.div>

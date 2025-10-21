@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import Breadcrumb from '@/components/shared/navigation/Breadcrumb'
+import NavBar from '@/components/shared/navigation/NavBar'
 import ApplicationForm from '@/components/features/applications/ApplicationForm'
 
 interface FormData {
@@ -69,13 +69,7 @@ export default function NewApplicationPage() {
 
   return (
     <>
-      <Breadcrumb
-        items={[
-          { label: 'Home', href: '/' },
-          { label: 'Applications', href: '/applications' },
-          { label: 'New Application', href: '/newapp' }
-        ]}
-      />
+      <NavBar />
       <ApplicationForm
         mode="create"
         onSave={handleSave}

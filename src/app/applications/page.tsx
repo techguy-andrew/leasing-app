@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
-import HeaderCard from '@/components/shared/cards/HeaderCard'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import NavBar from '@/components/shared/navigation/NavBar'
 import ApplicationsFilter from '@/components/features/applications/ApplicationsFilter'
 import ApplicationsList from '@/components/features/applications/ApplicationsList'
 
@@ -24,6 +24,7 @@ export default function ApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState('All')
   const [sortDirection, setSortDirection] = useState<'soonest' | 'furthest'>('soonest')
   const [calendarFilter, setCalendarFilter] = useState('All Time')
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     async function loadApplications() {
@@ -43,6 +44,13 @@ export default function ApplicationsPage() {
 
     loadApplications()
   }, [])
+
+  // Scroll to top when filters change
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [statusFilter, sortDirection, calendarFilter])
 
   const getStartOfWeek = useCallback(() => {
     const now = new Date()
@@ -130,29 +138,24 @@ export default function ApplicationsPage() {
 
   return (
     <>
-      <div className="w-full">
-        <HeaderCard
-          title="Applications"
-          description="View and manage all lease applications"
-        />
-      </div>
-      <div className="w-full">
-        <ApplicationsFilter
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-          sortDirection={sortDirection}
-          onSortChange={setSortDirection}
-          calendarFilter={calendarFilter}
-          onCalendarChange={setCalendarFilter}
-        />
-      </div>
-      <ApplicationsList
-        applications={filteredApplications}
-        isLoading={isLoading}
+      <NavBar />
+      <ApplicationsFilter
         statusFilter={statusFilter}
-        calendarFilter={calendarFilter}
+        onStatusChange={setStatusFilter}
         sortDirection={sortDirection}
+        onSortChange={setSortDirection}
+        calendarFilter={calendarFilter}
+        onCalendarChange={setCalendarFilter}
       />
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto pt-[120px]">
+        <ApplicationsList
+          applications={filteredApplications}
+          isLoading={isLoading}
+          statusFilter={statusFilter}
+          calendarFilter={calendarFilter}
+          sortDirection={sortDirection}
+        />
+      </div>
     </>
   )
 }

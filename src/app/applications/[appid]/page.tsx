@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
-import Breadcrumb from '@/components/shared/navigation/Breadcrumb'
+import NavBar from '@/components/shared/navigation/NavBar'
 import ApplicationDetailForm from '@/components/features/applications/ApplicationDetailForm'
 
 interface Task {
@@ -216,13 +216,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
   return (
     <>
-      <Breadcrumb
-        items={[
-          { label: 'Home', href: '/' },
-          { label: 'Applications', href: '/applications' },
-          { label: 'Application Details', href: `/applications/${application.id}` }
-        ]}
-      />
+      <NavBar />
       <ApplicationDetailForm
         mode="edit"
         initialData={{

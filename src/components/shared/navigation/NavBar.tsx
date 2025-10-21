@@ -1,0 +1,65 @@
+'use client'
+
+import Link from 'next/link'
+import { motion } from 'motion/react'
+import { usePathname } from 'next/navigation'
+
+/**
+ * NavBar Component
+ *
+ * A fixed navigation bar displaying all main application pages.
+ * Shows active state for current page and provides quick navigation.
+ *
+ * @example
+ * ```tsx
+ * <NavBar />
+ * ```
+ *
+ * To adapt for new projects:
+ * 1. Update the navigation links array with your app's pages
+ * 2. Adjust active state styling as needed
+ * 3. Modify positioning (top-[73px]) to match your layout
+ */
+
+const navigationLinks = [
+  { label: 'Dashboard', href: '/' },
+  { label: 'Applications', href: '/applications' },
+  { label: 'New Application', href: '/newapp' },
+  { label: 'About', href: '/about' }
+]
+
+export default function NavBar() {
+  const pathname = usePathname()
+
+  return (
+    <motion.nav
+      className="fixed top-[73px] left-0 right-0 flex items-center gap-2 text-sm font-sans text-gray-600 px-4 sm:px-6 py-4 bg-white/90 backdrop-blur-lg border-b border-gray-200 z-40"
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      {navigationLinks.map((link, index) => {
+        const isActive =
+          link.href === '/'
+            ? pathname === '/'
+            : pathname.startsWith(link.href)
+
+        return (
+          <div key={link.href} className="flex items-center gap-2">
+            {index > 0 && <span className="text-gray-400">/</span>}
+            <Link
+              href={link.href}
+              className={`transition-colors font-sans ${
+                isActive
+                  ? 'text-blue-700 font-semibold'
+                  : 'hover:text-gray-900 hover:underline'
+              }`}
+            >
+              {link.label}
+            </Link>
+          </div>
+        )
+      })}
+    </motion.nav>
+  )
+}
