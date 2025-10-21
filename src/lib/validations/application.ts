@@ -75,6 +75,12 @@ export const taskSchema = z.object({
 // Tasks array schema
 const tasksSchema = z.array(taskSchema).optional().default([])
 
+// Optional string schema for payment fields
+const optionalStringSchema = z.preprocess(
+  (val) => val === '' || val === null || val === undefined ? '' : val,
+  z.string().trim()
+)
+
 // Schema for creating a new application (POST)
 // Only name and createdAt are required; all other fields are optional
 export const applicationCreateSchema = z.object({
@@ -97,7 +103,14 @@ export const applicationCreateSchema = z.object({
   email: emailSchema,
   phone: phoneSchema,
   status: z.enum(statusValues).optional().default('New'),
-  tasks: tasksSchema
+  tasks: tasksSchema,
+
+  // Payment fields (all optional)
+  deposit: optionalStringSchema.optional(),
+  rent: optionalStringSchema.optional(),
+  petFee: optionalStringSchema.optional(),
+  rentersInsurance: optionalStringSchema.optional(),
+  adminFee: optionalStringSchema.optional()
 })
 
 // Schema for updating an application (PUT)
@@ -122,7 +135,14 @@ export const applicationUpdateSchema = z.object({
   email: emailSchema,
   phone: phoneSchema,
   status: z.enum(statusValues).optional(),
-  tasks: tasksSchema
+  tasks: tasksSchema,
+
+  // Payment fields (all optional)
+  deposit: optionalStringSchema.optional(),
+  rent: optionalStringSchema.optional(),
+  petFee: optionalStringSchema.optional(),
+  rentersInsurance: optionalStringSchema.optional(),
+  adminFee: optionalStringSchema.optional()
 })
 
 // Type exports for TypeScript

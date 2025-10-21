@@ -64,12 +64,18 @@ interface FormData {
   email: string
   phone: string
   createdAt: string
+  deposit: string
+  rent: string
+  petFee: string
+  rentersInsurance: string
+  adminFee: string
 }
 
 interface Task {
   id: string
   description: string
   completed: boolean
+  order: number
   createdAt: string
   updatedAt: string
 }
@@ -95,7 +101,12 @@ const defaultFormData: FormData = {
   applicant: '',
   email: '',
   phone: '',
-  createdAt: ''
+  createdAt: '',
+  deposit: '',
+  rent: '',
+  petFee: '',
+  rentersInsurance: '',
+  adminFee: ''
 }
 
 export default function ApplicationDetailForm({
@@ -153,6 +164,25 @@ export default function ApplicationDetailForm({
     return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`
   }
 
+  // Format currency with dollar sign and commas
+  const formatCurrency = (value: string): string => {
+    // Remove all non-digit characters except decimal point
+    const cleaned = value.replace(/[^\d.]/g, '')
+
+    // Ensure only one decimal point
+    const parts = cleaned.split('.')
+    if (parts.length > 2) {
+      return parts[0] + '.' + parts.slice(1).join('')
+    }
+
+    // Limit to 2 decimal places
+    if (parts.length === 2) {
+      parts[1] = parts[1].slice(0, 2)
+    }
+
+    return cleaned
+  }
+
   // Generic field change handler
   const handleFieldChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -174,6 +204,12 @@ export default function ApplicationDetailForm({
   const handlePhoneChange = (value: string) => {
     const formatted = formatPhone(value)
     setFormData(prev => ({ ...prev, phone: formatted }))
+  }
+
+  // Currency field change handlers
+  const handleCurrencyChange = (field: keyof FormData, value: string) => {
+    const formatted = formatCurrency(value)
+    setFormData(prev => ({ ...prev, [field]: formatted }))
   }
 
   // Status change handler
@@ -436,6 +472,78 @@ export default function ApplicationDetailForm({
                 onChange={handleDateChange}
                 isEditMode={isEditMode}
                 placeholder="MM/DD/YYYY"
+              />
+            </motion.div>
+
+            {/* Payment Fields Section */}
+            <motion.div className="flex flex-col gap-1 mt-4" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                Payment Information
+              </span>
+            </motion.div>
+
+            {/* Deposit Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Deposit
+              </span>
+              <InlineTextField
+                value={formData.deposit}
+                onChange={(value) => handleCurrencyChange('deposit', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
+              />
+            </motion.div>
+
+            {/* Rent Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Rent
+              </span>
+              <InlineTextField
+                value={formData.rent}
+                onChange={(value) => handleCurrencyChange('rent', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
+              />
+            </motion.div>
+
+            {/* Pet Fee Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Pet Fee
+              </span>
+              <InlineTextField
+                value={formData.petFee}
+                onChange={(value) => handleCurrencyChange('petFee', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
+              />
+            </motion.div>
+
+            {/* Renters Insurance Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Renters Insurance
+              </span>
+              <InlineTextField
+                value={formData.rentersInsurance}
+                onChange={(value) => handleCurrencyChange('rentersInsurance', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
+              />
+            </motion.div>
+
+            {/* Admin Fee Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Admin Fee
+              </span>
+              <InlineTextField
+                value={formData.adminFee}
+                onChange={(value) => handleCurrencyChange('adminFee', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
               />
             </motion.div>
 

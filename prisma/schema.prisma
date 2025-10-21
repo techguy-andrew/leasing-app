@@ -8,18 +8,25 @@ datasource db {
 }
 
 model Application {
-  id         Int      @id @default(autoincrement())
-  userId     String?  // Clerk user ID (optional for backward compatibility)
-  status     String   @default("New")
-  moveInDate String
-  property   String
-  unitNumber String
-  applicant  String
-  email      String?
-  phone      String?
-  createdAt  String   // Application date in MM/DD/YYYY format
-  updatedAt  DateTime @updatedAt
-  tasks      Task[]   // One-to-many relationship with tasks
+  id               Int      @id @default(autoincrement())
+  userId           String?  // Clerk user ID (optional for backward compatibility)
+  status           String   @default("New")
+  moveInDate       String
+  property         String
+  unitNumber       String
+  applicant        String
+  email            String?
+  phone            String?
+  createdAt        String   // Application date in MM/DD/YYYY format
+  updatedAt        DateTime @updatedAt
+  tasks            Task[]   // One-to-many relationship with tasks
+
+  // Payment fields
+  deposit          String?  // Security deposit amount
+  rent             String?  // Monthly rent amount
+  petFee           String?  // Pet fee (if applicable)
+  rentersInsurance String?  // Renters insurance cost
+  adminFee         String?  // Administrative fee
 
   @@index([status])
   @@index([moveInDate])
@@ -31,10 +38,25 @@ model Task {
   id            String      @id @default(cuid())
   description   String
   completed     Boolean     @default(false)
+  order         Int         @default(0)
   applicationId Int
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
   @@index([applicationId])
+  @@index([applicationId, order])
+}
+
+model Property {
+  id             Int      @id @default(autoincrement())
+  userId         String?  // Clerk user ID (optional for backward compatibility)
+  name           String   // Property name
+  address        String   // Full property address
+  energyProvider String   // Utility/energy company name and contact info
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([name])
 }

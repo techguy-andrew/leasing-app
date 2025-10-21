@@ -7,11 +7,11 @@ interface RouteParams {
   params: Promise<{ id: string }>
 }
 
-const taskCreateSchema = z.object({
-  description: z.string().min(1, 'Task description is required')
+const reorderSchema = z.object({
+  taskIds: z.array(z.string()).min(1, 'Task IDs array is required')
 })
 
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { userId } = await auth()
 
@@ -34,7 +34,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     // Verify the application exists
     const existingApplication = await prisma.application.findUnique({
-      where: { id: applicationId }
+      where: { id: applicationId },
+      include: { tasks: true }
     })
 
     if (!existingApplication) {
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json()
-    const validationResult = taskCreateSchema.safeParse(body)
+    const validationResult = reorderSchema.safeParse(body)
 
     if (!validationResult.success) {
       const errors = validationResult.error.errors.map(err => ({
@@ -62,36 +63,45 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { description } = validationResult.data
+    const { taskIds } = validationResult.data
 
-    // Get the maximum order value for tasks in this application
-    const maxOrderTask = await prisma.task.findFirst({
-      where: { applicationId },
-      orderBy: { order: 'desc' },
-      select: { order: true }
-    })
+    // Verify all tasks belong to this application
+    const taskIdsSet = new Set(taskIds)
+    const applicationTaskIds = new Set(existingApplication.tasks.map(t => t.id))
 
-    // Set new task order to max + 1, or 0 if no tasks exist
-    const newOrder = maxOrderTask ? maxOrderTask.order + 1 : 0
-
-    // Create the task
-    const task = await prisma.task.create({
-      data: {
-        description,
-        completed: false,
-        order: newOrder,
-        applicationId
+    for (const taskId of taskIds) {
+      if (!applicationTaskIds.has(taskId)) {
+        return NextResponse.json(
+          { error: `Task ${taskId} does not belong to this application` },
+          { status: 403 }
+        )
       }
+    }
+
+    // Update task order in a transaction
+    await prisma.$transaction(
+      taskIds.map((taskId, index) =>
+        prisma.task.update({
+          where: { id: taskId },
+          data: { order: index }
+        })
+      )
+    )
+
+    // Fetch updated tasks
+    const updatedTasks = await prisma.task.findMany({
+      where: { applicationId },
+      orderBy: { order: 'asc' }
     })
 
     return NextResponse.json(
-      { success: true, data: task },
-      { status: 201 }
+      { success: true, data: updatedTasks },
+      { status: 200 }
     )
   } catch (error) {
-    console.error('Error creating task:', error)
+    console.error('Error reordering tasks:', error)
     return NextResponse.json(
-      { error: 'Failed to create task' },
+      { error: 'Failed to reorder tasks' },
       { status: 500 }
     )
   }

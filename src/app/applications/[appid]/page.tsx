@@ -13,6 +13,7 @@ interface Task {
   id: string
   description: string
   completed: boolean
+  order: number
   createdAt: string
   updatedAt: string
 }
@@ -29,6 +30,11 @@ interface Application {
   createdAt: string
   updatedAt: string
   tasks: Task[]
+  deposit: string | null
+  rent: string | null
+  petFee: string | null
+  rentersInsurance: string | null
+  adminFee: string | null
 }
 
 interface FormData {
@@ -40,6 +46,11 @@ interface FormData {
   email: string
   phone: string
   createdAt: string
+  deposit: string
+  rent: string
+  petFee: string
+  rentersInsurance: string
+  adminFee: string
 }
 
 interface PageProps {
@@ -114,7 +125,12 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       ...formData,
       moveInDate: normalizeDate(formData.moveInDate),
       email: formData.email.trim() || null,
-      phone: formData.phone.trim() || null
+      phone: formData.phone.trim() || null,
+      deposit: formData.deposit.trim() || null,
+      rent: formData.rent.trim() || null,
+      petFee: formData.petFee.trim() || null,
+      rentersInsurance: formData.rentersInsurance.trim() || null,
+      adminFee: formData.adminFee.trim() || null
     }
 
     const response = await fetch(`/api/applications/${appId}`, {
@@ -171,7 +187,12 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       unitNumber: application.unitNumber,
       email: application.email?.trim() || null,
       phone: application.phone?.trim() || null,
-      status
+      status,
+      deposit: application.deposit?.trim() || null,
+      rent: application.rent?.trim() || null,
+      petFee: application.petFee?.trim() || null,
+      rentersInsurance: application.rentersInsurance?.trim() || null,
+      adminFee: application.adminFee?.trim() || null
     }
 
     const response = await fetch(`/api/applications/${appId}`, {
@@ -236,7 +257,12 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           applicant: application.applicant,
           email: application.email || '',
           phone: application.phone || '',
-          createdAt: application.createdAt || ''
+          createdAt: application.createdAt || '',
+          deposit: application.deposit || '',
+          rent: application.rent || '',
+          petFee: application.petFee || '',
+          rentersInsurance: application.rentersInsurance || '',
+          adminFee: application.adminFee || ''
         }}
         initialTasks={application.tasks || []}
         applicationId={appId}

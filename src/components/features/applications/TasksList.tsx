@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Reorder } from 'motion/react'
 import TaskMenuButton from './TaskMenuButton'
 import InlineTextField from '@/components/shared/fields/InlineTextField'
 import SaveButton from '@/components/shared/buttons/SaveButton'
@@ -13,6 +14,7 @@ interface Task {
   id: string
   description: string
   completed: boolean
+  order: number
   createdAt: string
   updatedAt: string
   clientId?: string // Stable ID for React keys to prevent remounting
@@ -60,6 +62,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
       clientId: tempId,
       description: '',
       completed: false,
+      order: 0, // New tasks get order 0 (will be at the top)
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
@@ -255,6 +258,58 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
     }
   }
 
+  // Handle task reordering
+  const handleReorder = async (newOrder: Task[]) => {
+    // Store previous order for rollback
+    const previousTasks = tasks
+
+    // Optimistically update UI
+    setTasks(newOrder)
+    onTasksChange?.(newOrder)
+
+    try {
+      // Filter out temporary tasks (new tasks being created)
+      const taskIds = newOrder
+        .filter(task => !task.id.startsWith('temp-'))
+        .map(task => task.id)
+
+      // Only persist if there are non-temporary tasks
+      if (taskIds.length === 0) {
+        return
+      }
+
+      const response = await fetch(
+        `/api/applications/${applicationId}/tasks/reorder`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ taskIds })
+        }
+      )
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to reorder tasks')
+      }
+
+      // Update with server response (includes updated order values)
+      setTasks(prev => {
+        // Preserve any temporary tasks that might be in edit mode
+        const tempTasks = prev.filter(t => t.id.startsWith('temp-'))
+        const updatedTasks = [...tempTasks, ...data.data]
+        onTasksChange?.(updatedTasks)
+        return updatedTasks
+      })
+    } catch (error) {
+      // Revert on error
+      setTasks(previousTasks)
+      onTasksChange?.(previousTasks)
+      setToastType('error')
+      setToastMessage(error instanceof Error ? error.message : 'Failed to reorder tasks')
+    }
+  }
+
   if (isLoading) {
     return (
       <>
@@ -282,74 +337,87 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
       </div>
 
       {/* Tasks List */}
-      <div className="flex flex-col gap-[2%]">
-              {/* All Tasks (including new tasks in edit mode) */}
-              {tasks.map((task) => (
-                <div
-                  key={task.clientId || task.id}
-                  className="flex items-start gap-3"
-                >
-                  {/* Checkbox */}
-                  {task.completed ? (
-                    <IconPack.CheckboxChecked
-                      onClick={() => handleToggleTask(task)}
-                      size="small"
-                      disabled={editingTaskId === (task.clientId || task.id)}
-                      className="flex-shrink-0 mt-[2px]"
-                    />
-                  ) : (
-                    <IconPack.CheckboxEmpty
-                      onClick={() => handleToggleTask(task)}
-                      size="small"
-                      disabled={editingTaskId === (task.clientId || task.id)}
-                      className="flex-shrink-0 mt-[2px]"
-                    />
-                  )}
+      <Reorder.Group
+        axis="y"
+        values={tasks}
+        onReorder={handleReorder}
+        className="flex flex-col gap-[2%]"
+      >
+        {/* All Tasks (including new tasks in edit mode) */}
+        {tasks.map((task) => (
+          <Reorder.Item
+            key={task.clientId || task.id}
+            value={task}
+            className="flex items-start gap-3 cursor-grab active:cursor-grabbing"
+            drag={editingTaskId !== (task.clientId || task.id)} // Disable drag when editing
+            whileDrag={{
+              scale: 1.02,
+              opacity: 0.8,
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+            }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Checkbox */}
+            {task.completed ? (
+              <IconPack.CheckboxChecked
+                onClick={() => handleToggleTask(task)}
+                size="small"
+                disabled={editingTaskId === (task.clientId || task.id)}
+                className="flex-shrink-0 mt-[2px]"
+              />
+            ) : (
+              <IconPack.CheckboxEmpty
+                onClick={() => handleToggleTask(task)}
+                size="small"
+                disabled={editingTaskId === (task.clientId || task.id)}
+                className="flex-shrink-0 mt-[2px]"
+              />
+            )}
 
-                  {/* Task Description */}
-                  <div className="flex-1 flex flex-col gap-[2%]">
-                      {editingTaskId === (task.clientId || task.id) ? (
-                        <div>
-                          <InlineTextField
-                            value={editingDescription}
-                            onChange={setEditingDescription}
-                            isEditMode={true}
-                            placeholder="Task description"
-                          />
-                        </div>
-                      ) : (
-                        <span
-                          className={`text-base sm:text-lg ${task.completed ? 'line-through text-gray-400' : 'text-gray-900'}`}
-                        >
-                          {task.description}
-                        </span>
-                      )}
-                  </div>
-
-                  {/* Action Buttons */}
-                    {editingTaskId === (task.clientId || task.id) ? (
-                      <div className="flex items-center gap-2">
-                        <CancelButton onClick={handleCancelEdit} size="small" />
-                        <SaveButton onClick={handleSaveEdit} disabled={isSaving} size="small" />
-                      </div>
-                    ) : (
-                      <div>
-                        <TaskMenuButton
-                          onEdit={() => handleEditTask(task)}
-                          onDelete={() => handleDeleteTask(task.id)}
-                        />
-                      </div>
-                    )}
+            {/* Task Description */}
+            <div className="flex-1 flex flex-col gap-[2%]">
+              {editingTaskId === (task.clientId || task.id) ? (
+                <div>
+                  <InlineTextField
+                    value={editingDescription}
+                    onChange={setEditingDescription}
+                    isEditMode={true}
+                    placeholder="Task description"
+                  />
                 </div>
-              ))}
+              ) : (
+                <span
+                  className={`text-base sm:text-lg ${task.completed ? 'line-through text-gray-400' : 'text-gray-900'}`}
+                >
+                  {task.description}
+                </span>
+              )}
+            </div>
 
-            {/* Empty State */}
-            {tasks.length === 0 && (
-              <div className="text-sm sm:text-base text-gray-400">
-                No tasks yet.
+            {/* Action Buttons */}
+            {editingTaskId === (task.clientId || task.id) ? (
+              <div className="flex items-center gap-2">
+                <CancelButton onClick={handleCancelEdit} size="small" />
+                <SaveButton onClick={handleSaveEdit} disabled={isSaving} size="small" />
+              </div>
+            ) : (
+              <div>
+                <TaskMenuButton
+                  onEdit={() => handleEditTask(task)}
+                  onDelete={() => handleDeleteTask(task.id)}
+                />
               </div>
             )}
-      </div>
+          </Reorder.Item>
+        ))}
+
+        {/* Empty State */}
+        {tasks.length === 0 && (
+          <div className="text-sm sm:text-base text-gray-400">
+            No tasks yet.
+          </div>
+        )}
+      </Reorder.Group>
 
       {/* Delete Confirmation Modal */}
       <ConfirmModal

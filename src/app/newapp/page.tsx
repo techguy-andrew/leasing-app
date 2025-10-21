@@ -12,6 +12,11 @@ interface FormData {
   email: string
   phone: string
   createdAt: string
+  deposit: string
+  rent: string
+  petFee: string
+  rentersInsurance: string
+  adminFee: string
 }
 
 export default function NewApplicationPage() {
@@ -41,7 +46,12 @@ export default function NewApplicationPage() {
       unitNumber: formData.unitNumber,
       email: formData.email.trim() || null,
       phone: formData.phone.trim() || null,
-      createdAt: normalizeDate(formData.createdAt)
+      createdAt: normalizeDate(formData.createdAt),
+      deposit: formData.deposit.trim() || null,
+      rent: formData.rent.trim() || null,
+      petFee: formData.petFee.trim() || null,
+      rentersInsurance: formData.rentersInsurance.trim() || null,
+      adminFee: formData.adminFee.trim() || null
     }
 
     const response = await fetch('/api/applications', {
