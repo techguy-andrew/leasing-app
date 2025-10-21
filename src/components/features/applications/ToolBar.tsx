@@ -48,7 +48,7 @@ export default function ToolBar({
         {/* Send Status Message Button */}
         <button
           onClick={onSendStatusMessage}
-          className="px-2 py-0.5 text-xs font-medium text-white rounded-full transition-colors hover:opacity-90"
+          className="px-2 py-0.5 text-xs font-medium text-white rounded-full transition-colors hover:opacity-90 cursor-pointer"
           style={{ backgroundColor: '#457b9d' }}
         >
           Send Status Message

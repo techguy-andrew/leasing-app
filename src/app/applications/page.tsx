@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { Suspense, useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useFilter } from '@/contexts/FilterContext'
 import ApplicationsList from '@/components/features/applications/ApplicationsList'
@@ -18,7 +18,7 @@ interface Application {
   updatedAt: string
 }
 
-export default function ApplicationsPage() {
+function ApplicationsContent() {
   const [applications, setApplications] = useState<Application[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const searchParams = useSearchParams()
@@ -153,5 +153,13 @@ export default function ApplicationsPage() {
         sortDirection={sortDirection}
       />
     </div>
+  )
+}
+
+export default function ApplicationsPage() {
+  return (
+    <Suspense fallback={<div className="w-full h-full flex items-center justify-center">Loading...</div>}>
+      <ApplicationsContent />
+    </Suspense>
   )
 }
