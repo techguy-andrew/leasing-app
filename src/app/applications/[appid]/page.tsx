@@ -6,6 +6,8 @@ import { motion } from 'motion/react'
 import { useToolBar } from '@/contexts/ToolBarContext'
 import ApplicationDetailForm from '@/components/features/applications/ApplicationDetailForm'
 import PopUp1 from '@/components/shared/modals/PopUp1'
+import LoadingScreen from '@/components/shared/LoadingScreen'
+import { fadeIn } from '@/lib/animations/variants'
 
 interface Task {
   id: string
@@ -202,32 +204,21 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col flex-1 w-full items-center justify-center bg-gradient-to-b from-gray-50 to-white">
-        <motion.div
-          className="text-lg text-gray-600"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-        >
-          Loading application...
-        </motion.div>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   if (error && !application) {
     return (
-      <div className="flex flex-col flex-1 w-full items-center justify-center bg-gradient-to-b from-gray-50 to-white">
-        <motion.div
-          className="text-lg text-red-600 px-4 text-center"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.3 }}
-        >
+      <motion.div
+        variants={fadeIn}
+        initial="initial"
+        animate="animate"
+        className="flex flex-col flex-1 w-full items-center justify-center"
+      >
+        <div className="text-base text-red-600 px-4 text-center">
           Error: {error}
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     )
   }
 

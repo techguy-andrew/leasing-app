@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useFilter } from '@/contexts/FilterContext'
 import ApplicationsList from '@/components/features/applications/ApplicationsList'
 
@@ -20,8 +21,17 @@ interface Application {
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const { statusFilter, sortDirection, calendarFilter } = useFilter()
+  const searchParams = useSearchParams()
+  const { statusFilter, setStatusFilter, sortDirection, calendarFilter } = useFilter()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Set status filter from URL params on mount
+  useEffect(() => {
+    const statusParam = searchParams.get('status')
+    if (statusParam) {
+      setStatusFilter(statusParam)
+    }
+  }, [searchParams, setStatusFilter])
 
   useEffect(() => {
     async function loadApplications() {
@@ -134,7 +144,7 @@ export default function ApplicationsPage() {
   }, [applications, statusFilter, calendarFilter, sortDirection, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
 
   return (
-    <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
+    <div ref={scrollContainerRef} className="w-full h-full overflow-y-auto">
       <ApplicationsList
         applications={filteredApplications}
         isLoading={isLoading}

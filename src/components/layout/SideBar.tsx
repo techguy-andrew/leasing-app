@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { listStagger, slideUp } from '@/lib/animations/variants'
 
 interface SideBarProps {
   isOpen: boolean
@@ -32,54 +33,71 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '-100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed top-[73px] left-0 w-72 sm:w-80 h-[calc(100vh-73px)] bg-white/90 backdrop-blur-xl border-r border-gray-200 z-50 flex flex-col overflow-y-auto shadow-2xl"
+            className="fixed left-0 w-72 sm:w-80 bg-white/90 backdrop-blur-xl border-r border-gray-200 z-50 flex flex-col overflow-y-auto shadow-2xl"
+            style={{
+              top: 'var(--topbar-height, 0px)',
+              height: 'calc(100vh - var(--topbar-height, 0px))'
+            }}
           >
-            <nav className="flex flex-col gap-1 p-4 sm:p-6">
-              <Link
-                href="/"
-                onClick={onClose}
-                className={`flex items-center px-5 py-4 rounded-xl transition-all duration-200 text-base font-medium ${
-                  pathname === '/'
-                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
-                }`}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/applications"
-                onClick={onClose}
-                className={`flex items-center px-5 py-4 rounded-xl transition-all duration-200 text-base font-medium ${
-                  pathname.startsWith('/applications')
-                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
-                }`}
-              >
-                Applications
-              </Link>
-              <Link
-                href="/newapp"
-                onClick={onClose}
-                className={`flex items-center px-5 py-4 rounded-xl transition-all duration-200 text-base font-medium ${
-                  pathname === '/newapp'
-                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
-                }`}
-              >
-                New Application
-              </Link>
-              <Link
-                href="/about"
-                onClick={onClose}
-                className={`flex items-center px-5 py-4 rounded-xl transition-all duration-200 text-base font-medium ${
-                  pathname === '/about'
-                    ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-100 active:bg-gray-200'
-                }`}
-              >
-                About
-              </Link>
-            </nav>
+            <motion.nav
+              className="flex flex-col gap-1 p-4 sm:p-6"
+              variants={listStagger}
+              initial="hidden"
+              animate="visible"
+            >
+              <motion.div variants={slideUp}>
+                <Link
+                  href="/"
+                  onClick={onClose}
+                  className={`flex items-center px-5 py-4 rounded-xl transition-colors duration-200 text-base font-medium ${
+                    pathname === '/'
+                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Dashboard
+                </Link>
+              </motion.div>
+              <motion.div variants={slideUp}>
+                <Link
+                  href="/applications"
+                  onClick={onClose}
+                  className={`flex items-center px-5 py-4 rounded-xl transition-colors duration-200 text-base font-medium ${
+                    pathname.startsWith('/applications')
+                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  Applications
+                </Link>
+              </motion.div>
+              <motion.div variants={slideUp}>
+                <Link
+                  href="/newapp"
+                  onClick={onClose}
+                  className={`flex items-center px-5 py-4 rounded-xl transition-colors duration-200 text-base font-medium ${
+                    pathname === '/newapp'
+                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  New Application
+                </Link>
+              </motion.div>
+              <motion.div variants={slideUp}>
+                <Link
+                  href="/about"
+                  onClick={onClose}
+                  className={`flex items-center px-5 py-4 rounded-xl transition-colors duration-200 text-base font-medium ${
+                    pathname === '/about'
+                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  About
+                </Link>
+              </motion.div>
+            </motion.nav>
           </motion.div>
         </>
       )}

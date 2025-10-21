@@ -12,6 +12,7 @@ import ConfirmModal from '@/components/shared/modals/ConfirmModal'
 import Toast, { ToastType } from '@/components/shared/feedback/Toast'
 import TasksList from './TasksList'
 import { STATUS_OPTIONS, PROPERTY_OPTIONS } from '@/lib/constants'
+import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animations/variants'
 
 /**
  * ApplicationDetailForm Component
@@ -289,15 +290,15 @@ export default function ApplicationDetailForm({
 
   return (
     <>
-      <div className="flex flex-col w-full flex-1 p-[3%] sm:p-[4%] md:p-[5%] lg:p-[6%] bg-white">
+      <div className="flex flex-col w-full flex-1 p-4 sm:p-6 md:p-8 bg-white">
         <motion.div
-          className="max-w-4xl mx-auto w-full p-[4%] sm:p-[5%] md:p-[6%] relative"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          className="max-w-4xl mx-auto w-full p-4 sm:p-6 md:p-8 relative"
+          variants={pageTransition}
+          initial="initial"
+          animate="animate"
         >
           {/* Action Buttons - Positioned in top right corner */}
-          <div className="absolute top-[4%] right-[4%] sm:top-[5%] sm:right-[5%] md:top-[6%] md:right-[6%]">
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-6 md:top-8 md:right-8">
             <AnimatePresence mode="wait">
               {mode === 'edit' && !isEditMode ? (
                 <motion.div
@@ -328,10 +329,15 @@ export default function ApplicationDetailForm({
             </AnimatePresence>
           </div>
 
-          <div className="flex flex-col gap-[4%]">
+          <motion.div
+            className="flex flex-col gap-2"
+            variants={formFieldStagger}
+            initial="hidden"
+            animate="visible"
+          >
             {/* Status Badge */}
-            <div className="flex items-center gap-[2%]">
-              <span className="text-xs sm:text-sm font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
+            <motion.div className="flex items-center gap-3" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
                 Status:
               </span>
               <InlineStatusBadge
@@ -339,11 +345,11 @@ export default function ApplicationDetailForm({
                 onChange={handleStatusChange}
                 options={STATUS_OPTIONS}
               />
-            </div>
+            </motion.div>
 
             {/* Application Date Field */}
-            <div className="flex flex-col gap-[2%]">
-              <span className="text-sm sm:text-base font-semibold text-gray-500">
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
                 Application Date
               </span>
               <InlineTextField
@@ -352,11 +358,11 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="MM/DD/YYYY"
               />
-            </div>
+            </motion.div>
 
             {/* Applicant Name Field */}
-            <div className="flex flex-col gap-[2%]">
-              <span className="text-sm sm:text-base font-semibold text-gray-500">
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
                 Applicant Name
               </span>
               <InlineTextField
@@ -365,11 +371,11 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="Applicant Name"
               />
-            </div>
+            </motion.div>
 
             {/* Email Field */}
-            <div className="flex flex-col gap-[2%]">
-              <span className="text-sm sm:text-base font-semibold text-gray-500">
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
                 Email
               </span>
               <InlineTextField
@@ -378,11 +384,11 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="Email"
               />
-            </div>
+            </motion.div>
 
             {/* Phone Field */}
-            <div className="flex flex-col gap-[2%]">
-              <span className="text-sm sm:text-base font-semibold text-gray-500">
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
                 Phone
               </span>
               <InlineTextField
@@ -391,11 +397,11 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="Phone"
               />
-            </div>
+            </motion.div>
 
             {/* Property Field */}
-            <div className="flex flex-col gap-[2%]">
-              <span className="text-sm sm:text-base font-semibold text-gray-500">
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
                 Property
               </span>
               <InlineSelectField
@@ -405,11 +411,11 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="Property"
               />
-            </div>
+            </motion.div>
 
             {/* Unit Number Field */}
-            <div className="flex flex-col gap-[2%]">
-              <span className="text-sm sm:text-base font-semibold text-gray-500">
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
                 Unit Number
               </span>
               <InlineTextField
@@ -418,11 +424,11 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="Unit Number"
               />
-            </div>
+            </motion.div>
 
             {/* Move-in Date Field */}
-            <div className="flex flex-col gap-[2%]">
-              <span className="text-sm sm:text-base font-semibold text-gray-500">
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
                 Move-in Date
               </span>
               <InlineTextField
@@ -431,19 +437,19 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="MM/DD/YYYY"
               />
-            </div>
+            </motion.div>
 
             {/* Tasks Section - Integrated as a field */}
             {applicationId && (
-              <div className="flex flex-col gap-[2%]">
+              <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
                 <TasksList
                   applicationId={applicationId}
                   initialTasks={initialTasks}
                   onTasksChange={onTasksChange}
                 />
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         </motion.div>
       </div>
 

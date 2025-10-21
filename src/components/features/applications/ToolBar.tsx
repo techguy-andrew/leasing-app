@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'motion/react'
+import { fadeIn, slideUp } from '@/lib/animations/variants'
 
 /**
  * ToolBar Component
@@ -31,15 +32,19 @@ export default function ToolBar({
   return (
     <motion.div
       data-toolbar
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
+      variants={fadeIn}
+      initial="initial"
+      animate="animate"
       className="fixed left-0 right-0 w-full h-fit flex flex-row items-center justify-start gap-4 px-6 py-4 bg-white border-b border-gray-200 z-30"
       style={{ top: 'calc(var(--topbar-height, 0px) + var(--navbar-height, 0px))' }}
     >
       {/* Tools Container */}
-      <div className="flex flex-row flex-wrap gap-3">
-
+      <motion.div
+        className="flex flex-row flex-wrap gap-3"
+        variants={slideUp}
+        initial="hidden"
+        animate="visible"
+      >
         {/* Send Status Message Button */}
         <button
           onClick={onSendStatusMessage}
@@ -51,7 +56,7 @@ export default function ToolBar({
 
         {/* Future tools can be added here */}
 
-      </div>
+      </motion.div>
     </motion.div>
   )
 }

@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react'
 import { STATUS_COLORS } from '@/lib/constants'
+import { fadeIn, listStagger, slideUp } from '@/lib/animations/variants'
 
 /**
  * FilterBar Component
@@ -50,17 +51,22 @@ export default function FilterBar({
   return (
     <motion.div
       data-filterbar
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
+      variants={fadeIn}
+      initial="initial"
+      animate="animate"
       className="fixed left-0 right-0 w-full h-fit flex flex-col gap-4 px-6 py-4 bg-white border-b border-gray-200 z-30"
       style={{ top: 'calc(var(--topbar-height, 0px) + var(--navbar-height, 0px))' }}
     >
       {/* Filter Sections Container */}
-      <div className="flex flex-row flex-wrap gap-6 w-full">
+      <motion.div
+        className="flex flex-row flex-wrap gap-6 w-full"
+        variants={listStagger}
+        initial="hidden"
+        animate="visible"
+      >
 
         {/* Status Filter Section */}
-        <div className="flex flex-col gap-2">
+        <motion.div className="flex flex-col gap-2" variants={slideUp}>
           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</span>
           <div className="flex flex-row flex-wrap gap-2">
             {statusOptions.map((status) => (
@@ -77,10 +83,10 @@ export default function FilterBar({
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Move-In Date Sorting Section */}
-        <div className="flex flex-col gap-2">
+        <motion.div className="flex flex-col gap-2" variants={slideUp}>
           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Move-In Date</span>
           <div className="flex flex-row flex-wrap gap-2">
             <button
@@ -110,10 +116,10 @@ export default function FilterBar({
               Furthest
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Calendar Filter Section */}
-        <div className="flex flex-col gap-2">
+        <motion.div className="flex flex-col gap-2" variants={slideUp}>
           <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Calendar</span>
           <div className="flex flex-row flex-wrap gap-2">
             {calendarOptions.map((option) => (
@@ -130,9 +136,9 @@ export default function FilterBar({
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-      </div>
+      </motion.div>
     </motion.div>
   )
 }

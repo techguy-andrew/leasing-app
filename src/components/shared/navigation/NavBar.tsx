@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { motion } from 'motion/react'
 import { usePathname } from 'next/navigation'
+import { fadeIn, listStagger, slideUp } from '@/lib/animations/variants'
 
 /**
  * NavBar Component
@@ -34,34 +35,41 @@ export default function NavBar() {
   return (
     <motion.nav
       data-navbar
-      className="fixed left-0 right-0 w-full h-fit flex items-center gap-4 text-sm font-sans text-gray-600 px-6 md:px-8 py-6 bg-white border-b border-gray-200 z-40"
+      className="fixed left-0 right-0 w-full h-fit flex items-center gap-4 text-base font-sans text-gray-600 px-6 md:px-8 py-6 bg-white border-b border-gray-200 z-40"
       style={{ top: 'var(--topbar-height, 0px)' }}
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      variants={fadeIn}
+      initial="initial"
+      animate="animate"
     >
-      {navigationLinks.map((link, index) => {
-        const isActive =
-          link.href === '/'
-            ? pathname === '/'
-            : pathname.startsWith(link.href)
+      <motion.div
+        className="flex items-center gap-4"
+        variants={listStagger}
+        initial="hidden"
+        animate="visible"
+      >
+        {navigationLinks.map((link, index) => {
+          const isActive =
+            link.href === '/'
+              ? pathname === '/'
+              : pathname.startsWith(link.href)
 
-        return (
-          <div key={link.href} className="flex items-center gap-3">
-            {index > 0 && <span className="text-gray-300 select-none">/</span>}
-            <Link
-              href={link.href}
-              className={`transition-colors font-sans ${
-                isActive
-                  ? 'text-blue-700 font-semibold'
-                  : 'hover:text-gray-900 hover:underline'
-              }`}
-            >
-              {link.label}
-            </Link>
-          </div>
-        )
-      })}
+          return (
+            <motion.div key={link.href} className="flex items-center gap-3" variants={slideUp}>
+              {index > 0 && <span className="text-gray-300 select-none">/</span>}
+              <Link
+                href={link.href}
+                className={`transition-colors font-sans ${
+                  isActive
+                    ? 'text-blue-700 font-semibold'
+                    : 'hover:text-gray-900 hover:underline'
+                }`}
+              >
+                {link.label}
+              </Link>
+            </motion.div>
+          )
+        })}
+      </motion.div>
     </motion.nav>
   )
 }

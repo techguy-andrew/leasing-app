@@ -2,6 +2,8 @@
 
 import { AnimatePresence, motion } from 'motion/react'
 import ApplicationListItem from './ApplicationListItem'
+import LoadingScreen from '@/components/shared/LoadingScreen'
+import { listStagger, slideUp, scaleIn } from '@/lib/animations/variants'
 
 /**
  * ApplicationsList Component
@@ -59,23 +61,14 @@ export default function ApplicationsList({
     <div className="flex flex-col w-full bg-white">
       <AnimatePresence mode="wait">
         {isLoading ? (
-          <motion.div
-            key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="flex items-center justify-center py-16 text-gray-500 text-sm"
-          >
-            Loading applications...
-          </motion.div>
+          <LoadingScreen key="loading" />
         ) : applications.length === 0 ? (
           <motion.div
             key="empty"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.15 }}
+            variants={scaleIn}
+            initial="initial"
+            animate="animate"
+            exit="exit"
             className="flex items-center justify-center py-16 text-gray-500 text-sm"
           >
             {statusFilter === 'All' && calendarFilter === 'All Time'
@@ -85,22 +78,15 @@ export default function ApplicationsList({
         ) : (
           <motion.div
             key={`filtered-${statusFilter}-${sortDirection}-${calendarFilter}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            variants={listStagger}
+            initial="hidden"
+            animate="visible"
             className="flex flex-col w-full"
           >
-            {applications.map((app, index) => (
+            {applications.map((app) => (
               <motion.div
                 key={app.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{
-                  duration: 0.1,
-                  delay: Math.min(index * 0.015, 0.2),
-                  ease: 'easeOut'
-                }}
+                variants={slideUp}
               >
                 <ApplicationListItem
                   id={app.id}

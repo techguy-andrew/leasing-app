@@ -63,13 +63,30 @@ function LayoutContent({ children }: NavigationLayoutProps) {
     // Update on mount and when route changes
     updateHeights()
 
-    // Update on window resize
+    // Use ResizeObserver to track content-driven size changes
+    const resizeObserver = new ResizeObserver(updateHeights)
+
+    const topbar = document.querySelector('[data-topbar]')
+    const navbar = document.querySelector('[data-navbar]')
+    const filterbar = document.querySelector('[data-filterbar]')
+    const toolbar = document.querySelector('[data-toolbar]')
+
+    if (topbar) resizeObserver.observe(topbar)
+    if (navbar) resizeObserver.observe(navbar)
+    if (filterbar) resizeObserver.observe(filterbar)
+    if (toolbar) resizeObserver.observe(toolbar)
+
+    // Update on window resize as fallback
     window.addEventListener('resize', updateHeights)
-    return () => window.removeEventListener('resize', updateHeights)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateHeights)
+    }
   }, [isApplicationsPage, isAppDetailPage])
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col h-screen">
       {/* Top Bar - Fixed at top */}
       <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
 
@@ -98,9 +115,9 @@ function LayoutContent({ children }: NavigationLayoutProps) {
       {/* Toggleable Sidebar */}
       <SideBar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
-      {/* Main Content Area - Dynamic padding based on header stack height */}
+      {/* Main Content Area - Horizontally centered, top-aligned with overflow handling */}
       <main
-        className="flex-1 flex flex-col"
+        className="flex-1 flex flex-col items-center justify-start overflow-y-auto"
         style={{ paddingTop: 'var(--header-stack-height, 0px)' }}
       >
         {children}

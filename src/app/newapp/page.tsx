@@ -1,7 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import NavBar from '@/components/shared/navigation/NavBar'
 import ApplicationForm from '@/components/features/applications/ApplicationForm'
 
 interface FormData {
@@ -68,13 +67,10 @@ export default function NewApplicationPage() {
   }
 
   return (
-    <>
-      <NavBar />
-      <ApplicationForm
-        mode="create"
-        onSave={handleSave}
-        onCancel={handleCancel}
-      />
-    </>
+    <ApplicationForm
+      mode="create"
+      onSave={handleSave}
+      onCancel={handleCancel}
+    />
   )
 }

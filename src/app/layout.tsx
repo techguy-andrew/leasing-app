@@ -41,7 +41,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${appFont.variable} antialiased`}>
+        <body className={`${appFont.variable} antialiased min-h-screen`}>
           <NavigationLayout>
             {children}
           </NavigationLayout>

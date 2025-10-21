@@ -46,19 +46,19 @@ const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, p
   return (
     <Link
       href={`/applications/${id}`}
-      className="flex items-center justify-between w-full px-6 md:px-8 py-5 sm:py-6 border-b border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-colors cursor-pointer group"
+      className="flex items-center justify-between w-full px-6 md:px-8 py-5 sm:py-6 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer group"
     >
       <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
         <div className="flex flex-col gap-3 flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-            <span className="font-semibold text-base sm:text-lg text-gray-900 truncate">
+            <span className="font-semibold text-base text-gray-900 truncate">
               {applicant}
             </span>
             <span className={`px-3 py-1.5 text-xs font-semibold rounded-full w-fit ${STATUS_BADGE_COLORS[status] || 'bg-gray-100 text-gray-800'}`}>
               {status}
             </span>
           </div>
-          <div className="flex flex-col gap-2 text-sm sm:text-base text-gray-600">
+          <div className="flex flex-col gap-2 text-base text-gray-600">
             <span className="truncate font-medium">{property}</span>
             <div className="flex flex-col sm:flex-row sm:gap-6">
               <span className="text-gray-500">Unit {unitNumber}</span>
@@ -68,7 +68,7 @@ const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, p
         </div>
       </div>
       <motion.div
-        className="flex items-center gap-3 text-sm text-gray-500 ml-4"
+        className="flex items-center gap-3 text-base text-gray-500 ml-4"
         whileHover={{ x: 3 }}
         transition={{ duration: 0.15 }}
       >

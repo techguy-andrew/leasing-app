@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
+import Link from 'next/link'
 import { STATUS_BADGE_COLORS } from '@/lib/constants'
 import { staggerContainer, staggerItem } from '@/lib/animations/variants'
+import LoadingScreen from '@/components/shared/LoadingScreen'
 
 interface Application {
   id: number
@@ -64,32 +66,32 @@ export default function Home() {
   }, [])
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
-        <p className="text-gray-600">Loading...</p>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white p-8">
+    <div className="w-full max-w-7xl p-4 md:p-8">
       <motion.div
-        className="flex flex-col gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
       >
         {statusCounts.map(({ status, count, colorClass }) => (
-          <motion.div
+          <Link
             key={status}
-            className="flex items-center gap-4"
-            variants={staggerItem}
+            href={`/applications?status=${status}`}
           >
-            <span className="text-2xl font-semibold text-gray-900">{count}</span>
-            <span className={`px-3 py-1 text-sm font-medium rounded-full ${colorClass}`}>
-              {status}
-            </span>
-          </motion.div>
+            <motion.div
+              className="flex items-center gap-4 p-6 bg-white border border-gray-200 rounded-2xl shadow-sm hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+              variants={staggerItem}
+            >
+              <span className="text-base font-semibold text-gray-900">{count}</span>
+              <span className={`px-3 py-1 text-xs font-medium rounded-full ${colorClass}`}>
+                {status}
+              </span>
+            </motion.div>
+          </Link>
         ))}
       </motion.div>
     </div>
