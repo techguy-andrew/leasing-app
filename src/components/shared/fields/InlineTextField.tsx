@@ -58,7 +58,7 @@ export default function InlineTextField({
 
   // Update contentEditable when value changes externally
   useEffect(() => {
-    const displayValue = value || (!isEditMode ? 'N/A' : '')
+    const displayValue = value || ''
     if (contentRef.current && contentRef.current.textContent !== displayValue) {
       const selection = window.getSelection()
       const hadFocus = document.activeElement === contentRef.current
@@ -191,7 +191,7 @@ export default function InlineTextField({
         </span>
       )}
       <div className="relative flex-1">
-        {isEditMode && value === '' && (
+        {value === '' && placeholder && (
           <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none">
             {placeholder}
           </div>
