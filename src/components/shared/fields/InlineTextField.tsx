@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react'
 
 /**
  * InlineTextField Component
@@ -45,7 +45,7 @@ interface InlineTextFieldProps {
   formatType?: 'text' | 'phone' | 'currency'
 }
 
-export default function InlineTextField({
+const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(function InlineTextField({
   value,
   onChange,
   isEditMode,
@@ -55,11 +55,21 @@ export default function InlineTextField({
   prefix,
   type = 'text',
   formatType = 'text'
-}: InlineTextFieldProps) {
+}, ref) {
   const contentRef = useRef<HTMLDivElement>(null)
   const isTypingRef = useRef(false)
   const lastValueRef = useRef<string>(value)
   const prevEditModeRef = useRef(isEditMode)
+
+  // Expose the contentRef to parent components via ref
+  useImperativeHandle(ref, () => contentRef.current as HTMLDivElement, [])
+
+  // Add focus method to the ref
+  useEffect(() => {
+    if (ref && typeof ref !== 'function' && contentRef.current) {
+      (ref.current as any)?.focus?.() // Make focus method available
+    }
+  }, [ref])
 
   // Format currency with fixed decimal point and thousand separators - inline as user types
   const formatCurrency = (rawValue: string): string => {
@@ -294,4 +304,6 @@ export default function InlineTextField({
       </div>
     </div>
   )
-}
+})
+
+export default InlineTextField
