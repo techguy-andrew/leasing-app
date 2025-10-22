@@ -40,6 +40,7 @@ interface InlineTextFieldProps {
   placeholder?: string
   className?: string
   onEnterPress?: () => void
+  prefix?: string
 }
 
 export default function InlineTextField({
@@ -48,7 +49,8 @@ export default function InlineTextField({
   isEditMode,
   placeholder = '',
   className = '',
-  onEnterPress
+  onEnterPress,
+  prefix
 }: InlineTextFieldProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const cursorPositionRef = useRef<number | null>(null)
@@ -182,21 +184,28 @@ export default function InlineTextField({
   }
 
   return (
-    <div className="relative">
-      {isEditMode && value === '' && (
-        <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none">
-          {placeholder}
-        </div>
+    <div className="relative flex items-baseline">
+      {prefix && (
+        <span className="text-base sm:text-lg text-gray-900 font-sans mr-1">
+          {prefix}
+        </span>
       )}
-      <div
-        ref={contentRef}
-        contentEditable={isEditMode}
-        suppressContentEditableWarning
-        onInput={handleInput}
-        onPaste={handlePaste}
-        onKeyDown={handleKeyDown}
-        className={`text-base sm:text-lg text-gray-900 font-sans bg-transparent outline-none ${isEditMode ? 'cursor-text' : 'cursor-text select-text'} ${className}`}
-      />
+      <div className="relative flex-1">
+        {isEditMode && value === '' && (
+          <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none">
+            {placeholder}
+          </div>
+        )}
+        <div
+          ref={contentRef}
+          contentEditable={isEditMode}
+          suppressContentEditableWarning
+          onInput={handleInput}
+          onPaste={handlePaste}
+          onKeyDown={handleKeyDown}
+          className={`text-base sm:text-lg text-gray-900 font-sans bg-transparent outline-none ${isEditMode ? 'cursor-text' : 'cursor-text select-text'} ${className}`}
+        />
+      </div>
     </div>
   )
 }

@@ -196,23 +196,24 @@ export default function ApplicationDetailForm({
     return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`
   }
 
-  // Format currency with dollar sign and commas
+  // Format currency with automatic decimal placement
+  // User types digits only, we auto-format with decimal
+  // Stores in database-ready format (dollars with decimal)
   const formatCurrency = (value: string): string => {
-    // Remove all non-digit characters except decimal point
-    const cleaned = value.replace(/[^\d.]/g, '')
+    // Remove all non-digit characters
+    const digitsOnly = value.replace(/\D/g, '')
 
-    // Ensure only one decimal point
-    const parts = cleaned.split('.')
-    if (parts.length > 2) {
-      return parts[0] + '.' + parts.slice(1).join('')
-    }
+    if (digitsOnly === '') return ''
 
-    // Limit to 2 decimal places
-    if (parts.length === 2) {
-      parts[1] = parts[1].slice(0, 2)
-    }
+    // Treat input as cents and convert to dollars with decimal
+    // Pad with zeros if needed (minimum 3 digits for proper decimal placement)
+    const paddedCents = digitsOnly.padStart(3, '0')
 
-    return cleaned
+    // Insert decimal point 2 places from the right
+    const dollars = paddedCents.slice(0, -2)
+    const cents = paddedCents.slice(-2)
+
+    return `${dollars}.${cents}`
   }
 
   // Generic field change handler
@@ -523,6 +524,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('rent', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                prefix="$"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -537,6 +539,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('deposit', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                prefix="$"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -551,6 +554,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('petFee', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                prefix="$"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -565,6 +569,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('petRent', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                prefix="$"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -579,6 +584,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('proratedRent', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                prefix="$"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -593,6 +599,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('concession', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                prefix="$"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -607,6 +614,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('rentersInsurance', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                prefix="$"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -621,6 +629,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('adminFee', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                prefix="$"
                 onEnterPress={handleSave}
               />
             </motion.div>
