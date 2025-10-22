@@ -193,8 +193,8 @@ export default function InlineTextField({
       <div className="relative flex-1">
         {isEditMode ? (
           <>
-            {placeholder && (
-              <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none -z-10">
+            {value === '' && placeholder && (
+              <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none">
                 {placeholder}
               </div>
             )}
@@ -205,7 +205,7 @@ export default function InlineTextField({
               onInput={handleInput}
               onPaste={handlePaste}
               onKeyDown={handleKeyDown}
-              className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text relative z-10 ${value === '' ? 'min-h-[1.5rem]' : ''} text-gray-900 ${className}`}
+              className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text text-gray-900 ${value === '' ? 'min-h-[1.5rem]' : ''} ${className}`}
             >
               {value}
             </div>
