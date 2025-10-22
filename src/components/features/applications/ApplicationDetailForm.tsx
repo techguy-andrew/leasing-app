@@ -170,15 +170,6 @@ export default function ApplicationDetailForm({
     fetchProperties()
   }, [])
 
-  // Update form when initialData changes (edit mode)
-  useEffect(() => {
-    if (mode === 'edit' && initialData) {
-      const newData = { ...defaultFormData, ...initialData }
-      setFormData(newData)
-      setOriginalData(newData)
-    }
-  }, [initialData, mode])
-
   // Format date as MM/DD/YYYY
   const formatDate = (value: string): string => {
     const digits = value.replace(/\D/g, '')
@@ -196,13 +187,13 @@ export default function ApplicationDetailForm({
     return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`
   }
 
-  // Format currency with automatic decimal placement
-  // User types digits only, we auto-format with decimal
-  // Stores in database-ready format (dollars with decimal)
+  // Format currency with fixed decimal point
+  // Decimal is always in place, user types digits and they fill in naturally
   const formatCurrency = (value: string): string => {
     // Remove all non-digit characters
     const digitsOnly = value.replace(/\D/g, '')
 
+    // Allow empty state - user can clear the field
     if (digitsOnly === '') return ''
 
     // Treat input as cents and convert to dollars with decimal
@@ -215,6 +206,43 @@ export default function ApplicationDetailForm({
 
     return `${dollars}.${cents}`
   }
+
+  // Format initial data for display
+  const formatInitialData = (data: Partial<FormData>): FormData => {
+    const formatted = { ...defaultFormData, ...data }
+
+    // Format phone if present
+    if (formatted.phone) {
+      formatted.phone = formatPhone(formatted.phone)
+    }
+
+    // Format currency fields
+    const currencyFields: (keyof FormData)[] = ['deposit', 'rent', 'petFee', 'petRent', 'proratedRent', 'concession', 'rentersInsurance', 'adminFee']
+    currencyFields.forEach(field => {
+      if (formatted[field]) {
+        formatted[field] = formatCurrency(formatted[field])
+      }
+    })
+
+    // Format dates if present
+    if (formatted.moveInDate) {
+      formatted.moveInDate = formatDate(formatted.moveInDate)
+    }
+    if (formatted.createdAt) {
+      formatted.createdAt = formatDate(formatted.createdAt)
+    }
+
+    return formatted
+  }
+
+  // Update form when initialData changes (edit mode) with formatting
+  useEffect(() => {
+    if (mode === 'edit' && initialData) {
+      const newData = formatInitialData(initialData)
+      setFormData(newData)
+      setOriginalData(newData)
+    }
+  }, [initialData, mode])
 
   // Generic field change handler
   const handleFieldChange = (field: keyof FormData, value: string) => {
