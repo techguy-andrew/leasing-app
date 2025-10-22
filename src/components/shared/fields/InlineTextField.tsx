@@ -61,14 +61,19 @@ export default function InlineTextField({
   const lastValueRef = useRef<string>(value)
   const prevEditModeRef = useRef(isEditMode)
 
-  // Format currency with fixed decimal point - inline as user types
+  // Format currency with fixed decimal point and thousand separators - inline as user types
   const formatCurrency = (rawValue: string): string => {
     const digitsOnly = rawValue.replace(/\D/g, '')
     if (digitsOnly === '') return ''
     const paddedCents = digitsOnly.padStart(3, '0')
     const dollars = paddedCents.slice(0, -2)
     const cents = paddedCents.slice(-2)
-    return `${dollars}.${cents}`
+
+    // Remove leading zeros and add thousand separators (e.g., 1234 -> 1,234)
+    const dollarsAsNumber = parseInt(dollars, 10)
+    const formattedDollars = dollarsAsNumber.toLocaleString('en-US')
+
+    return `${formattedDollars}.${cents}`
   }
 
   // Format phone with dashes - inline as user types
