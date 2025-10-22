@@ -94,7 +94,7 @@ interface ApplicationDetailFormProps {
   onDelete?: (id: number) => Promise<void>
   showDeleteButton?: boolean
   onStatusChange?: (status: string) => Promise<void>
-  onTasksChange?: (tasks: Task[]) => void
+  onTasksChange?: (tasks: Task[], taskType: 'AGENT' | 'APPLICANT') => void
 }
 
 const defaultFormData: FormData = {
@@ -675,7 +675,7 @@ export default function ApplicationDetailForm({
                 <TasksList
                   applicationId={applicationId}
                   initialTasks={initialTasks}
-                  onTasksChange={onTasksChange}
+                  onTasksChange={(tasks) => onTasksChange?.(tasks, 'AGENT')}
                   taskType="AGENT"
                   title="Leasing Agent Tasks"
                 />
@@ -688,7 +688,7 @@ export default function ApplicationDetailForm({
                 <TasksList
                   applicationId={applicationId}
                   initialTasks={initialTasks}
-                  onTasksChange={onTasksChange}
+                  onTasksChange={(tasks) => onTasksChange?.(tasks, 'APPLICANT')}
                   taskType="APPLICANT"
                   title="Applicant Tasks"
                 />

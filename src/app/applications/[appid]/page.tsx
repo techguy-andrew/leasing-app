@@ -217,12 +217,19 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     // Cancel is handled within ApplicationForm for edit mode
   }
 
-  const handleTasksChange = (updatedTasks: Task[]) => {
+  const handleTasksChange = (updatedTasks: Task[], taskType: 'AGENT' | 'APPLICANT') => {
     setApplication(prev => {
       if (!prev) return prev
+
+      // Get current tasks of the OTHER type (preserve them)
+      const otherTypeTasks = prev.tasks.filter(t => t.type !== taskType)
+
+      // Merge updated tasks with preserved other type tasks
+      const mergedTasks = [...updatedTasks, ...otherTypeTasks]
+
       return {
         ...prev,
-        tasks: updatedTasks
+        tasks: mergedTasks
       }
     })
   }

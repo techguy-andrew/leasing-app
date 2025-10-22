@@ -63,15 +63,6 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
     )
   }, [initialTasks, taskType])
 
-  // Helper function to merge current task type with other types when notifying parent
-  const notifyTasksChange = (updatedTasks: Task[]) => {
-    if (!onTasksChange) return
-    // Get tasks of the other type from initialTasks to preserve them
-    const otherTypeTasks = initialTasks.filter(t => t.type !== taskType)
-    // Merge updated tasks with other type tasks
-    onTasksChange([...updatedTasks, ...otherTypeTasks])
-  }
-
   // Auto-focus input when creating a new task
   useEffect(() => {
     if (editingTaskId?.startsWith('temp-')) {
@@ -159,7 +150,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
               ? { ...data.data, clientId: data.data.id }
               : task
           )
-          notifyTasksChange(updatedTasks)
+          onTasksChange?.(updatedTasks)
           return updatedTasks
         })
         setToastType('success')
@@ -183,7 +174,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
 
         setTasks(prev => {
           const updatedTasks = prev.map(task => (task.id === editingTaskId ? data.data : task))
-          notifyTasksChange(updatedTasks)
+          onTasksChange?.(updatedTasks)
           return updatedTasks
         })
         setToastType('success')
@@ -231,7 +222,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
 
       setTasks(prev => {
         const updatedTasks = prev.filter(task => task.id !== deletingTaskId)
-        notifyTasksChange(updatedTasks)
+        onTasksChange?.(updatedTasks)
         return updatedTasks
       })
       setToastType('success')
@@ -278,7 +269,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
       // Update with server response
       setTasks(prev => {
         const updatedTasks = prev.map(t => (t.id === task.id ? data.data : t))
-        notifyTasksChange(updatedTasks)
+        onTasksChange?.(updatedTasks)
         return updatedTasks
       })
     } catch (error) {
@@ -298,7 +289,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
 
     // Optimistically update UI
     setTasks(newOrder)
-    notifyTasksChange(newOrder)
+    onTasksChange?.(newOrder)
 
     try {
       // Filter out temporary tasks (new tasks being created)
@@ -331,13 +322,13 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
         // Preserve any temporary tasks that might be in edit mode
         const tempTasks = prev.filter(t => t.id.startsWith('temp-'))
         const updatedTasks = [...tempTasks, ...data.data]
-        notifyTasksChange(updatedTasks)
+        onTasksChange?.(updatedTasks)
         return updatedTasks
       })
     } catch (error) {
       // Revert on error
       setTasks(previousTasks)
-      notifyTasksChange(previousTasks)
+      onTasksChange?.(previousTasks)
       setToastType('error')
       setToastMessage(error instanceof Error ? error.message : 'Failed to reorder tasks')
     }
