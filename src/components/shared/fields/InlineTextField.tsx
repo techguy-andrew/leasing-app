@@ -41,6 +41,7 @@ interface InlineTextFieldProps {
   className?: string
   onEnterPress?: () => void
   prefix?: string
+  type?: 'text' | 'number'
 }
 
 export default function InlineTextField({
@@ -50,11 +51,19 @@ export default function InlineTextField({
   placeholder = '',
   className = '',
   onEnterPress,
-  prefix
+  prefix,
+  type = 'text'
 }: InlineTextFieldProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const cursorPositionRef = useRef<number | null>(null)
   const previousValueRef = useRef<string>('')
+
+  // Initialize content when switching to edit mode
+  useEffect(() => {
+    if (isEditMode && contentRef.current && contentRef.current.textContent !== value) {
+      contentRef.current.textContent = value || ''
+    }
+  }, [isEditMode, value])
 
   // Update contentEditable when value changes externally
   useEffect(() => {
@@ -172,13 +181,39 @@ export default function InlineTextField({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!isEditMode) return
-
     // Handle Enter key
     if (e.key === 'Enter') {
       e.preventDefault() // Prevent line breaks in contentEditable
       if (onEnterPress) {
         onEnterPress()
+      }
+      return
+    }
+
+    // For number type, only allow digits
+    if (type === 'number') {
+      // Allow: backspace, delete, tab, escape, enter, arrows
+      if (
+        e.key === 'Backspace' ||
+        e.key === 'Delete' ||
+        e.key === 'Tab' ||
+        e.key === 'Escape' ||
+        e.key === 'Enter' ||
+        e.key === 'ArrowLeft' ||
+        e.key === 'ArrowRight' ||
+        e.key === 'ArrowUp' ||
+        e.key === 'ArrowDown' ||
+        e.key === 'Home' ||
+        e.key === 'End' ||
+        // Allow Ctrl/Cmd + A, C, V, X
+        ((e.ctrlKey || e.metaKey) && ['a', 'c', 'v', 'x'].includes(e.key.toLowerCase()))
+      ) {
+        return
+      }
+
+      // Prevent non-numeric characters
+      if (!/^\d$/.test(e.key)) {
+        e.preventDefault()
       }
     }
   }
@@ -206,9 +241,7 @@ export default function InlineTextField({
               onPaste={handlePaste}
               onKeyDown={handleKeyDown}
               className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text text-gray-900 ${value === '' ? 'min-h-[1.5rem]' : ''} ${className}`}
-            >
-              {value}
-            </div>
+            />
           </>
         ) : (
           <div className={`text-base sm:text-lg font-sans cursor-text select-text ${value === '' ? 'text-gray-400' : 'text-gray-900'}`}>

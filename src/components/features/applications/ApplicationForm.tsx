@@ -503,6 +503,7 @@ export default function ApplicationForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
               />
             </motion.div>
 
@@ -517,6 +518,7 @@ export default function ApplicationForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
               />
             </motion.div>
 
@@ -531,6 +533,7 @@ export default function ApplicationForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
               />
             </motion.div>
 
@@ -545,6 +548,7 @@ export default function ApplicationForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
               />
             </motion.div>
 
@@ -559,6 +563,7 @@ export default function ApplicationForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
               />
             </motion.div>
 
@@ -573,6 +578,7 @@ export default function ApplicationForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
               />
             </motion.div>
 
@@ -587,6 +593,7 @@ export default function ApplicationForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
               />
             </motion.div>
 
@@ -601,6 +608,7 @@ export default function ApplicationForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
               />
             </motion.div>
           </motion.div>

@@ -525,6 +525,7 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -540,6 +541,7 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -555,6 +557,7 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -570,6 +573,7 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -585,6 +589,7 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -600,6 +605,7 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -615,6 +621,7 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -630,6 +637,7 @@ export default function ApplicationDetailForm({
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
+                type="number"
                 onEnterPress={handleSave}
               />
             </motion.div>
