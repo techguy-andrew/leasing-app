@@ -25,6 +25,9 @@ model Application {
   deposit          String?  // Security deposit amount
   rent             String?  // Monthly rent amount
   petFee           String?  // Pet fee (if applicable)
+  petRent          String?  // Monthly pet rent
+  proratedRent     String?  // Prorated rent amount
+  concession       String?  // Concession amount
   rentersInsurance String?  // Renters insurance cost
   adminFee         String?  // Administrative fee
 

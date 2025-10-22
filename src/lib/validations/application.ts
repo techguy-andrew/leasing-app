@@ -109,6 +109,9 @@ export const applicationCreateSchema = z.object({
   deposit: optionalStringSchema.optional(),
   rent: optionalStringSchema.optional(),
   petFee: optionalStringSchema.optional(),
+  petRent: optionalStringSchema.optional(),
+  proratedRent: optionalStringSchema.optional(),
+  concession: optionalStringSchema.optional(),
   rentersInsurance: optionalStringSchema.optional(),
   adminFee: optionalStringSchema.optional()
 })
@@ -141,6 +144,9 @@ export const applicationUpdateSchema = z.object({
   deposit: optionalStringSchema.optional(),
   rent: optionalStringSchema.optional(),
   petFee: optionalStringSchema.optional(),
+  petRent: optionalStringSchema.optional(),
+  proratedRent: optionalStringSchema.optional(),
+  concession: optionalStringSchema.optional(),
   rentersInsurance: optionalStringSchema.optional(),
   adminFee: optionalStringSchema.optional()
 })

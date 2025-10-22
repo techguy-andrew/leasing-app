@@ -66,6 +66,9 @@ interface FormData {
   deposit: string
   rent: string
   petFee: string
+  petRent: string
+  proratedRent: string
+  concession: string
   rentersInsurance: string
   adminFee: string
 }
@@ -93,6 +96,9 @@ const defaultFormData: FormData = {
   deposit: '',
   rent: '',
   petFee: '',
+  petRent: '',
+  proratedRent: '',
+  concession: '',
   rentersInsurance: '',
   adminFee: ''
 }
@@ -393,6 +399,46 @@ export default function ApplicationForm({
               />
             </motion.div>
 
+            {/* Property Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Property
+              </span>
+              <InlineSelectField
+                value={formData.property}
+                onChange={(value) => handleFieldChange('property', value)}
+                options={propertyOptions}
+                isEditMode={isEditMode}
+                placeholder="Property"
+              />
+            </motion.div>
+
+            {/* Unit Number Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Unit Number
+              </span>
+              <InlineTextField
+                value={formData.unitNumber}
+                onChange={(value) => handleFieldChange('unitNumber', value)}
+                isEditMode={isEditMode}
+                placeholder="Unit Number"
+              />
+            </motion.div>
+
+            {/* Move-in Date Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Move-in Date
+              </span>
+              <InlineTextField
+                value={formData.moveInDate}
+                onChange={handleDateChange}
+                isEditMode={isEditMode}
+                placeholder="MM/DD/YYYY"
+              />
+            </motion.div>
+
             {/* Application Date Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
@@ -445,51 +491,17 @@ export default function ApplicationForm({
               />
             </motion.div>
 
-            {/* Property Field */}
+            {/* Rent Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Property
-              </span>
-              <InlineSelectField
-                value={formData.property}
-                onChange={(value) => handleFieldChange('property', value)}
-                options={propertyOptions}
-                isEditMode={isEditMode}
-                placeholder="Property"
-              />
-            </motion.div>
-
-            {/* Unit Number Field */}
-            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
-              <span className="text-xs font-semibold text-gray-500">
-                Unit Number
+                Rent
               </span>
               <InlineTextField
-                value={formData.unitNumber}
-                onChange={(value) => handleFieldChange('unitNumber', value)}
+                value={formData.rent}
+                onChange={(value) => handleCurrencyChange('rent', value)}
                 isEditMode={isEditMode}
-                placeholder="Unit Number"
+                placeholder="0.00"
               />
-            </motion.div>
-
-            {/* Move-in Date Field */}
-            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
-              <span className="text-xs font-semibold text-gray-500">
-                Move-in Date
-              </span>
-              <InlineTextField
-                value={formData.moveInDate}
-                onChange={handleDateChange}
-                isEditMode={isEditMode}
-                placeholder="MM/DD/YYYY"
-              />
-            </motion.div>
-
-            {/* Payment Fields Section */}
-            <motion.div className="flex flex-col gap-1 mt-4" variants={formFieldItem}>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                Payment Information
-              </span>
             </motion.div>
 
             {/* Deposit Field */}
@@ -500,19 +512,6 @@ export default function ApplicationForm({
               <InlineTextField
                 value={formData.deposit}
                 onChange={(value) => handleCurrencyChange('deposit', value)}
-                isEditMode={isEditMode}
-                placeholder="0.00"
-              />
-            </motion.div>
-
-            {/* Rent Field */}
-            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
-              <span className="text-xs font-semibold text-gray-500">
-                Rent
-              </span>
-              <InlineTextField
-                value={formData.rent}
-                onChange={(value) => handleCurrencyChange('rent', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
               />
@@ -531,10 +530,49 @@ export default function ApplicationForm({
               />
             </motion.div>
 
-            {/* Renters Insurance Field */}
+            {/* Pet Rent Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Renters Insurance
+                Pet Rent
+              </span>
+              <InlineTextField
+                value={formData.petRent}
+                onChange={(value) => handleCurrencyChange('petRent', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
+              />
+            </motion.div>
+
+            {/* Prorated Rent Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Prorated Rent
+              </span>
+              <InlineTextField
+                value={formData.proratedRent}
+                onChange={(value) => handleCurrencyChange('proratedRent', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
+              />
+            </motion.div>
+
+            {/* Concession Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Concession
+              </span>
+              <InlineTextField
+                value={formData.concession}
+                onChange={(value) => handleCurrencyChange('concession', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
+              />
+            </motion.div>
+
+            {/* Insurance Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Insurance
               </span>
               <InlineTextField
                 value={formData.rentersInsurance}
