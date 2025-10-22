@@ -8,6 +8,12 @@ import { useRef, useEffect } from 'react'
  * A sophisticated inline editable text field with cursor position preservation
  * and automatic formatting support. Displays as plain text when not in edit mode.
  *
+ * Features:
+ * - Strips all formatting from pasted content (bold, italic, colors, highlights, etc.)
+ * - Ensures pasted text adopts the application's default typography
+ * - Preserves cursor position during editing and formatting
+ * - Supports automatic value formatting (dates, phone numbers, currency)
+ *
  * @example
  * ```tsx
  * <InlineTextField
@@ -24,6 +30,7 @@ import { useRef, useEffect } from 'react'
  * 3. Supports formatted values (e.g., dates, phone numbers) with cursor preservation
  * 4. Customize placeholder and className as needed
  * 5. Works seamlessly with formatDate/formatPhone functions
+ * 6. Automatically strips all formatting from pasted content
  */
 
 interface InlineTextFieldProps {
@@ -143,6 +150,23 @@ export default function InlineTextField({
     onChange(newValue)
   }
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    if (!isEditMode) return
+
+    // Prevent default paste behavior that preserves formatting
+    e.preventDefault()
+
+    // Extract plain text from clipboard
+    const plainText = e.clipboardData.getData('text/plain')
+
+    // If there's no text, do nothing
+    if (!plainText) return
+
+    // Insert plain text at cursor position
+    // Using execCommand for better browser support and cursor handling
+    document.execCommand('insertText', false, plainText)
+  }
+
   return (
     <div className="relative">
       {isEditMode && value === '' && (
@@ -155,6 +179,7 @@ export default function InlineTextField({
         contentEditable={isEditMode}
         suppressContentEditableWarning
         onInput={handleInput}
+        onPaste={handlePaste}
         className={`text-base sm:text-lg text-gray-900 font-sans bg-transparent outline-none ${isEditMode ? 'cursor-text' : 'cursor-text select-text'} ${className}`}
       />
     </div>
