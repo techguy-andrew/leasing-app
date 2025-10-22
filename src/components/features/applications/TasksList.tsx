@@ -14,6 +14,7 @@ interface Task {
   id: string
   description: string
   completed: boolean
+  type: 'AGENT' | 'APPLICANT'
   order: number
   createdAt: string
   updatedAt: string
@@ -24,15 +25,19 @@ interface TasksListProps {
   applicationId: number
   initialTasks?: Task[]
   onTasksChange?: (tasks: Task[]) => void
+  taskType: 'AGENT' | 'APPLICANT'
+  title: string
 }
 
-export default function TasksList({ applicationId, initialTasks = [], onTasksChange }: TasksListProps) {
-  // Add clientId to initial tasks for stable keys
+export default function TasksList({ applicationId, initialTasks = [], onTasksChange, taskType, title }: TasksListProps) {
+  // Filter initial tasks by type and add clientId for stable keys
   const [tasks, setTasks] = useState<Task[]>(() =>
-    initialTasks.map(task => ({
-      ...task,
-      clientId: task.clientId || task.id
-    }))
+    initialTasks
+      .filter(task => task.type === taskType)
+      .map(task => ({
+        ...task,
+        clientId: task.clientId || task.id
+      }))
   )
   const [isLoading] = useState(false)
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
@@ -43,15 +48,17 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [toastType, setToastType] = useState<ToastType>('success')
 
-  // Update tasks when initialTasks changes
+  // Update tasks when initialTasks changes, filtering by type
   useEffect(() => {
     setTasks(
-      initialTasks.map(task => ({
-        ...task,
-        clientId: task.clientId || task.id
-      }))
+      initialTasks
+        .filter(task => task.type === taskType)
+        .map(task => ({
+          ...task,
+          clientId: task.clientId || task.id
+        }))
     )
-  }, [initialTasks])
+  }, [initialTasks, taskType])
 
   // Add new task
   const handleAddTask = () => {
@@ -62,6 +69,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
       clientId: tempId,
       description: '',
       completed: false,
+      type: taskType,
       order: 0, // New tasks get order 0 (will be at the top)
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -110,7 +118,10 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
         const response = await fetch(`/api/applications/${applicationId}/tasks`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ description: editingDescription.trim() })
+          body: JSON.stringify({
+            description: editingDescription.trim(),
+            type: taskType
+          })
         })
 
         const data = await response.json()
@@ -328,7 +339,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
       {/* Header with Add Task Icon - matches other field labels */}
       <div className="flex items-center gap-[2%]">
         <span className="text-sm sm:text-base font-semibold text-gray-500">
-          Tasks
+          {title}
         </span>
         <IconPack.Add
           onClick={handleAddTask}
@@ -383,6 +394,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
                     onChange={setEditingDescription}
                     isEditMode={true}
                     placeholder="Task description"
+                    onEnterPress={handleSaveEdit}
                   />
                 </div>
               ) : (

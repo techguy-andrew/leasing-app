@@ -9,6 +9,7 @@ interface Task {
   id: string
   description: string
   completed: boolean
+  type: 'AGENT' | 'APPLICANT'
 }
 
 interface ApplicationData {
@@ -99,7 +100,7 @@ export default function PopUp1({
 
               {/* Title */}
               <h3 className="text-base font-bold text-gray-900 mb-3">
-                Status Message Template
+                Applicant Status Message
               </h3>
 
               {/* Email Template Display */}

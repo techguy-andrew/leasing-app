@@ -66,7 +66,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { taskIds } = validationResult.data
 
     // Verify all tasks belong to this application
-    const taskIdsSet = new Set(taskIds)
     const applicationTaskIds = new Set(existingApplication.tasks.map(t => t.id))
 
     for (const taskId of taskIds) {

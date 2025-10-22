@@ -39,6 +39,7 @@ interface InlineTextFieldProps {
   isEditMode: boolean
   placeholder?: string
   className?: string
+  onEnterPress?: () => void
 }
 
 export default function InlineTextField({
@@ -46,7 +47,8 @@ export default function InlineTextField({
   onChange,
   isEditMode,
   placeholder = '',
-  className = ''
+  className = '',
+  onEnterPress
 }: InlineTextFieldProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const cursorPositionRef = useRef<number | null>(null)
@@ -167,6 +169,18 @@ export default function InlineTextField({
     document.execCommand('insertText', false, plainText)
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!isEditMode) return
+
+    // Handle Enter key
+    if (e.key === 'Enter') {
+      e.preventDefault() // Prevent line breaks in contentEditable
+      if (onEnterPress) {
+        onEnterPress()
+      }
+    }
+  }
+
   return (
     <div className="relative">
       {isEditMode && value === '' && (
@@ -180,6 +194,7 @@ export default function InlineTextField({
         suppressContentEditableWarning
         onInput={handleInput}
         onPaste={handlePaste}
+        onKeyDown={handleKeyDown}
         className={`text-base sm:text-lg text-gray-900 font-sans bg-transparent outline-none ${isEditMode ? 'cursor-text' : 'cursor-text select-text'} ${className}`}
       />
     </div>

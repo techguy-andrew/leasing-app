@@ -37,10 +37,16 @@ model Application {
   @@index([userId])
 }
 
+enum TaskType {
+  AGENT
+  APPLICANT
+}
+
 model Task {
   id            String      @id @default(cuid())
   description   String
   completed     Boolean     @default(false)
+  type          TaskType    @default(AGENT)
   order         Int         @default(0)
   applicationId Int
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
@@ -49,6 +55,7 @@ model Task {
 
   @@index([applicationId])
   @@index([applicationId, order])
+  @@index([applicationId, type])
 }
 
 model Property {

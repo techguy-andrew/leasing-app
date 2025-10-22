@@ -78,6 +78,7 @@ interface Task {
   id: string
   description: string
   completed: boolean
+  type: 'AGENT' | 'APPLICANT'
   order: number
   createdAt: string
   updatedAt: string
@@ -438,6 +439,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleFieldChange('unitNumber', value)}
                 isEditMode={isEditMode}
                 placeholder="Unit Number"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -451,6 +453,7 @@ export default function ApplicationDetailForm({
                 onChange={handleDateChange}
                 isEditMode={isEditMode}
                 placeholder="MM/DD/YYYY"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -464,6 +467,7 @@ export default function ApplicationDetailForm({
                 onChange={handleCreatedAtChange}
                 isEditMode={isEditMode}
                 placeholder="MM/DD/YYYY"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -477,6 +481,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleFieldChange('applicant', value)}
                 isEditMode={isEditMode}
                 placeholder="Applicant Name"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -490,6 +495,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleFieldChange('email', value)}
                 isEditMode={isEditMode}
                 placeholder="Email"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -503,6 +509,7 @@ export default function ApplicationDetailForm({
                 onChange={handlePhoneChange}
                 isEditMode={isEditMode}
                 placeholder="Phone"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -516,6 +523,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('rent', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -529,6 +537,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('deposit', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -542,6 +551,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('petFee', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -555,6 +565,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('petRent', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -568,6 +579,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('proratedRent', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -581,6 +593,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('concession', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -594,6 +607,7 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('rentersInsurance', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -607,16 +621,32 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleCurrencyChange('adminFee', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
+                onEnterPress={handleSave}
               />
             </motion.div>
 
-            {/* Tasks Section - Integrated as a field */}
+            {/* Leasing Agent Tasks Section */}
             {applicationId && (
               <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
                 <TasksList
                   applicationId={applicationId}
                   initialTasks={initialTasks}
                   onTasksChange={onTasksChange}
+                  taskType="AGENT"
+                  title="Leasing Agent Tasks"
+                />
+              </motion.div>
+            )}
+
+            {/* Applicant Tasks Section */}
+            {applicationId && (
+              <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+                <TasksList
+                  applicationId={applicationId}
+                  initialTasks={initialTasks}
+                  onTasksChange={onTasksChange}
+                  taskType="APPLICANT"
+                  title="Applicant Tasks"
                 />
               </motion.div>
             )}

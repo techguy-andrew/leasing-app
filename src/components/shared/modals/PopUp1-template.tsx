@@ -57,6 +57,7 @@ interface Task {
   id: string
   description: string
   completed: boolean
+  type: 'AGENT' | 'APPLICANT'
 }
 
 interface ApplicationData {
@@ -127,16 +128,18 @@ export function buildPaymentBreakdown(data: ApplicationData): string {
 }
 
 /**
- * Get incomplete tasks as a formatted list
+ * Get incomplete applicant tasks as a formatted list
  */
 export function formatTasksList(tasks: Task[]): string {
-  const incompleteTasks = tasks.filter(task => !task.completed)
+  const incompleteApplicantTasks = tasks.filter(
+    task => !task.completed && task.type === 'APPLICANT'
+  )
 
-  if (incompleteTasks.length === 0) {
+  if (incompleteApplicantTasks.length === 0) {
     return 'No outstanding tasks'
   }
 
-  return incompleteTasks.map(task => `- ${task.description}`).join('\n')
+  return incompleteApplicantTasks.map(task => `- ${task.description}`).join('\n')
 }
 
 // ============================================================================

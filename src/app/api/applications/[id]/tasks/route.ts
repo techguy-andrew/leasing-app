@@ -8,7 +8,8 @@ interface RouteParams {
 }
 
 const taskCreateSchema = z.object({
-  description: z.string().min(1, 'Task description is required')
+  description: z.string().min(1, 'Task description is required'),
+  type: z.enum(['AGENT', 'APPLICANT']).default('AGENT')
 })
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
@@ -62,11 +63,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { description } = validationResult.data
+    const { description, type } = validationResult.data
 
-    // Get the maximum order value for tasks in this application
+    // Get the maximum order value for tasks of this type in this application
     const maxOrderTask = await prisma.task.findFirst({
-      where: { applicationId },
+      where: {
+        applicationId,
+        type
+      },
       orderBy: { order: 'desc' },
       select: { order: true }
     })
@@ -79,6 +83,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       data: {
         description,
         completed: false,
+        type,
         order: newOrder,
         applicationId
       }

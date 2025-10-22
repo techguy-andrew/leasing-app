@@ -13,6 +13,7 @@ interface Task {
   id: string
   description: string
   completed: boolean
+  type: 'AGENT' | 'APPLICANT'
   order: number
   createdAt: string
   updatedAt: string
