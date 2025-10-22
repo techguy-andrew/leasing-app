@@ -58,7 +58,7 @@ export default function InlineTextField({
 
   // Update contentEditable when value changes externally
   useEffect(() => {
-    const displayValue = value || ''
+    const displayValue = value
     if (contentRef.current && contentRef.current.textContent !== displayValue) {
       const selection = window.getSelection()
       const hadFocus = document.activeElement === contentRef.current
@@ -186,7 +186,7 @@ export default function InlineTextField({
   return (
     <div className="relative flex items-baseline">
       {prefix && (
-        <span className="text-base sm:text-lg text-gray-900 font-sans mr-1">
+        <span className={`text-base sm:text-lg font-sans mr-1 ${value === '' ? 'text-gray-400' : 'text-gray-900'}`}>
           {prefix}
         </span>
       )}
@@ -203,7 +203,7 @@ export default function InlineTextField({
           onInput={handleInput}
           onPaste={handlePaste}
           onKeyDown={handleKeyDown}
-          className={`text-base sm:text-lg text-gray-900 font-sans bg-transparent outline-none ${isEditMode ? 'cursor-text' : 'cursor-text select-text'} ${className}`}
+          className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text ${value === '' ? 'text-transparent' : 'text-gray-900'} ${className}`}
         />
       </div>
     </div>
