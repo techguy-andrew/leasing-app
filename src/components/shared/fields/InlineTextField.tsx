@@ -58,8 +58,10 @@ export default function InlineTextField({
 
   // Update contentEditable when value changes externally
   useEffect(() => {
-    const displayValue = value
-    if (contentRef.current && contentRef.current.textContent !== displayValue) {
+    if (!isEditMode || !contentRef.current) return
+
+    const displayValue = value || ''
+    if (contentRef.current.textContent !== displayValue) {
       const selection = window.getSelection()
       const hadFocus = document.activeElement === contentRef.current
 
@@ -115,8 +117,8 @@ export default function InlineTextField({
       contentRef.current.textContent = displayValue
       previousValueRef.current = displayValue
 
-      // Restore cursor position (only in edit mode and if we had focus)
-      if (isEditMode && hadFocus && targetCursorPos !== null && contentRef.current.firstChild) {
+      // Restore cursor position (only if we had focus)
+      if (hadFocus && targetCursorPos !== null && contentRef.current.firstChild) {
         try {
           const newRange = document.createRange()
           const textNode = contentRef.current.firstChild
@@ -140,8 +142,6 @@ export default function InlineTextField({
   }, [value, isEditMode])
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    if (!isEditMode) return
-
     // Get cursor position BEFORE onChange is called
     const selection = window.getSelection()
     if (selection?.rangeCount) {
@@ -193,8 +193,8 @@ export default function InlineTextField({
       <div className="relative flex-1">
         {isEditMode ? (
           <>
-            {value === '' && placeholder && (
-              <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none">
+            {placeholder && (
+              <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none -z-10">
                 {placeholder}
               </div>
             )}
@@ -205,8 +205,10 @@ export default function InlineTextField({
               onInput={handleInput}
               onPaste={handlePaste}
               onKeyDown={handleKeyDown}
-              className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text ${value === '' ? 'text-transparent' : 'text-gray-900'} ${className}`}
-            />
+              className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text relative z-10 ${value === '' ? 'min-h-[1.5rem]' : ''} text-gray-900 ${className}`}
+            >
+              {value}
+            </div>
           </>
         ) : (
           <div className={`text-base sm:text-lg font-sans cursor-text select-text ${value === '' ? 'text-gray-400' : 'text-gray-900'}`}>
