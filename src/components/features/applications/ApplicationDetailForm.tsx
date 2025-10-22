@@ -261,17 +261,6 @@ export default function ApplicationDetailForm({
     setFormData(prev => ({ ...prev, createdAt: formatted }))
   }
 
-  // Phone field change with formatting
-  const handlePhoneChange = (value: string) => {
-    const formatted = formatPhone(value)
-    setFormData(prev => ({ ...prev, phone: formatted }))
-  }
-
-  // Currency field change handlers
-  const handleCurrencyChange = (field: keyof FormData, value: string) => {
-    const formatted = formatCurrency(value)
-    setFormData(prev => ({ ...prev, [field]: formatted }))
-  }
 
   // Status change handler
   const handleStatusChange = async (value: string) => {
@@ -535,10 +524,11 @@ export default function ApplicationDetailForm({
               </span>
               <InlineTextField
                 value={formData.phone}
-                onChange={handlePhoneChange}
+                onChange={(value) => handleFieldChange('phone', value)}
                 isEditMode={isEditMode}
                 placeholder="Phone"
                 type="number"
+                formatType="phone"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -550,11 +540,12 @@ export default function ApplicationDetailForm({
               </span>
               <InlineTextField
                 value={formData.rent}
-                onChange={(value) => handleCurrencyChange('rent', value)}
+                onChange={(value) => handleFieldChange('rent', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
                 type="number"
+                formatType="currency"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -566,11 +557,12 @@ export default function ApplicationDetailForm({
               </span>
               <InlineTextField
                 value={formData.deposit}
-                onChange={(value) => handleCurrencyChange('deposit', value)}
+                onChange={(value) => handleFieldChange('deposit', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
                 type="number"
+                formatType="currency"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -582,11 +574,12 @@ export default function ApplicationDetailForm({
               </span>
               <InlineTextField
                 value={formData.petFee}
-                onChange={(value) => handleCurrencyChange('petFee', value)}
+                onChange={(value) => handleFieldChange('petFee', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
                 type="number"
+                formatType="currency"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -598,11 +591,12 @@ export default function ApplicationDetailForm({
               </span>
               <InlineTextField
                 value={formData.petRent}
-                onChange={(value) => handleCurrencyChange('petRent', value)}
+                onChange={(value) => handleFieldChange('petRent', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
                 type="number"
+                formatType="currency"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -614,11 +608,12 @@ export default function ApplicationDetailForm({
               </span>
               <InlineTextField
                 value={formData.proratedRent}
-                onChange={(value) => handleCurrencyChange('proratedRent', value)}
+                onChange={(value) => handleFieldChange('proratedRent', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
                 type="number"
+                formatType="currency"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -630,11 +625,12 @@ export default function ApplicationDetailForm({
               </span>
               <InlineTextField
                 value={formData.concession}
-                onChange={(value) => handleCurrencyChange('concession', value)}
+                onChange={(value) => handleFieldChange('concession', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
                 type="number"
+                formatType="currency"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -646,11 +642,12 @@ export default function ApplicationDetailForm({
               </span>
               <InlineTextField
                 value={formData.rentersInsurance}
-                onChange={(value) => handleCurrencyChange('rentersInsurance', value)}
+                onChange={(value) => handleFieldChange('rentersInsurance', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
                 type="number"
+                formatType="currency"
                 onEnterPress={handleSave}
               />
             </motion.div>
@@ -662,11 +659,12 @@ export default function ApplicationDetailForm({
               </span>
               <InlineTextField
                 value={formData.adminFee}
-                onChange={(value) => handleCurrencyChange('adminFee', value)}
+                onChange={(value) => handleFieldChange('adminFee', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"
                 type="number"
+                formatType="currency"
                 onEnterPress={handleSave}
               />
             </motion.div>

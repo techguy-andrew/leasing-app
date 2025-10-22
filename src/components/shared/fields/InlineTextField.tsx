@@ -42,6 +42,7 @@ interface InlineTextFieldProps {
   onEnterPress?: () => void
   prefix?: string
   type?: 'text' | 'number'
+  formatType?: 'text' | 'phone' | 'currency'
 }
 
 export default function InlineTextField({
@@ -52,12 +53,38 @@ export default function InlineTextField({
   className = '',
   onEnterPress,
   prefix,
-  type = 'text'
+  type = 'text',
+  formatType = 'text'
 }: InlineTextFieldProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const isTypingRef = useRef(false)
   const lastValueRef = useRef<string>(value)
   const prevEditModeRef = useRef(isEditMode)
+
+  // Format currency with fixed decimal point - inline as user types
+  const formatCurrency = (rawValue: string): string => {
+    const digitsOnly = rawValue.replace(/\D/g, '')
+    if (digitsOnly === '') return ''
+    const paddedCents = digitsOnly.padStart(3, '0')
+    const dollars = paddedCents.slice(0, -2)
+    const cents = paddedCents.slice(-2)
+    return `${dollars}.${cents}`
+  }
+
+  // Format phone with dashes - inline as user types
+  const formatPhone = (rawValue: string): string => {
+    const digitsOnly = rawValue.replace(/\D/g, '')
+    if (digitsOnly.length <= 3) return digitsOnly
+    if (digitsOnly.length <= 6) return `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3)}`
+    return `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6, 10)}`
+  }
+
+  // Apply formatting based on formatType
+  const applyFormatting = (rawValue: string): string => {
+    if (formatType === 'currency') return formatCurrency(rawValue)
+    if (formatType === 'phone') return formatPhone(rawValue)
+    return rawValue
+  }
 
   // Initialize content when entering edit mode
   useEffect(() => {
@@ -119,9 +146,44 @@ export default function InlineTextField({
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     isTypingRef.current = true
 
-    const newValue = e.currentTarget.textContent || ''
-    lastValueRef.current = newValue
-    onChange(newValue)
+    const rawValue = e.currentTarget.textContent || ''
+
+    // Apply formatting IMMEDIATELY before state update
+    const formattedValue = applyFormatting(rawValue)
+
+    // Update DOM with formatted value and restore cursor
+    if (formattedValue !== rawValue && contentRef.current) {
+      const selection = window.getSelection()
+      const cursorOffset = selection?.rangeCount ? selection.getRangeAt(0).startOffset : 0
+
+      // Calculate new cursor position based on formatting changes
+      let newCursorPos = formattedValue.length
+
+      // For currency and phone, keep cursor at end for natural typing
+      if (formatType === 'currency' || formatType === 'phone') {
+        newCursorPos = formattedValue.length
+      }
+
+      contentRef.current.textContent = formattedValue
+
+      // Restore cursor position
+      if (contentRef.current.firstChild) {
+        try {
+          const range = document.createRange()
+          const textNode = contentRef.current.firstChild
+          const safePos = Math.min(newCursorPos, textNode.textContent?.length ?? 0)
+          range.setStart(textNode, safePos)
+          range.collapse(true)
+          selection?.removeAllRanges()
+          selection?.addRange(range)
+        } catch {
+          // Ignore cursor restoration errors
+        }
+      }
+    }
+
+    lastValueRef.current = formattedValue
+    onChange(formattedValue)
 
     // Reset typing flag after formatting has happened
     setTimeout(() => {
@@ -144,9 +206,11 @@ export default function InlineTextField({
     // Mark as typing to prevent DOM updates during paste
     isTypingRef.current = true
 
-    // Insert plain text at cursor position
-    // Using execCommand for better browser support and cursor handling
-    document.execCommand('insertText', false, plainText)
+    // Apply formatting to pasted text immediately
+    const formattedText = applyFormatting(plainText)
+
+    // Insert formatted text at cursor position
+    document.execCommand('insertText', false, formattedText)
 
     // Reset typing flag after paste
     setTimeout(() => {
