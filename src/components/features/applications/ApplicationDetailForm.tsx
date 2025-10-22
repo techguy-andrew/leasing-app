@@ -510,6 +510,7 @@ export default function ApplicationDetailForm({
                 onChange={handlePhoneChange}
                 isEditMode={isEditMode}
                 placeholder="Phone"
+                type="number"
                 onEnterPress={handleSave}
               />
             </motion.div>

@@ -489,6 +489,7 @@ export default function ApplicationForm({
                 onChange={handlePhoneChange}
                 isEditMode={isEditMode}
                 placeholder="Phone"
+                type="number"
               />
             </motion.div>
 

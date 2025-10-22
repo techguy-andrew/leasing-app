@@ -57,6 +57,7 @@ export default function InlineTextField({
   const contentRef = useRef<HTMLDivElement>(null)
   const cursorPositionRef = useRef<number | null>(null)
   const previousValueRef = useRef<string>('')
+  const isTypingRef = useRef(false)
 
   // Initialize content when switching to edit mode
   useEffect(() => {
@@ -83,9 +84,12 @@ export default function InlineTextField({
         targetCursorPos = range.startOffset
       }
 
-      // If we have a saved cursor position and the value changed due to formatting
-      // (e.g., date formatting added slashes), we need to intelligently reposition
-      if (targetCursorPos !== null && contentRef.current.textContent !== displayValue) {
+      // For number fields (currency) during active typing, always place cursor at end
+      // This works better with auto-decimal formatting
+      if (type === 'number' && isTypingRef.current && hadFocus) {
+        targetCursorPos = displayValue.length
+      } else if (targetCursorPos !== null && contentRef.current.textContent !== displayValue) {
+        // For other fields with formatting (like dates), intelligently reposition
         const oldValue = contentRef.current.textContent || ''
         const newValue = displayValue
 
@@ -148,9 +152,11 @@ export default function InlineTextField({
       // Clear saved cursor position after use
       cursorPositionRef.current = null
     }
-  }, [value, isEditMode])
+  }, [value, isEditMode, type])
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    isTypingRef.current = true
+
     // Get cursor position BEFORE onChange is called
     const selection = window.getSelection()
     if (selection?.rangeCount) {
@@ -161,6 +167,11 @@ export default function InlineTextField({
 
     const newValue = e.currentTarget.textContent || ''
     onChange(newValue)
+
+    // Reset typing flag after a short delay
+    setTimeout(() => {
+      isTypingRef.current = false
+    }, 10)
   }
 
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
