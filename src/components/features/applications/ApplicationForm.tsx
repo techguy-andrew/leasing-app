@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import InlineTextField from '@/components/shared/fields/InlineTextField'
 import InlineSelectField from '@/components/shared/fields/InlineSelectField'
@@ -193,7 +193,7 @@ export default function ApplicationForm({
   }
 
   // Format initial data for display
-  const formatInitialData = (data: Partial<FormData>): FormData => {
+  const formatInitialData = useCallback((data: Partial<FormData>): FormData => {
     const formatted = { ...defaultFormData, ...data }
 
     // Format phone if present
@@ -218,7 +218,7 @@ export default function ApplicationForm({
     }
 
     return formatted
-  }
+  }, [formatDate, formatPhone, formatCurrency])
 
   // Update form when initialData changes (edit mode) with formatting
   useEffect(() => {
@@ -227,7 +227,7 @@ export default function ApplicationForm({
       setFormData(newData)
       setOriginalData(newData)
     }
-  }, [initialData, mode])
+  }, [initialData, mode, formatInitialData])
 
   // Generic field change handler
   const handleFieldChange = (field: keyof FormData, value: string) => {

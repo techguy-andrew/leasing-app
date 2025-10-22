@@ -64,13 +64,6 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
   // Expose the contentRef to parent components via ref
   useImperativeHandle(ref, () => contentRef.current as HTMLDivElement, [])
 
-  // Add focus method to the ref
-  useEffect(() => {
-    if (ref && typeof ref !== 'function' && contentRef.current) {
-      (ref.current as any)?.focus?.() // Make focus method available
-    }
-  }, [ref])
-
   // Format currency with fixed decimal point and thousand separators - inline as user types
   const formatCurrency = (rawValue: string): string => {
     const digitsOnly = rawValue.replace(/\D/g, '')
@@ -169,15 +162,9 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
     // Update DOM with formatted value and restore cursor
     if (formattedValue !== rawValue && contentRef.current) {
       const selection = window.getSelection()
-      const cursorOffset = selection?.rangeCount ? selection.getRangeAt(0).startOffset : 0
 
-      // Calculate new cursor position based on formatting changes
-      let newCursorPos = formattedValue.length
-
-      // For currency and phone, keep cursor at end for natural typing
-      if (formatType === 'currency' || formatType === 'phone') {
-        newCursorPos = formattedValue.length
-      }
+      // For currency and phone, always keep cursor at end for natural typing
+      const newCursorPos = formattedValue.length
 
       contentRef.current.textContent = formattedValue
 
