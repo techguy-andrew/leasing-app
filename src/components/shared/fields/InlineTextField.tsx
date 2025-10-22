@@ -55,123 +55,78 @@ export default function InlineTextField({
   type = 'text'
 }: InlineTextFieldProps) {
   const contentRef = useRef<HTMLDivElement>(null)
-  const cursorPositionRef = useRef<number | null>(null)
-  const previousValueRef = useRef<string>('')
   const isTypingRef = useRef(false)
+  const lastValueRef = useRef<string>(value)
+  const prevEditModeRef = useRef(isEditMode)
 
-  // Initialize content when switching to edit mode
+  // Initialize content when entering edit mode
   useEffect(() => {
-    if (isEditMode && contentRef.current && contentRef.current.textContent !== value) {
+    if (isEditMode && !prevEditModeRef.current && contentRef.current) {
       contentRef.current.textContent = value || ''
+      lastValueRef.current = value
     }
+    prevEditModeRef.current = isEditMode
   }, [isEditMode, value])
 
-  // Update contentEditable when value changes externally
+  // Only update DOM when value changes externally (not during user typing)
   useEffect(() => {
+    // Don't interfere while user is actively typing
+    if (isTypingRef.current) return
+
     if (!isEditMode || !contentRef.current) return
 
     const displayValue = value || ''
-    if (contentRef.current.textContent !== displayValue) {
-      const selection = window.getSelection()
+
+    // Only update if value actually changed and different from DOM content
+    if (displayValue !== lastValueRef.current && contentRef.current.textContent !== displayValue) {
       const hadFocus = document.activeElement === contentRef.current
 
-      // Get saved cursor position
-      let targetCursorPos = cursorPositionRef.current
-
-      // If we don't have a saved position, try to get current position
-      if (targetCursorPos === null && hadFocus && selection?.rangeCount) {
-        const range = selection.getRangeAt(0)
-        targetCursorPos = range.startOffset
-      }
-
-      // For number fields (currency) during active typing, always place cursor at end
-      // This works better with auto-decimal formatting
-      if (type === 'number' && isTypingRef.current && hadFocus) {
-        targetCursorPos = displayValue.length
-      } else if (targetCursorPos !== null && contentRef.current.textContent !== displayValue) {
-        // For other fields with formatting (like dates), intelligently reposition
-        const oldValue = contentRef.current.textContent || ''
-        const newValue = displayValue
-
-        // Count non-formatting characters (digits) before cursor in old value
-        let digitsBeforeCursor = 0
-        for (let i = 0; i < Math.min(targetCursorPos, oldValue.length); i++) {
-          if (/\d/.test(oldValue[i])) {
-            digitsBeforeCursor++
-          }
-        }
-
-        // Find position in new value after same number of digits
-        let newCursorPos = 0
-        let digitCount = 0
-        for (let i = 0; i < newValue.length; i++) {
-          if (/\d/.test(newValue[i])) {
-            digitCount++
-            if (digitCount > digitsBeforeCursor) {
-              newCursorPos = i
-              break
-            }
-          }
-          if (digitCount === digitsBeforeCursor) {
-            newCursorPos = i + 1
-          }
-        }
-
-        // If we've counted all digits we need, use that position
-        if (digitCount >= digitsBeforeCursor) {
-          targetCursorPos = newCursorPos
-        } else {
-          // Otherwise, place cursor at end
-          targetCursorPos = newValue.length
+      // Save cursor position
+      let cursorPos = 0
+      if (hadFocus) {
+        const selection = window.getSelection()
+        if (selection?.rangeCount) {
+          cursorPos = selection.getRangeAt(0).startOffset
         }
       }
 
-      // Update the content
+      // Update content
       contentRef.current.textContent = displayValue
-      previousValueRef.current = displayValue
+      lastValueRef.current = displayValue
 
-      // Restore cursor position (only if we had focus)
-      if (hadFocus && targetCursorPos !== null && contentRef.current.firstChild) {
+      // Restore cursor position for formatted fields
+      if (hadFocus && contentRef.current.firstChild) {
         try {
-          const newRange = document.createRange()
+          const selection = window.getSelection()
+          const range = document.createRange()
           const textNode = contentRef.current.firstChild
           const textLength = textNode.textContent?.length ?? 0
 
-          // Ensure cursor position is valid
-          const newOffset = Math.min(Math.max(0, targetCursorPos), textLength)
+          // For number fields, place cursor at end
+          const newPos = type === 'number' ? textLength : Math.min(cursorPos, textLength)
 
-          newRange.setStart(textNode, newOffset)
-          newRange.collapse(true)
+          range.setStart(textNode, newPos)
+          range.collapse(true)
           selection?.removeAllRanges()
-          selection?.addRange(newRange)
+          selection?.addRange(range)
         } catch {
-          // Cursor restoration failed, that's ok
+          // Ignore cursor restoration errors
         }
       }
-
-      // Clear saved cursor position after use
-      cursorPositionRef.current = null
     }
   }, [value, isEditMode, type])
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     isTypingRef.current = true
 
-    // Get cursor position BEFORE onChange is called
-    const selection = window.getSelection()
-    if (selection?.rangeCount) {
-      const range = selection.getRangeAt(0)
-      // Save cursor position for restoration after formatting
-      cursorPositionRef.current = range.startOffset
-    }
-
     const newValue = e.currentTarget.textContent || ''
+    lastValueRef.current = newValue
     onChange(newValue)
 
-    // Reset typing flag after a short delay
+    // Reset typing flag after formatting has happened
     setTimeout(() => {
       isTypingRef.current = false
-    }, 10)
+    }, 50)
   }
 
   const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
@@ -186,9 +141,17 @@ export default function InlineTextField({
     // If there's no text, do nothing
     if (!plainText) return
 
+    // Mark as typing to prevent DOM updates during paste
+    isTypingRef.current = true
+
     // Insert plain text at cursor position
     // Using execCommand for better browser support and cursor handling
     document.execCommand('insertText', false, plainText)
+
+    // Reset typing flag after paste
+    setTimeout(() => {
+      isTypingRef.current = false
+    }, 50)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
