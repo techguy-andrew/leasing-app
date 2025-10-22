@@ -191,20 +191,28 @@ export default function InlineTextField({
         </span>
       )}
       <div className="relative flex-1">
-        {value === '' && placeholder && (
-          <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none">
-            {placeholder}
+        {isEditMode ? (
+          <>
+            {value === '' && placeholder && (
+              <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none">
+                {placeholder}
+              </div>
+            )}
+            <div
+              ref={contentRef}
+              contentEditable={true}
+              suppressContentEditableWarning
+              onInput={handleInput}
+              onPaste={handlePaste}
+              onKeyDown={handleKeyDown}
+              className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text ${value === '' ? 'text-transparent' : 'text-gray-900'} ${className}`}
+            />
+          </>
+        ) : (
+          <div className={`text-base sm:text-lg font-sans cursor-text select-text ${value === '' ? 'text-gray-400' : 'text-gray-900'}`}>
+            {value || placeholder}
           </div>
         )}
-        <div
-          ref={contentRef}
-          contentEditable={isEditMode}
-          suppressContentEditableWarning
-          onInput={handleInput}
-          onPaste={handlePaste}
-          onKeyDown={handleKeyDown}
-          className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text ${value === '' ? 'text-transparent' : 'text-gray-900'} ${className}`}
-        />
       </div>
     </div>
   )
