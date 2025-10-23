@@ -51,6 +51,10 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
   // Ref for auto-focusing new task input
   const inputRef = useRef<HTMLDivElement>(null)
 
+  // Ref for debouncing reorder save operations
+  const reorderTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const lastReorderRef = useRef<Task[] | null>(null)
+
   // Update tasks when initialTasks changes, filtering by type
   useEffect(() => {
     setTasks(
@@ -72,6 +76,15 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
       }, 50)
     }
   }, [editingTaskId])
+
+  // Cleanup reorder timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (reorderTimeoutRef.current) {
+        clearTimeout(reorderTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Add new task
   const handleAddTask = () => {
@@ -282,15 +295,8 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
     }
   }
 
-  // Handle task reordering
-  const handleReorder = async (newOrder: Task[]) => {
-    // Store previous order for rollback
-    const previousTasks = tasks
-
-    // Optimistically update UI
-    setTasks(newOrder)
-    onTasksChange?.(newOrder)
-
+  // Persist task order to database
+  const persistTaskOrder = async (newOrder: Task[], previousTasks: Task[]) => {
     try {
       // Filter out temporary tasks (new tasks being created)
       const taskIds = newOrder
@@ -342,6 +348,30 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
     }
   }
 
+  // Handle task reordering - called during drag with debounced save
+  const handleReorder = (newOrder: Task[]) => {
+    // Store previous order for potential rollback
+    const previousTasks = lastReorderRef.current || tasks
+
+    // Update visual state immediately for smooth animation
+    setTasks(newOrder)
+    onTasksChange?.(newOrder)
+
+    // Store current order for reference
+    lastReorderRef.current = previousTasks
+
+    // Clear any pending save timeout
+    if (reorderTimeoutRef.current) {
+      clearTimeout(reorderTimeoutRef.current)
+    }
+
+    // Set new timeout to save after drag settles (300ms of no movement)
+    reorderTimeoutRef.current = setTimeout(() => {
+      persistTaskOrder(newOrder, previousTasks)
+      lastReorderRef.current = null
+    }, 300)
+  }
+
   if (isLoading) {
     return (
       <>
@@ -381,6 +411,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
           <Reorder.Item
             key={task.clientId || task.id}
             value={task}
+            id={task.clientId || task.id}
             className={`flex items-start gap-3 ${
               isSaving && editingTaskId === (task.clientId || task.id)
                 ? 'cursor-wait'
@@ -396,7 +427,11 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
               zIndex: 10
             }}
             transition={{
-              layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+              layout: {
+                type: 'spring',
+                stiffness: 350,
+                damping: 25
+              },
               default: { duration: 0.2 }
             }}
             layout
