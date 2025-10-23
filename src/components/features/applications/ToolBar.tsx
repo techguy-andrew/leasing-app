@@ -36,7 +36,7 @@ export default function ToolBar({
       initial="initial"
       animate="animate"
       className="fixed left-0 right-0 w-full h-fit flex flex-row items-center justify-start gap-4 px-6 py-4 bg-white border-b border-gray-200 z-30"
-      style={{ top: 'calc(var(--topbar-height, 0px) + var(--navbar-height, 0px))' }}
+      style={{ top: 'var(--topbar-height, 0px)' }}
     >
       {/* Tools Container */}
       <motion.div

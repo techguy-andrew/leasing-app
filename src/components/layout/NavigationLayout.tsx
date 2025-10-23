@@ -6,7 +6,7 @@ import { useUser } from '@clerk/nextjs'
 import { SignIn } from '@clerk/nextjs'
 import TopBar from './TopBar'
 import SideBar from './SideBar'
-import NavBar from '@/components/shared/navigation/NavBar'
+import SearchBox from '@/components/features/applications/SearchBox'
 import FilterBar from '@/components/features/applications/FilterBar'
 import ToolBar from '@/components/features/applications/ToolBar'
 import { FilterProvider, useFilter } from '@/contexts/FilterContext'
@@ -43,21 +43,21 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
   useEffect(() => {
     const updateHeights = () => {
       const topbar = document.querySelector('[data-topbar]') as HTMLElement
-      const navbar = document.querySelector('[data-navbar]') as HTMLElement
+      const searchbox = document.querySelector('[data-searchbox]') as HTMLElement
       const filterbar = document.querySelector('[data-filterbar]') as HTMLElement
       const toolbar = document.querySelector('[data-toolbar]') as HTMLElement
 
       const topbarHeight = topbar?.offsetHeight || 0
-      const navbarHeight = navbar?.offsetHeight || 0
+      const searchboxHeight = searchbox?.offsetHeight || 0
       const filterbarHeight = filterbar?.offsetHeight || 0
       const toolbarHeight = toolbar?.offsetHeight || 0
 
       document.documentElement.style.setProperty('--topbar-height', `${topbarHeight}px`)
-      document.documentElement.style.setProperty('--navbar-height', `${navbarHeight}px`)
+      document.documentElement.style.setProperty('--searchbox-height', `${searchboxHeight}px`)
 
-      let totalHeight = topbarHeight + navbarHeight
+      let totalHeight = topbarHeight
       if (isApplicationsPage) {
-        totalHeight += filterbarHeight
+        totalHeight += searchboxHeight + filterbarHeight
       } else if (isAppDetailPage) {
         totalHeight += toolbarHeight
       }
@@ -72,12 +72,12 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
     const resizeObserver = new ResizeObserver(updateHeights)
 
     const topbar = document.querySelector('[data-topbar]')
-    const navbar = document.querySelector('[data-navbar]')
+    const searchbox = document.querySelector('[data-searchbox]')
     const filterbar = document.querySelector('[data-filterbar]')
     const toolbar = document.querySelector('[data-toolbar]')
 
     if (topbar) resizeObserver.observe(topbar)
-    if (navbar) resizeObserver.observe(navbar)
+    if (searchbox) resizeObserver.observe(searchbox)
     if (filterbar) resizeObserver.observe(filterbar)
     if (toolbar) resizeObserver.observe(toolbar)
 
@@ -95,10 +95,10 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
       {/* Top Bar - Fixed at top */}
       <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
 
-      {/* Navigation Bar - Fixed below TopBar */}
-      <NavBar />
+      {/* Search Box - Fixed below TopBar, only on applications page */}
+      {isApplicationsPage && <SearchBox />}
 
-      {/* Filter Bar - Fixed below NavBar, only on applications page */}
+      {/* Filter Bar - Fixed below SearchBox, only on applications page */}
       {isApplicationsPage && (
         <FilterBar
           statusFilter={statusFilter}
@@ -112,7 +112,7 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
         />
       )}
 
-      {/* Tool Bar - Fixed below NavBar, only on application detail pages */}
+      {/* Tool Bar - Fixed below TopBar, only on application detail pages */}
       {isAppDetailPage && onSendStatusMessage && (
         <ToolBar
           onSendStatusMessage={onSendStatusMessage}

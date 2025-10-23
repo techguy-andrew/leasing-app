@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'motion/react'
+import { useState, useEffect, useMemo } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { STATUS_COLORS } from '@/lib/constants'
 import { fadeIn, listStagger, slideUp } from '@/lib/animations/variants'
 
@@ -54,6 +54,7 @@ export default function FilterBar({
   onPropertyChange
 }: FilterBarProps) {
   const [propertyOptions, setPropertyOptions] = useState<string[]>(['All'])
+  const [isOpen, setIsOpen] = useState(false)
 
   // Fetch properties from database
   useEffect(() => {
@@ -74,117 +75,192 @@ export default function FilterBar({
 
     fetchProperties()
   }, [])
+
+  // Calculate active filter count
+  const activeFilterCount = useMemo(() => {
+    let count = 0
+    if (statusFilter !== 'All') count++
+    if (sortDirection !== 'soonest') count++
+    if (calendarFilter !== 'All Time') count++
+    if (propertyFilter !== 'All') count++
+    return count
+  }, [statusFilter, sortDirection, calendarFilter, propertyFilter])
+
+  // Toggle accordion
+  const toggleAccordion = () => {
+    setIsOpen(!isOpen)
+  }
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    onStatusChange('All')
+    onSortChange('soonest')
+    onCalendarChange('All Time')
+    onPropertyChange('All')
+  }
   return (
     <motion.div
       data-filterbar
       variants={fadeIn}
       initial="initial"
       animate="animate"
-      className="fixed left-0 right-0 w-full h-fit flex flex-col gap-4 px-6 py-4 bg-white border-b border-gray-200 z-30"
-      style={{ top: 'calc(var(--topbar-height, 0px) + var(--navbar-height, 0px))' }}
+      className="fixed left-0 right-0 w-full h-fit flex flex-col px-6 py-3 bg-white border-b border-gray-200 z-30"
+      style={{ top: 'calc(var(--topbar-height, 0px) + var(--searchbox-height, 0px))' }}
     >
-      {/* Filter Sections Container */}
-      <motion.div
-        className="flex flex-row flex-wrap gap-6 w-full"
-        variants={listStagger}
-        initial="hidden"
-        animate="visible"
+      {/* Accordion Header - Always Visible */}
+      <button
+        onClick={toggleAccordion}
+        className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
       >
+        {/* Chevron Icon */}
+        <motion.svg
+          className="w-3 h-3 text-gray-600"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <path
+            fillRule="evenodd"
+            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+            clipRule="evenodd"
+          />
+        </motion.svg>
 
-        {/* Status Filter Section */}
-        <motion.div className="flex flex-col gap-2" variants={slideUp}>
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</span>
-          <div className="flex flex-row flex-wrap gap-2">
-            {statusOptions.map((status) => (
+        {/* "Filters" Text */}
+        <span className="text-[10pt] text-gray-700 font-medium">Filters</span>
+
+        {/* Active Filter Count Badge */}
+        {activeFilterCount > 0 && (
+          <span className="px-2 py-0.5 text-[9pt] font-medium bg-blue-100 text-blue-700 rounded-full">
+            {activeFilterCount} active
+          </span>
+        )}
+      </button>
+
+      {/* Accordion Content - Expandable */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            {/* Clear Button */}
+            <div className="flex justify-end mt-3 mb-2">
               <button
-                key={status}
-                onClick={() => onStatusChange(status)}
-                className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
-                  statusFilter === status
-                    ? STATUS_COLORS[status]
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
+                onClick={handleClearFilters}
+                className="px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
               >
-                {status}
+                Clear All
               </button>
-            ))}
-          </div>
-        </motion.div>
+            </div>
 
-        {/* Move-In Date Sorting Section */}
-        <motion.div className="flex flex-col gap-2" variants={slideUp}>
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Move-In Date</span>
-          <div className="flex flex-row flex-wrap gap-2">
-            <button
-              onClick={() => onSortChange('soonest')}
-              className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
-                sortDirection === 'soonest'
-                  ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-              }`}
+            {/* Filter Sections Container */}
+            <motion.div
+              className="flex flex-row flex-wrap gap-6 w-full pb-2"
+              variants={listStagger}
+              initial="hidden"
+              animate="visible"
             >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-              </svg>
-              Soonest
-            </button>
-            <button
-              onClick={() => onSortChange('furthest')}
-              className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
-                sortDirection === 'furthest'
-                  ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-              Furthest
-            </button>
-          </div>
-        </motion.div>
+              {/* Status Filter Section */}
+              <motion.div className="flex flex-col gap-2" variants={slideUp}>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</span>
+                <div className="flex flex-row flex-wrap gap-2">
+                  {statusOptions.map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => onStatusChange(status)}
+                      className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
+                        statusFilter === status
+                          ? STATUS_COLORS[status]
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
 
-        {/* Calendar Filter Section */}
-        <motion.div className="flex flex-col gap-2" variants={slideUp}>
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Calendar</span>
-          <div className="flex flex-row flex-wrap gap-2">
-            {calendarOptions.map((option) => (
-              <button
-                key={option}
-                onClick={() => onCalendarChange(option)}
-                className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
-                  calendarFilter === option
-                    ? 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </motion.div>
+              {/* Move-In Date Sorting Section */}
+              <motion.div className="flex flex-col gap-2" variants={slideUp}>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Move-In Date</span>
+                <div className="flex flex-row flex-wrap gap-2">
+                  <button
+                    onClick={() => onSortChange('soonest')}
+                    className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
+                      sortDirection === 'soonest'
+                        ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                    Soonest
+                  </button>
+                  <button
+                    onClick={() => onSortChange('furthest')}
+                    className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
+                      sortDirection === 'furthest'
+                        ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                    Furthest
+                  </button>
+                </div>
+              </motion.div>
 
-        {/* Property Filter Section */}
-        <motion.div className="flex flex-col gap-2" variants={slideUp}>
-          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Property</span>
-          <div className="flex flex-row flex-wrap gap-2">
-            {propertyOptions.map((option) => (
-              <button
-                key={option}
-                onClick={() => onPropertyChange(option)}
-                className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
-                  propertyFilter === option
-                    ? 'bg-teal-100 text-teal-800 hover:bg-teal-200'
-                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </motion.div>
+              {/* Calendar Filter Section */}
+              <motion.div className="flex flex-col gap-2" variants={slideUp}>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Calendar</span>
+                <div className="flex flex-row flex-wrap gap-2">
+                  {calendarOptions.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => onCalendarChange(option)}
+                      className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
+                        calendarFilter === option
+                          ? 'bg-indigo-100 text-indigo-800 hover:bg-indigo-200'
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
 
-      </motion.div>
+              {/* Property Filter Section */}
+              <motion.div className="flex flex-col gap-2" variants={slideUp}>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Property</span>
+                <div className="flex flex-row flex-wrap gap-2">
+                  {propertyOptions.map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => onPropertyChange(option)}
+                      className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
+                        propertyFilter === option
+                          ? 'bg-teal-100 text-teal-800 hover:bg-teal-200'
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
