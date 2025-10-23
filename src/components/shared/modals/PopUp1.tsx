@@ -76,7 +76,7 @@ export default function PopUp1({
               stiffness: 300,
               duration: 0.3
             }}
-            className="relative z-10 bg-white rounded-lg shadow-xl max-w-md w-full mx-4 overflow-hidden border border-gray-200"
+            className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-5xl w-full mx-4 overflow-hidden border border-gray-200"
           >
 
             {/* Content */}
@@ -102,8 +102,8 @@ export default function PopUp1({
               </h3>
 
               {/* Email Template Display */}
-              <div className="p-4 rounded-lg mb-6 border border-gray-200 bg-gray-50 max-h-96 overflow-y-auto">
-                <div className="text-sm text-gray-700 leading-relaxed font-mono whitespace-pre-wrap">
+              <div className="p-6 rounded-lg mb-6 border border-gray-200 bg-gray-50 max-h-[600px] overflow-y-auto">
+                <div className="text-base text-gray-700 leading-relaxed font-mono whitespace-pre-wrap">
                   {generateEmailTemplate(applicationData)}
                 </div>
               </div>
