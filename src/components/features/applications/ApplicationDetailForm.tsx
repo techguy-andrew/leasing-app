@@ -198,6 +198,46 @@ export default function ApplicationDetailForm({
     return `${dollars}.${cents}`
   }, [])
 
+  // Calculate prorated rent based on move-in date and monthly rent
+  // Formula: (Monthly Rent ÷ Days in Month) × Days Occupied = Prorated Amount
+  const calculateProratedRent = useCallback((moveInDate: string, rent: string): string => {
+    // Validate inputs - return empty if either is missing
+    if (!moveInDate || !rent) return ''
+
+    // Parse date (MM/DD/YYYY format)
+    const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/
+    const match = moveInDate.match(dateRegex)
+    if (!match) return ''
+
+    const month = parseInt(match[1], 10)
+    const day = parseInt(match[2], 10)
+    const year = parseInt(match[3], 10)
+
+    // Validate date components
+    if (month < 1 || month > 12 || day < 1 || day > 31) return ''
+
+    // Calculate days in the move-in month (month parameter is 0-indexed, so we use month directly to get last day)
+    const daysInMonth = new Date(year, month, 0).getDate()
+
+    // Validate that the day is valid for this month
+    if (day > daysInMonth) return ''
+
+    // Calculate days occupied (from move-in date to end of month, inclusive)
+    const daysOccupied = daysInMonth - day + 1
+
+    // Parse rent amount (remove commas and convert to number)
+    const rentValue = parseFloat(rent.replace(/,/g, ''))
+    if (isNaN(rentValue) || rentValue <= 0) return ''
+
+    // Calculate prorated rent: Daily Rate × Days Occupied
+    const dailyRate = rentValue / daysInMonth
+    const proratedAmount = dailyRate * daysOccupied
+
+    // Round to 2 decimal places and format as currency string
+    const rounded = Math.round(proratedAmount * 100) / 100
+    return rounded.toFixed(2)
+  }, [])
+
   // Format initial data for display
   const formatInitialData = useCallback((data: Partial<FormData>): FormData => {
     const formatted = { ...defaultFormData, ...data }
@@ -228,6 +268,20 @@ export default function ApplicationDetailForm({
       setOriginalData(newData)
     }
   }, [initialData, mode, formatInitialData])
+
+  // Auto-calculate prorated rent when move-in date or rent changes
+  useEffect(() => {
+    // Only calculate if both moveInDate and rent have values
+    if (formData.moveInDate && formData.rent) {
+      const calculated = calculateProratedRent(formData.moveInDate, formData.rent)
+
+      // Only update if calculation was successful (returns non-empty string)
+      if (calculated) {
+        setFormData(prev => ({ ...prev, proratedRent: calculated }))
+      }
+    }
+    // If either field is empty, do nothing (allow manual entry)
+  }, [formData.moveInDate, formData.rent, calculateProratedRent])
 
   // Generic field change handler
   const handleFieldChange = (field: keyof FormData, value: string) => {
