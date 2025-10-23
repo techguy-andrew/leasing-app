@@ -132,6 +132,9 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       deposit: formData.deposit.trim() || null,
       rent: formData.rent.trim() || null,
       petFee: formData.petFee.trim() || null,
+      petRent: formData.petRent.trim() || null,
+      proratedRent: formData.proratedRent.trim() || null,
+      concession: formData.concession.trim() || null,
       rentersInsurance: formData.rentersInsurance.trim() || null,
       adminFee: formData.adminFee.trim() || null
     }
@@ -194,6 +197,9 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       deposit: application.deposit?.trim() || null,
       rent: application.rent?.trim() || null,
       petFee: application.petFee?.trim() || null,
+      petRent: application.petRent?.trim() || null,
+      proratedRent: application.proratedRent?.trim() || null,
+      concession: application.concession?.trim() || null,
       rentersInsurance: application.rentersInsurance?.trim() || null,
       adminFee: application.adminFee?.trim() || null
     }

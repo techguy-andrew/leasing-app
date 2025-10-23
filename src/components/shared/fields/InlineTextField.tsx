@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react'
+import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react'
 
 /**
  * InlineTextField Component
@@ -61,6 +61,9 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
   const lastValueRef = useRef<string>(value)
   const prevEditModeRef = useRef(isEditMode)
 
+  // Track if field has content (for placeholder visibility)
+  const [hasContent, setHasContent] = useState(value.length > 0)
+
   // Expose the contentRef to parent components via ref
   useImperativeHandle(ref, () => contentRef.current as HTMLDivElement, [])
 
@@ -111,6 +114,9 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
     if (!isEditMode || !contentRef.current) return
 
     const displayValue = value || ''
+
+    // Update hasContent state for placeholder visibility
+    setHasContent(displayValue.length > 0)
 
     // Only update if value actually changed and different from DOM content
     if (displayValue !== lastValueRef.current && contentRef.current.textContent !== displayValue) {
@@ -186,6 +192,9 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
 
     lastValueRef.current = formattedValue
     onChange(formattedValue)
+
+    // Update hasContent for immediate placeholder hide
+    setHasContent(formattedValue.length > 0)
 
     // Reset typing flag after formatting has happened
     setTimeout(() => {
@@ -268,7 +277,7 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
       <div className="relative flex-1">
         {isEditMode ? (
           <>
-            {value === '' && placeholder && (
+            {!hasContent && placeholder && (
               <div className="absolute inset-0 text-base sm:text-lg text-gray-400 font-sans pointer-events-none">
                 {placeholder}
               </div>
@@ -280,7 +289,7 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
               onInput={handleInput}
               onPaste={handlePaste}
               onKeyDown={handleKeyDown}
-              className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text text-gray-900 ${value === '' ? 'min-h-[1.5rem]' : ''} ${className}`}
+              className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text text-gray-900 ${!hasContent ? 'min-h-[1.5rem]' : ''} ${className}`}
             />
           </>
         ) : (

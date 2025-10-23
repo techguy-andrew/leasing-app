@@ -121,7 +121,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { applicant, createdAt, moveInDate, property, unitNumber, email, phone, status, tasks, deposit, rent, petFee, rentersInsurance, adminFee } = validationResult.data
+    const { applicant, createdAt, moveInDate, property, unitNumber, email, phone, status, tasks, deposit, rent, petFee, petRent, proratedRent, concession, rentersInsurance, adminFee } = validationResult.data
 
     // Verify the application exists
     const existingApplication = await prisma.application.findUnique({
@@ -151,6 +151,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       deposit: string | null
       rent: string | null
       petFee: string | null
+      petRent: string | null
+      proratedRent: string | null
+      concession: string | null
       rentersInsurance: string | null
       adminFee: string | null
       tasks?: {
@@ -170,6 +173,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       deposit: deposit || null,
       rent: rent || null,
       petFee: petFee || null,
+      petRent: petRent || null,
+      proratedRent: proratedRent || null,
+      concession: concession || null,
       rentersInsurance: rentersInsurance || null,
       adminFee: adminFee || null
     }
