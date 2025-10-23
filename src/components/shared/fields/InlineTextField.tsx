@@ -303,7 +303,7 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
             />
           </>
         ) : (
-          <div className={`text-base sm:text-lg font-sans cursor-text select-text ${value === '' ? 'text-gray-400' : 'text-gray-900'}`}>
+          <div className={`text-base sm:text-lg font-sans select-text ${value === '' ? 'text-gray-400' : 'text-gray-900'} ${className}`}>
             {value || placeholder}
           </div>
         )}
