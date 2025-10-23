@@ -34,6 +34,9 @@ interface Application {
   deposit: string | null
   rent: string | null
   petFee: string | null
+  petRent: string | null
+  proratedRent: string | null
+  concession: string | null
   rentersInsurance: string | null
   adminFee: string | null
   propertyAddress?: string | null
