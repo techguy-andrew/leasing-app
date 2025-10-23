@@ -22,7 +22,7 @@ function ApplicationsContent() {
   const [applications, setApplications] = useState<Application[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const searchParams = useSearchParams()
-  const { statusFilter, setStatusFilter, sortDirection, applicationDateSort, calendarFilter, propertyFilter } = useFilter()
+  const { statusFilter, setStatusFilter, dateType, calendarFilter, propertyFilter } = useFilter()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Set status filter from URL params on mount
@@ -57,7 +57,7 @@ function ApplicationsContent() {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
     }
-  }, [statusFilter, propertyFilter, sortDirection, applicationDateSort, calendarFilter])
+  }, [statusFilter, propertyFilter, dateType, calendarFilter])
 
   const getStartOfWeek = useCallback(() => {
     const now = new Date()
@@ -109,7 +109,7 @@ function ApplicationsContent() {
       filtered = filtered.filter(app => app.property === propertyFilter)
     }
 
-    // Then apply calendar filter
+    // Then apply calendar filter based on selected date type
     const now = new Date()
     now.setHours(0, 0, 0, 0)
 
@@ -120,8 +120,10 @@ function ApplicationsContent() {
       endOfWeek.setHours(23, 59, 59, 999)
 
       filtered = filtered.filter(app => {
-        const moveInDate = parseMoveInDate(app.moveInDate)
-        return moveInDate >= startOfWeek && moveInDate <= endOfWeek
+        const date = dateType === 'moveIn'
+          ? parseMoveInDate(app.moveInDate)
+          : parseMoveInDate(app.createdAt)
+        return date >= startOfWeek && date <= endOfWeek
       })
     } else if (calendarFilter === 'This Month') {
       const startOfMonth = getStartOfMonth()
@@ -130,40 +132,25 @@ function ApplicationsContent() {
       endOfMonth.setHours(23, 59, 59, 999)
 
       filtered = filtered.filter(app => {
-        const moveInDate = parseMoveInDate(app.moveInDate)
-        return moveInDate >= startOfMonth && moveInDate <= endOfMonth
+        const date = dateType === 'moveIn'
+          ? parseMoveInDate(app.moveInDate)
+          : parseMoveInDate(app.createdAt)
+        return date >= startOfMonth && date <= endOfMonth
       })
     }
 
-    // Sort by move-in date based on direction, then by application date
+    // Sort by selected date type (always earliest first - ascending)
     return [...filtered].sort((a, b) => {
-      // Primary sort: Move-in date
-      const moveInDateA = parseMoveInDate(a.moveInDate)
-      const moveInDateB = parseMoveInDate(b.moveInDate)
+      const dateA = dateType === 'moveIn'
+        ? parseMoveInDate(a.moveInDate)
+        : parseMoveInDate(a.createdAt)
+      const dateB = dateType === 'moveIn'
+        ? parseMoveInDate(b.moveInDate)
+        : parseMoveInDate(b.createdAt)
 
-      let moveInComparison = 0
-      if (sortDirection === 'furthest') {
-        moveInComparison = moveInDateB.getTime() - moveInDateA.getTime() // Furthest first (descending)
-      } else {
-        moveInComparison = moveInDateA.getTime() - moveInDateB.getTime() // Closest first (ascending)
-      }
-
-      // If move-in dates are equal, use application date as tiebreaker
-      if (moveInComparison !== 0) {
-        return moveInComparison
-      }
-
-      // Secondary sort: Application date (createdAt)
-      const appDateA = parseMoveInDate(a.createdAt)
-      const appDateB = parseMoveInDate(b.createdAt)
-
-      if (applicationDateSort === 'furthest') {
-        return appDateB.getTime() - appDateA.getTime() // Furthest first (descending)
-      } else {
-        return appDateA.getTime() - appDateB.getTime() // Closest first (ascending)
-      }
+      return dateA.getTime() - dateB.getTime() // Earliest first (ascending)
     })
-  }, [applications, statusFilter, propertyFilter, calendarFilter, sortDirection, applicationDateSort, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
+  }, [applications, statusFilter, propertyFilter, calendarFilter, dateType, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
 
   return (
     <div ref={scrollContainerRef} className="w-full h-full overflow-y-auto">
@@ -172,7 +159,7 @@ function ApplicationsContent() {
         isLoading={isLoading}
         statusFilter={statusFilter}
         calendarFilter={calendarFilter}
-        sortDirection={sortDirection}
+        dateType={dateType}
       />
     </div>
   )

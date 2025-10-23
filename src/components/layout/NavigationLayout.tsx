@@ -26,10 +26,8 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
   const {
     statusFilter,
     setStatusFilter,
-    sortDirection,
-    setSortDirection,
-    applicationDateSort,
-    setApplicationDateSort,
+    dateType,
+    setDateType,
     calendarFilter,
     setCalendarFilter,
     propertyFilter,
@@ -105,10 +103,8 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
         <FilterBar
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
-          sortDirection={sortDirection}
-          onSortChange={setSortDirection}
-          applicationDateSort={applicationDateSort}
-          onApplicationDateSortChange={setApplicationDateSort}
+          dateType={dateType}
+          onDateTypeChange={setDateType}
           calendarFilter={calendarFilter}
           onCalendarChange={setCalendarFilter}
           propertyFilter={propertyFilter}

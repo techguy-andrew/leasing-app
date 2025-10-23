@@ -32,10 +32,8 @@ import { fadeIn, listStagger, slideUp } from '@/lib/animations/variants'
 interface FilterBarProps {
   statusFilter: string
   onStatusChange: (status: string) => void
-  sortDirection: 'soonest' | 'furthest'
-  onSortChange: (direction: 'soonest' | 'furthest') => void
-  applicationDateSort: 'soonest' | 'furthest'
-  onApplicationDateSortChange: (direction: 'soonest' | 'furthest') => void
+  dateType: 'moveIn' | 'application'
+  onDateTypeChange: (type: 'moveIn' | 'application') => void
   calendarFilter: string
   onCalendarChange: (filter: string) => void
   propertyFilter: string
@@ -48,10 +46,8 @@ const calendarOptions = ['All Time', 'This Week', 'This Month']
 export default function FilterBar({
   statusFilter,
   onStatusChange,
-  sortDirection,
-  onSortChange,
-  applicationDateSort,
-  onApplicationDateSortChange,
+  dateType,
+  onDateTypeChange,
   calendarFilter,
   onCalendarChange,
   propertyFilter,
@@ -84,12 +80,11 @@ export default function FilterBar({
   const activeFilterCount = useMemo(() => {
     let count = 0
     if (statusFilter !== 'All') count++
-    if (sortDirection !== 'soonest') count++
-    if (applicationDateSort !== 'soonest') count++
+    if (dateType !== 'moveIn') count++
     if (calendarFilter !== 'All Time') count++
     if (propertyFilter !== 'All') count++
     return count
-  }, [statusFilter, sortDirection, applicationDateSort, calendarFilter, propertyFilter])
+  }, [statusFilter, dateType, calendarFilter, propertyFilter])
 
   // Toggle accordion
   const toggleAccordion = () => {
@@ -99,8 +94,7 @@ export default function FilterBar({
   // Clear all filters
   const handleClearFilters = () => {
     onStatusChange('All')
-    onSortChange('soonest')
-    onApplicationDateSortChange('soonest')
+    onDateTypeChange('moveIn')
     onCalendarChange('All Time')
     onPropertyChange('All')
   }
@@ -191,68 +185,29 @@ export default function FilterBar({
                 </div>
               </motion.div>
 
-              {/* Move-In Date Sorting Section */}
+              {/* Date Type Selection Section */}
               <motion.div className="flex flex-col gap-2" variants={slideUp}>
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Move-In Date</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</span>
                 <div className="flex flex-row flex-wrap gap-2">
                   <button
-                    onClick={() => onSortChange('soonest')}
-                    className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
-                      sortDirection === 'soonest'
+                    onClick={() => onDateTypeChange('moveIn')}
+                    className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
+                      dateType === 'moveIn'
                         ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
                         : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                     }`}
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                    Soonest
+                    Move-In Date
                   </button>
                   <button
-                    onClick={() => onSortChange('furthest')}
-                    className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
-                      sortDirection === 'furthest'
+                    onClick={() => onDateTypeChange('application')}
+                    className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
+                      dateType === 'application'
                         ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
                         : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                     }`}
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                    Furthest
-                  </button>
-                </div>
-              </motion.div>
-
-              {/* Application Date Sorting Section */}
-              <motion.div className="flex flex-col gap-2" variants={slideUp}>
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Application Date</span>
-                <div className="flex flex-row flex-wrap gap-2">
-                  <button
-                    onClick={() => onApplicationDateSortChange('soonest')}
-                    className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
-                      applicationDateSort === 'soonest'
-                        ? 'bg-orange-100 text-orange-800 hover:bg-orange-200'
-                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                    Soonest
-                  </button>
-                  <button
-                    onClick={() => onApplicationDateSortChange('furthest')}
-                    className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
-                      applicationDateSort === 'furthest'
-                        ? 'bg-orange-100 text-orange-800 hover:bg-orange-200'
-                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                    Furthest
+                    Application Date
                   </button>
                 </div>
               </motion.div>

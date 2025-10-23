@@ -47,7 +47,7 @@ interface ApplicationsListProps {
   isLoading: boolean
   statusFilter: string
   calendarFilter: string
-  sortDirection: 'soonest' | 'furthest'
+  dateType: 'moveIn' | 'application'
 }
 
 export default function ApplicationsList({
@@ -55,7 +55,7 @@ export default function ApplicationsList({
   isLoading,
   statusFilter,
   calendarFilter,
-  sortDirection
+  dateType
 }: ApplicationsListProps) {
   return (
     <div className="flex flex-col w-full bg-white">
@@ -77,7 +77,7 @@ export default function ApplicationsList({
           </motion.div>
         ) : (
           <motion.div
-            key={`filtered-${statusFilter}-${sortDirection}-${calendarFilter}`}
+            key={`filtered-${statusFilter}-${dateType}-${calendarFilter}`}
             variants={listStagger}
             initial="hidden"
             animate="visible"
