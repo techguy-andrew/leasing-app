@@ -99,15 +99,26 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       }
     }
 
-    // Update task order in a transaction
-    await prisma.$transaction(
-      taskIds.map((taskId, index) =>
-        prisma.task.update({
-          where: { id: taskId },
-          data: { order: index }
+    // Update task order in a transaction with two-phase approach to avoid unique constraint conflicts
+    // Phase 1: Set all tasks to temporary high order values (offset by 10000)
+    // Phase 2: Update to final order values
+    await prisma.$transaction(async (tx) => {
+      // Phase 1: Move to temporary positions to avoid conflicts
+      for (let i = 0; i < taskIds.length; i++) {
+        await tx.task.update({
+          where: { id: taskIds[i] },
+          data: { order: 10000 + i }
         })
-      )
-    )
+      }
+
+      // Phase 2: Update to final order values
+      for (let i = 0; i < taskIds.length; i++) {
+        await tx.task.update({
+          where: { id: taskIds[i] },
+          data: { order: i }
+        })
+      }
+    })
 
     // Fetch updated tasks - ONLY return tasks of the type being reordered
     const updatedTasks = await prisma.task.findMany({

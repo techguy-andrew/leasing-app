@@ -329,6 +329,10 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
         onTasksChange?.(updatedTasks)
         return updatedTasks
       })
+
+      // Show subtle success feedback
+      setToastType('success')
+      setToastMessage('Tasks reordered successfully!')
     } catch (error) {
       // Revert on error
       setTasks(previousTasks)
@@ -388,9 +392,14 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
             whileDrag={{
               scale: 1.02,
               opacity: 0.8,
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+              zIndex: 10
             }}
-            transition={{ duration: 0.2 }}
+            transition={{
+              layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+              default: { duration: 0.2 }
+            }}
+            layout
           >
             {/* Checkbox */}
             {task.completed ? (
