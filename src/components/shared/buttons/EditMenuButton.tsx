@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { useState, useRef } from 'react'
 import IconPack from '@/components/shared/icons/IconPack'
+import OptionsModal, { ModalAction } from '@/components/shared/modals/OptionsModal'
 
 /**
  * EditMenuButton Component
  *
- * A dropdown menu button with Edit and Delete options. Auto-closes on outside click.
- * Features flat design with minimal hover effects - only background color changes.
+ * A dropdown menu button with Edit and Delete options using the modern OptionsModal.
+ * Features dynamic positioning, portal rendering, and accessibility support.
  *
  * @example
  * ```tsx
@@ -16,10 +16,9 @@ import IconPack from '@/components/shared/icons/IconPack'
  * ```
  *
  * To adapt for new projects:
- * 1. Modify menu items (currently Edit/Delete) in the dropdown
- * 2. Adjust animation timing (duration: 0.12) as needed
- * 3. Customize menu item colors and styles
- * 4. Add more menu options by copying the button pattern
+ * 1. Modify actions array to add/remove menu items
+ * 2. Customize labels and icons as needed
+ * 3. Add more menu options by extending the actions array
  */
 
 interface EditMenuProps {
@@ -29,71 +28,48 @@ interface EditMenuProps {
 
 export default function EditMenuButton({ onEdit, onDelete }: EditMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
+  const actions: ModalAction[] = [
+    {
+      label: 'Edit Application',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      ),
+      onClick: onEdit
+    },
+    {
+      label: 'Delete Application',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      ),
+      onClick: onDelete,
+      destructive: true
     }
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isOpen])
-
-  const handleEdit = () => {
-    setIsOpen(false)
-    onEdit()
-  }
-
-  const handleDelete = () => {
-    setIsOpen(false)
-    onDelete()
-  }
+  ]
 
   return (
-    <div className="relative inline-block ml-auto" ref={menuRef}>
-      <IconPack.Menu
+    <div className="ml-auto">
+      <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        size="large"
-      />
+        className="inline-flex items-center justify-center"
+        aria-label="Application options"
+        type="button"
+      >
+        <IconPack.Menu size="large" />
+      </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -4 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -4 }}
-            transition={{ duration: 0.12, ease: 'easeOut' }}
-            className="absolute right-0 mt-[3%] min-w-[13rem] w-max max-w-[90vw] bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden"
-          >
-            <div className="py-[3%]">
-              <button
-                onClick={handleEdit}
-                className="flex items-center gap-[5%] w-full px-[5%] py-[4%] text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer text-left whitespace-nowrap"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-                Edit Application
-              </button>
-              <div className="border-t border-gray-200" />
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-[5%] w-full px-[5%] py-[4%] text-sm font-medium text-red-600 hover:bg-red-50 transition-colors cursor-pointer text-left whitespace-nowrap"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Delete Application
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <OptionsModal
+        isOpen={isOpen}
+        triggerRef={buttonRef}
+        actions={actions}
+        onClose={() => setIsOpen(false)}
+      />
     </div>
   )
 }
