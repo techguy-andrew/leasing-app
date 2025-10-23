@@ -41,7 +41,6 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
   )
   const [isLoading] = useState(false)
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
-  const [editingDescription, setEditingDescription] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -54,6 +53,9 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
   // Ref for debouncing reorder save operations
   const reorderTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastReorderRef = useRef<Task[] | null>(null)
+
+  // Ref for storing original task data when entering edit mode
+  const originalTaskRef = useRef<Task | null>(null)
 
   // Update tasks when initialTasks changes, filtering by type
   useEffect(() => {
@@ -104,29 +106,57 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
     // Add to beginning of list and set it to edit mode
     setTasks(prev => [newTask, ...prev])
     setEditingTaskId(tempId)
-    setEditingDescription('')
   }
 
   // Edit existing task
   const handleEditTask = (task: Task) => {
+    // Store original task data for potential cancellation
+    originalTaskRef.current = { ...task }
     setEditingTaskId(task.clientId || task.id)
-    setEditingDescription(task.description)
+  }
+
+  // Handle task description change
+  const handleTaskDescriptionChange = (taskId: string, description: string) => {
+    setTasks(prev => {
+      const updatedTasks = prev.map(task =>
+        (task.clientId || task.id) === taskId
+          ? { ...task, description }
+          : task
+      )
+      onTasksChange?.(updatedTasks)
+      return updatedTasks
+    })
   }
 
   const handleCancelEdit = () => {
     // If canceling a temporary task (new task), remove it from the list
     if (editingTaskId?.startsWith('temp-')) {
       setTasks(prev => prev.filter(task => task.id !== editingTaskId))
+    } else if (originalTaskRef.current) {
+      // Restore original task data
+      setTasks(prev => {
+        const restoredTasks = prev.map(task =>
+          (task.clientId || task.id) === editingTaskId
+            ? originalTaskRef.current!
+            : task
+        )
+        onTasksChange?.(restoredTasks)
+        return restoredTasks
+      })
     }
 
     setEditingTaskId(null)
-    setEditingDescription('')
+    originalTaskRef.current = null
   }
 
   const handleSaveEdit = async () => {
     if (!editingTaskId) return
 
-    if (!editingDescription.trim()) {
+    // Get the task being edited
+    const taskToSave = tasks.find(t => (t.clientId || t.id) === editingTaskId)
+    if (!taskToSave) return
+
+    if (!taskToSave.description.trim()) {
       setToastType('error')
       setToastMessage('Task description is required')
       return
@@ -145,7 +175,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            description: editingDescription.trim(),
+            description: taskToSave.description.trim(),
             type: taskType
           })
         })
@@ -175,7 +205,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
           {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ description: editingDescription.trim() })
+            body: JSON.stringify({ description: taskToSave.description.trim() })
           }
         )
 
@@ -195,7 +225,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
       }
 
       setEditingTaskId(null)
-      setEditingDescription('')
+      originalTaskRef.current = null
     } catch (error) {
       setToastType('error')
       setToastMessage(
@@ -455,25 +485,17 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
 
             {/* Task Description */}
             <div className={`flex-1 flex flex-col gap-[2%] ${isSaving && editingTaskId === (task.clientId || task.id) ? 'cursor-wait' : ''}`}>
-              {editingTaskId === (task.clientId || task.id) ? (
-                <div className={isSaving ? 'cursor-wait' : ''}>
-                  <InlineTextField
-                    ref={inputRef}
-                    value={editingDescription}
-                    onChange={setEditingDescription}
-                    isEditMode={true}
-                    placeholder="Task description"
-                    onEnterPress={handleSaveEdit}
-                    className={isSaving ? 'cursor-wait pointer-events-none' : ''}
-                  />
-                </div>
-              ) : (
-                <span
-                  className={`text-base sm:text-lg ${task.completed ? 'line-through text-gray-400' : 'text-gray-900'}`}
-                >
-                  {task.description}
-                </span>
-              )}
+              <div className={`${task.completed ? 'line-through text-gray-400' : 'text-gray-900'} ${isSaving && editingTaskId === (task.clientId || task.id) ? 'cursor-wait' : ''}`}>
+                <InlineTextField
+                  ref={editingTaskId === (task.clientId || task.id) ? inputRef : null}
+                  value={task.description}
+                  onChange={(value) => handleTaskDescriptionChange(task.clientId || task.id, value)}
+                  isEditMode={editingTaskId === (task.clientId || task.id)}
+                  placeholder="Task description"
+                  onEnterPress={handleSaveEdit}
+                  className={isSaving && editingTaskId === (task.clientId || task.id) ? 'cursor-wait pointer-events-none' : ''}
+                />
+              </div>
             </div>
 
             {/* Action Buttons */}
