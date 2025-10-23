@@ -484,8 +484,27 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
             )}
 
             {/* Task Description */}
-            <div className={`flex-1 flex flex-col gap-[2%] ${isSaving && editingTaskId === (task.clientId || task.id) ? 'cursor-wait' : ''}`}>
-              <div className={`${task.completed ? 'line-through text-gray-400' : 'text-gray-900'} ${isSaving && editingTaskId === (task.clientId || task.id) ? 'cursor-wait' : ''}`}>
+            <div
+              className={`flex-1 flex flex-col gap-[2%] ${
+                isSaving && editingTaskId === (task.clientId || task.id)
+                  ? 'cursor-wait'
+                  : editingTaskId !== (task.clientId || task.id)
+                  ? 'cursor-pointer'
+                  : ''
+              }`}
+              onClick={() => {
+                if (editingTaskId !== (task.clientId || task.id) && !isSaving) {
+                  handleEditTask(task)
+                }
+              }}
+            >
+              <div className={`${task.completed ? 'line-through text-gray-400' : 'text-gray-900'} ${
+                isSaving && editingTaskId === (task.clientId || task.id)
+                  ? 'cursor-wait'
+                  : editingTaskId !== (task.clientId || task.id)
+                  ? 'cursor-pointer'
+                  : ''
+              }`}>
                 <InlineTextField
                   ref={editingTaskId === (task.clientId || task.id) ? inputRef : null}
                   value={task.description}
