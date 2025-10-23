@@ -24,6 +24,29 @@ const nextConfig: NextConfig = {
 
   // Headers for security and caching
   async headers() {
+    const isDev = process.env.NODE_ENV === 'development';
+
+    // CSP directives - conditionally include upgrade-insecure-requests
+    const cspDirectives = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com https://*.clerk.accounts.dev https://*.clerk.com https://vercel.live blob:",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: https: blob:",
+      "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://*.neon.tech wss://*.clerk.com https://clerk-telemetry.com",
+      "frame-src 'self' https://challenges.cloudflare.com https://*.clerk.accounts.dev https://*.clerk.com",
+      "worker-src 'self' blob:",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+    ];
+
+    // Only enforce HTTPS upgrade in production
+    if (!isDev) {
+      cspDirectives.push("upgrade-insecure-requests");
+    }
+
     return [
       // Security headers for all routes
       {
@@ -51,21 +74,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com https://*.clerk.accounts.dev https://*.clerk.com https://vercel.live blob:",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://*.neon.tech wss://*.clerk.com https://clerk-telemetry.com",
-              "frame-src 'self' https://challenges.cloudflare.com https://*.clerk.accounts.dev https://*.clerk.com",
-              "worker-src 'self' blob:",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'none'",
-              "upgrade-insecure-requests"
-            ].join('; '),
+            value: cspDirectives.join('; '),
           },
         ],
       },

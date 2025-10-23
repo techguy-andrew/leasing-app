@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { useUser } from '@clerk/nextjs'
+import { SignIn } from '@clerk/nextjs'
 import TopBar from './TopBar'
 import SideBar from './SideBar'
 import NavBar from '@/components/shared/navigation/NavBar'
@@ -14,7 +16,8 @@ interface NavigationLayoutProps {
   children: React.ReactNode
 }
 
-function LayoutContent({ children }: NavigationLayoutProps) {
+// Authenticated layout with all the navigation components
+function AuthenticatedLayout({ children }: NavigationLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const pathname = usePathname()
   const isApplicationsPage = pathname === '/applications'
@@ -130,12 +133,34 @@ function LayoutContent({ children }: NavigationLayoutProps) {
   )
 }
 
-export default function NavigationLayout({ children }: NavigationLayoutProps) {
+// Layout content that checks authentication state
+function LayoutContent({ children }: NavigationLayoutProps) {
+  const { isSignedIn, isLoaded } = useUser()
+
+  // If Clerk hasn't loaded yet, show nothing (or a loading state)
+  if (!isLoaded) {
+    return null
+  }
+
+  // If user is not signed in, show only the minimal sign-in page
+  if (!isSignedIn) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" />
+      </div>
+    )
+  }
+
+  // User is authenticated, render the full layout with context providers
   return (
     <FilterProvider>
       <ToolBarProvider>
-        <LayoutContent>{children}</LayoutContent>
+        <AuthenticatedLayout>{children}</AuthenticatedLayout>
       </ToolBarProvider>
     </FilterProvider>
   )
+}
+
+export default function NavigationLayout({ children }: NavigationLayoutProps) {
+  return <LayoutContent>{children}</LayoutContent>
 }
