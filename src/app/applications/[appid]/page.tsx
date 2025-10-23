@@ -52,6 +52,9 @@ interface FormData {
   deposit: string
   rent: string
   petFee: string
+  petRent: string
+  proratedRent: string
+  concession: string
   rentersInsurance: string
   adminFee: string
 }
@@ -277,6 +280,9 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           deposit: application.deposit || '',
           rent: application.rent || '',
           petFee: application.petFee || '',
+          petRent: application.petRent || '',
+          proratedRent: application.proratedRent || '',
+          concession: application.concession || '',
           rentersInsurance: application.rentersInsurance || '',
           adminFee: application.adminFee || ''
         }}

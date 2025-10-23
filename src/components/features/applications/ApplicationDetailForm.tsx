@@ -171,25 +171,25 @@ export default function ApplicationDetailForm({
   }, [])
 
   // Format date as MM/DD/YYYY
-  const formatDate = (value: string): string => {
+  const formatDate = useCallback((value: string): string => {
     const digits = value.replace(/\D/g, '')
     if (digits.length === 0) return ''
     if (digits.length <= 2) return digits
     if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`
     return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`
-  }
+  }, [])
 
   // Format phone as XXX-XXX-XXXX
-  const formatPhone = (value: string): string => {
+  const formatPhone = useCallback((value: string): string => {
     const digits = value.replace(/\D/g, '')
     if (digits.length <= 3) return digits
     if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`
     return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6, 10)}`
-  }
+  }, [])
 
   // Format currency with fixed decimal point
   // Decimal is always in place, user types digits and they fill in naturally
-  const formatCurrency = (value: string): string => {
+  const formatCurrency = useCallback((value: string): string => {
     // Remove all non-digit characters
     const digitsOnly = value.replace(/\D/g, '')
 
@@ -205,7 +205,7 @@ export default function ApplicationDetailForm({
     const cents = paddedCents.slice(-2)
 
     return `${dollars}.${cents}`
-  }
+  }, [])
 
   // Format initial data for display
   const formatInitialData = useCallback((data: Partial<FormData>): FormData => {
