@@ -155,15 +155,6 @@ export default function ApplicationForm({
     fetchProperties()
   }, [])
 
-  // Format date as MM/DD/YYYY
-  const formatDate = useCallback((value: string): string => {
-    const digits = value.replace(/\D/g, '')
-    if (digits.length === 0) return ''
-    if (digits.length <= 2) return digits
-    if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`
-    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`
-  }, [])
-
   // Format phone as XXX-XXX-XXXX
   const formatPhone = useCallback((value: string): string => {
     const digits = value.replace(/\D/g, '')
@@ -209,16 +200,10 @@ export default function ApplicationForm({
       }
     })
 
-    // Format dates if present
-    if (formatted.moveInDate) {
-      formatted.moveInDate = formatDate(formatted.moveInDate)
-    }
-    if (formatted.createdAt) {
-      formatted.createdAt = formatDate(formatted.createdAt)
-    }
+    // Dates are formatted inline by InlineTextField with formatType="date"
 
     return formatted
-  }, [formatDate, formatPhone, formatCurrency])
+  }, [formatPhone, formatCurrency])
 
   // Update form when initialData changes (edit mode) with formatting
   useEffect(() => {
@@ -233,19 +218,6 @@ export default function ApplicationForm({
   const handleFieldChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
-
-  // Date field change with formatting
-  const handleDateChange = (value: string) => {
-    const formatted = formatDate(value)
-    setFormData(prev => ({ ...prev, moveInDate: formatted }))
-  }
-
-  // Created at date change with formatting
-  const handleCreatedAtChange = (value: string) => {
-    const formatted = formatDate(value)
-    setFormData(prev => ({ ...prev, createdAt: formatted }))
-  }
-
 
   // Status change handler
   const handleStatusChange = async (value: string) => {
@@ -451,9 +423,10 @@ export default function ApplicationForm({
               </span>
               <InlineTextField
                 value={formData.moveInDate}
-                onChange={handleDateChange}
+                onChange={(value) => handleFieldChange('moveInDate', value)}
                 isEditMode={isEditMode}
                 placeholder="MM/DD/YYYY"
+                formatType="date"
               />
             </motion.div>
 
@@ -464,9 +437,10 @@ export default function ApplicationForm({
               </span>
               <InlineTextField
                 value={formData.createdAt}
-                onChange={handleCreatedAtChange}
+                onChange={(value) => handleFieldChange('createdAt', value)}
                 isEditMode={isEditMode}
                 placeholder="MM/DD/YYYY"
+                formatType="date"
               />
             </motion.div>
 

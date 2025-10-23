@@ -42,7 +42,7 @@ interface InlineTextFieldProps {
   onEnterPress?: () => void
   prefix?: string
   type?: 'text' | 'number'
-  formatType?: 'text' | 'phone' | 'currency'
+  formatType?: 'text' | 'phone' | 'currency' | 'date'
 }
 
 const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(function InlineTextField({
@@ -90,10 +90,20 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
     return `${digitsOnly.slice(0, 3)}-${digitsOnly.slice(3, 6)}-${digitsOnly.slice(6, 10)}`
   }
 
+  // Format date with slashes - inline as user types (MM/DD/YYYY)
+  const formatDate = (rawValue: string): string => {
+    const digitsOnly = rawValue.replace(/\D/g, '')
+    if (digitsOnly.length === 0) return ''
+    if (digitsOnly.length <= 2) return digitsOnly
+    if (digitsOnly.length <= 4) return `${digitsOnly.slice(0, 2)}/${digitsOnly.slice(2)}`
+    return `${digitsOnly.slice(0, 2)}/${digitsOnly.slice(2, 4)}/${digitsOnly.slice(4, 8)}`
+  }
+
   // Apply formatting based on formatType
   const applyFormatting = (rawValue: string): string => {
     if (formatType === 'currency') return formatCurrency(rawValue)
     if (formatType === 'phone') return formatPhone(rawValue)
+    if (formatType === 'date') return formatDate(rawValue)
     return rawValue
   }
 
