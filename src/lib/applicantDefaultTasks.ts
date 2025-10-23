@@ -42,9 +42,12 @@
  * - AGENT: Tasks for the leasing agent to complete
  * - APPLICANT: Tasks for the applicant to complete
  *
- * Currently, tasks created through this system default to AGENT type.
- * To create APPLICANT tasks, they need to be added through the UI
- * on the application detail page.
+ * Default tasks created through this system are APPLICANT type,
+ * meaning they appear in the "Applicant Tasks" section and are
+ * intended for the applicant to complete.
+ *
+ * AGENT tasks can be added through the UI on the application
+ * detail page.
  *
  * ============================================================
  */
@@ -82,7 +85,8 @@ export function getDefaultTasks() {
   return DEFAULT_TASKS.map((task) => ({
     id: generateTaskId(),
     description: task.description,
-    completed: task.completed
+    completed: task.completed,
+    type: 'APPLICANT' as const
   }))
 }
 

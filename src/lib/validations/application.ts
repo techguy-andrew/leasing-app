@@ -69,7 +69,8 @@ const phoneSchema = z.preprocess(
 export const taskSchema = z.object({
   id: z.string(),
   description: z.string(),
-  completed: z.boolean()
+  completed: z.boolean(),
+  type: z.enum(['AGENT', 'APPLICANT']).optional()
 })
 
 // Tasks array schema

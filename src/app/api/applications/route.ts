@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
             id: task.id,
             description: task.description,
             completed: task.completed,
+            type: task.type || 'APPLICANT', // Use task type if provided, default to APPLICANT
             order: index // Set order based on array position
           }))
         }
