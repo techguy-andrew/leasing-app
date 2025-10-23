@@ -7,7 +7,7 @@ import ApplicationsList from '@/components/features/applications/ApplicationsLis
 
 interface Application {
   id: number
-  status: string
+  status: string[]
   moveInDate: string
   property: string
   unitNumber: string
@@ -29,7 +29,7 @@ function ApplicationsContent() {
   useEffect(() => {
     const statusParam = searchParams.get('status')
     if (statusParam) {
-      setStatusFilter(statusParam)
+      setStatusFilter([statusParam])
     }
   }, [searchParams, setStatusFilter])
 
@@ -99,10 +99,18 @@ function ApplicationsContent() {
   }, [])
 
   const filteredApplications = useMemo(() => {
-    // First filter by status
-    let filtered = statusFilter === 'All'
-      ? applications.filter(app => app.status !== 'Archived') // Exclude archived from "All"
-      : applications.filter(app => app.status === statusFilter)
+    // First filter by status using AND logic
+    let filtered = applications
+
+    if (statusFilter.includes('All')) {
+      // "All" means exclude archived applications
+      filtered = applications.filter(app => !app.status.includes('Archived'))
+    } else if (statusFilter.length > 0) {
+      // AND logic: application must have ALL selected statuses
+      filtered = applications.filter(app =>
+        statusFilter.every(status => app.status.includes(status))
+      )
+    }
 
     // Then filter by property
     if (propertyFilter !== 'All') {

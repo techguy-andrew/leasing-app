@@ -10,7 +10,7 @@ datasource db {
 model Application {
   id               Int      @id @default(autoincrement())
   userId           String?  // Clerk user ID (optional for backward compatibility)
-  status           String   @default("New")
+  status           String[] @default(["New"])
   moveInDate       String
   property         String
   unitNumber       String

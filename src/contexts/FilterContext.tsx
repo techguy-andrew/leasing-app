@@ -3,8 +3,8 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
 
 interface FilterContextType {
-  statusFilter: string
-  setStatusFilter: (status: string) => void
+  statusFilter: string[]
+  setStatusFilter: (status: string[]) => void
   dateType: 'moveIn' | 'application'
   setDateType: (type: 'moveIn' | 'application') => void
   calendarFilter: string
@@ -16,7 +16,7 @@ interface FilterContextType {
 const FilterContext = createContext<FilterContextType | undefined>(undefined)
 
 export function FilterProvider({ children }: { children: ReactNode }) {
-  const [statusFilter, setStatusFilter] = useState('All')
+  const [statusFilter, setStatusFilter] = useState<string[]>(['All'])
   const [dateType, setDateType] = useState<'moveIn' | 'application'>('moveIn')
   const [calendarFilter, setCalendarFilter] = useState('All Time')
   const [propertyFilter, setPropertyFilter] = useState('All')

@@ -103,7 +103,13 @@ export const applicationCreateSchema = z.object({
   ),
   email: emailSchema,
   phone: phoneSchema,
-  status: z.enum(statusValues).optional().default('New'),
+  status: z.array(z.enum(statusValues))
+    .min(1, 'At least one status is required')
+    .refine((statuses) => new Set(statuses).size === statuses.length, {
+      message: 'Status values must be unique'
+    })
+    .optional()
+    .default(['New']),
   tasks: tasksSchema,
 
   // Payment fields (all optional)
@@ -138,7 +144,12 @@ export const applicationUpdateSchema = z.object({
   ),
   email: emailSchema,
   phone: phoneSchema,
-  status: z.enum(statusValues).optional(),
+  status: z.array(z.enum(statusValues))
+    .min(1, 'At least one status is required')
+    .refine((statuses) => new Set(statuses).size === statuses.length, {
+      message: 'Status values must be unique'
+    })
+    .optional(),
   tasks: tasksSchema,
 
   // Payment fields (all optional)

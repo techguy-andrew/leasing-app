@@ -30,8 +30,8 @@ import { fadeIn, listStagger, slideUp } from '@/lib/animations/variants'
  */
 
 interface FilterBarProps {
-  statusFilter: string
-  onStatusChange: (status: string) => void
+  statusFilter: string[]
+  onStatusChange: (status: string[]) => void
   dateType: 'moveIn' | 'application'
   onDateTypeChange: (type: 'moveIn' | 'application') => void
   calendarFilter: string
@@ -40,7 +40,7 @@ interface FilterBarProps {
   onPropertyChange: (property: string) => void
 }
 
-const statusOptions = ['All', 'New', 'Pending', 'Approved', 'Rejected', 'Archived']
+const statusOptions = ['All', 'New', 'Pending', 'Approved', 'Rejected', 'Outstanding Tasks', 'Ready for Move-In', 'Archived']
 const calendarOptions = ['All Time', 'This Week', 'This Month']
 
 export default function FilterBar({
@@ -79,7 +79,7 @@ export default function FilterBar({
   // Calculate active filter count
   const activeFilterCount = useMemo(() => {
     let count = 0
-    if (statusFilter !== 'All') count++
+    if (statusFilter.length > 0 && !statusFilter.includes('All')) count++
     if (dateType !== 'moveIn') count++
     if (calendarFilter !== 'All Time') count++
     if (propertyFilter !== 'All') count++
@@ -93,10 +93,27 @@ export default function FilterBar({
 
   // Clear all filters
   const handleClearFilters = () => {
-    onStatusChange('All')
+    onStatusChange(['All'])
     onDateTypeChange('moveIn')
     onCalendarChange('All Time')
     onPropertyChange('All')
+  }
+
+  // Handle status filter toggle
+  const handleStatusToggle = (status: string) => {
+    if (status === 'All') {
+      onStatusChange(['All'])
+    } else {
+      if (statusFilter.includes(status)) {
+        // Remove status if already selected
+        const newFilter = statusFilter.filter(s => s !== status && s !== 'All')
+        onStatusChange(newFilter.length > 0 ? newFilter : ['All'])
+      } else {
+        // Add status if not selected, remove 'All'
+        const newFilter = [...statusFilter.filter(s => s !== 'All'), status]
+        onStatusChange(newFilter)
+      }
+    }
   }
   return (
     <motion.div
@@ -167,21 +184,32 @@ export default function FilterBar({
             >
               {/* Status Filter Section */}
               <motion.div className="flex flex-col gap-2" variants={slideUp}>
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status (AND)</span>
                 <div className="flex flex-row flex-wrap gap-2">
-                  {statusOptions.map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => onStatusChange(status)}
-                      className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors ${
-                        statusFilter === status
-                          ? STATUS_COLORS[status]
-                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                      }`}
-                    >
-                      {status}
-                    </button>
-                  ))}
+                  {statusOptions.map((status) => {
+                    const isSelected = statusFilter.includes(status)
+                    return (
+                      <button
+                        key={status}
+                        onClick={() => handleStatusToggle(status)}
+                        className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex items-center gap-1 ${
+                          isSelected
+                            ? STATUS_COLORS[status]
+                            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        {status !== 'All' && (
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            className="w-3 h-3 rounded border-gray-300 pointer-events-none"
+                          />
+                        )}
+                        {status}
+                      </button>
+                    )
+                  })}
                 </div>
               </motion.div>
 

@@ -31,7 +31,7 @@ import { listStagger, slideUp, scaleIn } from '@/lib/animations/variants'
 
 interface Application {
   id: number
-  status: string
+  status: string[]
   moveInDate: string
   property: string
   unitNumber: string
@@ -45,7 +45,7 @@ interface Application {
 interface ApplicationsListProps {
   applications: Application[]
   isLoading: boolean
-  statusFilter: string
+  statusFilter: string[]
   calendarFilter: string
   dateType: 'moveIn' | 'application'
 }
@@ -71,7 +71,7 @@ export default function ApplicationsList({
             exit="exit"
             className="flex items-center justify-center py-16 text-gray-500 text-sm"
           >
-            {statusFilter === 'All' && calendarFilter === 'All Time'
+            {statusFilter.includes('All') && calendarFilter === 'All Time'
               ? 'No applications found'
               : 'No applications match the selected filters'}
           </motion.div>

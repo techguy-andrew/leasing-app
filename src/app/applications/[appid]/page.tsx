@@ -21,7 +21,7 @@ interface Task {
 
 interface Application {
   id: number
-  status: string
+  status: string[]
   moveInDate: string
   property: string
   unitNumber: string
@@ -44,7 +44,7 @@ interface Application {
 }
 
 interface FormData {
-  status: string
+  status: string[]
   moveInDate: string
   property: string
   unitNumber: string
@@ -174,7 +174,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     router.push('/applications')
   }
 
-  const handleStatusChange = async (status: string) => {
+  const handleStatusChange = async (status: string[]) => {
     if (!appId || !application) throw new Error('No application ID')
 
     // Normalize date to ensure MM/DD/YYYY format with leading zeros

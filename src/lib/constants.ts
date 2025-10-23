@@ -5,6 +5,8 @@ export const STATUS_OPTIONS = [
   { value: 'Pending', label: 'Pending' },
   { value: 'Approved', label: 'Approved' },
   { value: 'Rejected', label: 'Rejected' },
+  { value: 'Outstanding Tasks', label: 'Outstanding Tasks' },
+  { value: 'Ready for Move-In', label: 'Ready for Move-In' },
   { value: 'Archived', label: 'Archived' }
 ]
 
@@ -27,6 +29,8 @@ export const STATUS_COLORS: Record<string, string> = {
   Pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
   Approved: 'bg-green-100 text-green-800 hover:bg-green-200',
   Rejected: 'bg-red-100 text-red-800 hover:bg-red-200',
+  'Outstanding Tasks': 'bg-amber-100 text-amber-800 hover:bg-amber-200',
+  'Ready for Move-In': 'bg-teal-100 text-teal-800 hover:bg-teal-200',
   Archived: 'bg-slate-100 text-slate-800 hover:bg-slate-200'
 } as const
 
@@ -35,5 +39,7 @@ export const STATUS_BADGE_COLORS: Record<string, string> = {
   Pending: 'bg-yellow-100 text-yellow-800',
   Approved: 'bg-green-100 text-green-800',
   Rejected: 'bg-red-100 text-red-800',
+  'Outstanding Tasks': 'bg-amber-100 text-amber-800',
+  'Ready for Move-In': 'bg-teal-100 text-teal-800',
   Archived: 'bg-slate-100 text-slate-800'
 } as const

@@ -5,7 +5,7 @@ import ApplicationForm from '@/components/features/applications/ApplicationForm'
 import { getDefaultTasks } from '@/lib/applicantDefaultTasks'
 
 interface FormData {
-  status: string
+  status: string[]
   moveInDate: string
   property: string
   unitNumber: string

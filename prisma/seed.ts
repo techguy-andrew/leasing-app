@@ -59,7 +59,7 @@ async function main() {
         moveInDate,
         property: fullPropertyName,
         unitNumber: unit,
-        status: 'New',
+        status: ['New'],
         email: null,
         phone: null,
         createdAt

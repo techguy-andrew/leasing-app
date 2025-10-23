@@ -37,7 +37,7 @@ interface ApplicationListItemProps {
   applicant: string
   property: string
   unitNumber: string
-  status: string
+  status: string[]
   moveInDate: string
   createdAt: string
 }
@@ -54,9 +54,16 @@ const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, p
             <span className="font-semibold text-base text-gray-900 truncate">
               {applicant}
             </span>
-            <span className={`px-3 py-1.5 text-xs font-semibold rounded-full w-fit ${STATUS_BADGE_COLORS[status] || 'bg-gray-100 text-gray-800'}`}>
-              {status}
-            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {status.map((s, index) => (
+                <span
+                  key={`${s}-${index}`}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-full w-fit ${STATUS_BADGE_COLORS[s] || 'bg-gray-100 text-gray-800'}`}
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
           </div>
           <div className="flex flex-col gap-2 text-base text-gray-600">
             <span className="truncate font-medium">{property}</span>

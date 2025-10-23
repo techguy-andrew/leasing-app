@@ -55,7 +55,7 @@ import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animation
  */
 
 interface FormData {
-  status: string
+  status: string[]
   moveInDate: string
   property: string
   unitNumber: string
@@ -81,11 +81,11 @@ interface ApplicationFormProps {
   onCancel: () => void
   onDelete?: (id: number) => Promise<void>
   showDeleteButton?: boolean
-  onStatusChange?: (status: string) => Promise<void>
+  onStatusChange?: (status: string[]) => Promise<void>
 }
 
 const defaultFormData: FormData = {
-  status: 'New',
+  status: ['New'],
   moveInDate: '',
   property: '',
   unitNumber: '',
@@ -233,10 +233,11 @@ export default function ApplicationForm({
     }
 
     // Format currency fields
-    const currencyFields: (keyof FormData)[] = ['deposit', 'rent', 'petFee', 'petRent', 'proratedRent', 'concession', 'rentersInsurance', 'adminFee']
+    const currencyFields = ['deposit', 'rent', 'petFee', 'petRent', 'proratedRent', 'concession', 'rentersInsurance', 'adminFee'] as const
     currencyFields.forEach(field => {
-      if (formatted[field]) {
-        formatted[field] = formatCurrency(formatted[field])
+      const value = formatted[field]
+      if (value && typeof value === 'string') {
+        formatted[field] = formatCurrency(value)
       }
     })
 
@@ -276,7 +277,7 @@ export default function ApplicationForm({
   }
 
   // Status change handler
-  const handleStatusChange = async (value: string) => {
+  const handleStatusChange = async (value: string[]) => {
     setFormData(prev => ({ ...prev, status: value }))
 
     // If in edit mode and onStatusChange callback is provided, update database immediately

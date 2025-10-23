@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     const application = await prisma.application.create({
       data: {
         userId,
-        status: status || 'New',
+        status: status || ['New'],
         createdAt,
         moveInDate,
         property,

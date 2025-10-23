@@ -140,7 +140,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Prepare update data
     const updateData: {
-      status: string
+      status: string[]
       createdAt: string
       moveInDate: string
       property: string
