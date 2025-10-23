@@ -157,6 +157,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const { userId } = await auth()
 
     if (!userId) {
+      console.error('PATCH /tasks/[taskId] - Unauthorized: No userId')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -166,7 +167,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const { id, taskId } = await params
     const applicationId = parseInt(id, 10)
 
+    console.log('PATCH /tasks/[taskId] - Request:', { applicationId, taskId, userId })
+
     if (isNaN(applicationId)) {
+      console.error('PATCH /tasks/[taskId] - Invalid application ID:', id)
       return NextResponse.json(
         { error: 'Invalid application ID' },
         { status: 400 }
@@ -179,6 +183,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     })
 
     if (!existingTask) {
+      console.error('PATCH /tasks/[taskId] - Task not found:', taskId)
       return NextResponse.json(
         { error: 'Task not found' },
         { status: 404 }
@@ -186,6 +191,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     if (existingTask.applicationId !== applicationId) {
+      console.error('PATCH /tasks/[taskId] - Task does not belong to application:', {
+        taskId,
+        taskApplicationId: existingTask.applicationId,
+        requestedApplicationId: applicationId
+      })
       return NextResponse.json(
         { error: 'Task does not belong to this application' },
         { status: 403 }
@@ -193,6 +203,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json()
+    console.log('PATCH /tasks/[taskId] - Request body:', body)
+
     const validationResult = taskToggleSchema.safeParse(body)
 
     if (!validationResult.success) {
@@ -201,6 +213,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         message: err.message
       }))
 
+      console.error('PATCH /tasks/[taskId] - Validation failed:', errors)
       return NextResponse.json(
         {
           error: 'Validation failed',
@@ -212,10 +225,22 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const { completed } = validationResult.data
 
+    console.log('PATCH /tasks/[taskId] - Updating task:', {
+      taskId,
+      currentStatus: existingTask.completed,
+      newStatus: completed
+    })
+
     // Toggle the task completion status
     const task = await prisma.task.update({
       where: { id: taskId },
       data: { completed }
+    })
+
+    console.log('PATCH /tasks/[taskId] - Task updated successfully:', {
+      taskId: task.id,
+      completed: task.completed,
+      updatedAt: task.updatedAt
     })
 
     return NextResponse.json(
@@ -223,7 +248,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       { status: 200 }
     )
   } catch (error) {
-    console.error('Error toggling task:', error)
+    console.error('PATCH /tasks/[taskId] - Error toggling task:', error)
+    // Log more details about the error
+    if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+    }
     return NextResponse.json(
       { error: 'Failed to toggle task' },
       { status: 500 }

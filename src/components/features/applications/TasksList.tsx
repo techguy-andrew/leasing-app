@@ -286,7 +286,22 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
 
   // Toggle task completion
   const handleToggleTask = async (task: Task) => {
+    // Validate task ID format
+    if (!task.id || task.id.startsWith('temp-')) {
+      console.error('Cannot toggle task with invalid or temporary ID:', task.id)
+      setToastType('error')
+      setToastMessage('Cannot update task: Invalid task ID. Please save the task first.')
+      return
+    }
+
     const newCompletedStatus = !task.completed
+
+    console.log('Toggling task completion:', {
+      taskId: task.id,
+      currentStatus: task.completed,
+      newStatus: newCompletedStatus,
+      applicationId
+    })
 
     // Optimistically update UI
     setTasks(prev =>
@@ -305,8 +320,20 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
 
       const data = await response.json()
 
+      console.log('Task toggle response:', {
+        status: response.status,
+        ok: response.ok,
+        data
+      })
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to toggle task')
+      }
+
+      // Verify the response has the expected structure
+      if (!data.data || !data.data.id) {
+        console.error('Invalid response structure:', data)
+        throw new Error('Invalid response from server')
       }
 
       // Update with server response
@@ -315,7 +342,13 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
         onTasksChange?.(updatedTasks)
         return updatedTasks
       })
+
+      console.log('Task toggled successfully:', {
+        taskId: data.data.id,
+        completed: data.data.completed
+      })
     } catch (error) {
+      console.error('Error toggling task:', error)
       // Revert on error
       setTasks(prev =>
         prev.map(t => (t.id === task.id ? { ...t, completed: task.completed } : t))
@@ -485,10 +518,18 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
 
             {/* Task Description */}
             <div className={`flex-1 flex flex-col gap-[2%] ${
-              isSaving && editingTaskId === (task.clientId || task.id) ? 'cursor-wait' : ''
+              isSaving && editingTaskId === (task.clientId || task.id)
+                ? 'cursor-wait'
+                : editingTaskId !== (task.clientId || task.id)
+                ? 'cursor-grab active:cursor-grabbing'
+                : ''
             }`}>
               <div className={`${task.completed ? 'line-through text-gray-400' : 'text-gray-900'} ${
-                isSaving && editingTaskId === (task.clientId || task.id) ? 'cursor-wait' : ''
+                isSaving && editingTaskId === (task.clientId || task.id)
+                  ? 'cursor-wait'
+                  : editingTaskId !== (task.clientId || task.id)
+                  ? 'cursor-grab active:cursor-grabbing'
+                  : ''
               }`}>
                 <InlineTextField
                   ref={editingTaskId === (task.clientId || task.id) ? inputRef : null}
@@ -497,7 +538,13 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
                   isEditMode={editingTaskId === (task.clientId || task.id)}
                   placeholder="Task description"
                   onEnterPress={handleSaveEdit}
-                  className={isSaving && editingTaskId === (task.clientId || task.id) ? 'cursor-wait pointer-events-none' : ''}
+                  className={
+                    isSaving && editingTaskId === (task.clientId || task.id)
+                      ? 'cursor-wait pointer-events-none'
+                      : editingTaskId !== (task.clientId || task.id)
+                      ? 'cursor-grab active:cursor-grabbing'
+                      : ''
+                  }
                 />
               </div>
             </div>
