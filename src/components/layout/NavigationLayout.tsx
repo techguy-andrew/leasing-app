@@ -28,6 +28,8 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
     setStatusFilter,
     sortDirection,
     setSortDirection,
+    applicationDateSort,
+    setApplicationDateSort,
     calendarFilter,
     setCalendarFilter,
     propertyFilter,
@@ -105,6 +107,8 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
           onStatusChange={setStatusFilter}
           sortDirection={sortDirection}
           onSortChange={setSortDirection}
+          applicationDateSort={applicationDateSort}
+          onApplicationDateSortChange={setApplicationDateSort}
           calendarFilter={calendarFilter}
           onCalendarChange={setCalendarFilter}
           propertyFilter={propertyFilter}

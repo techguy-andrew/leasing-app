@@ -7,6 +7,8 @@ interface FilterContextType {
   setStatusFilter: (status: string) => void
   sortDirection: 'soonest' | 'furthest'
   setSortDirection: (direction: 'soonest' | 'furthest') => void
+  applicationDateSort: 'soonest' | 'furthest'
+  setApplicationDateSort: (direction: 'soonest' | 'furthest') => void
   calendarFilter: string
   setCalendarFilter: (filter: string) => void
   propertyFilter: string
@@ -18,6 +20,7 @@ const FilterContext = createContext<FilterContextType | undefined>(undefined)
 export function FilterProvider({ children }: { children: ReactNode }) {
   const [statusFilter, setStatusFilter] = useState('All')
   const [sortDirection, setSortDirection] = useState<'soonest' | 'furthest'>('soonest')
+  const [applicationDateSort, setApplicationDateSort] = useState<'soonest' | 'furthest'>('soonest')
   const [calendarFilter, setCalendarFilter] = useState('All Time')
   const [propertyFilter, setPropertyFilter] = useState('All')
 
@@ -28,6 +31,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         setStatusFilter,
         sortDirection,
         setSortDirection,
+        applicationDateSort,
+        setApplicationDateSort,
         calendarFilter,
         setCalendarFilter,
         propertyFilter,

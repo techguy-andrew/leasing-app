@@ -34,6 +34,8 @@ interface FilterBarProps {
   onStatusChange: (status: string) => void
   sortDirection: 'soonest' | 'furthest'
   onSortChange: (direction: 'soonest' | 'furthest') => void
+  applicationDateSort: 'soonest' | 'furthest'
+  onApplicationDateSortChange: (direction: 'soonest' | 'furthest') => void
   calendarFilter: string
   onCalendarChange: (filter: string) => void
   propertyFilter: string
@@ -48,6 +50,8 @@ export default function FilterBar({
   onStatusChange,
   sortDirection,
   onSortChange,
+  applicationDateSort,
+  onApplicationDateSortChange,
   calendarFilter,
   onCalendarChange,
   propertyFilter,
@@ -81,10 +85,11 @@ export default function FilterBar({
     let count = 0
     if (statusFilter !== 'All') count++
     if (sortDirection !== 'soonest') count++
+    if (applicationDateSort !== 'soonest') count++
     if (calendarFilter !== 'All Time') count++
     if (propertyFilter !== 'All') count++
     return count
-  }, [statusFilter, sortDirection, calendarFilter, propertyFilter])
+  }, [statusFilter, sortDirection, applicationDateSort, calendarFilter, propertyFilter])
 
   // Toggle accordion
   const toggleAccordion = () => {
@@ -95,6 +100,7 @@ export default function FilterBar({
   const handleClearFilters = () => {
     onStatusChange('All')
     onSortChange('soonest')
+    onApplicationDateSortChange('soonest')
     onCalendarChange('All Time')
     onPropertyChange('All')
   }
@@ -207,6 +213,39 @@ export default function FilterBar({
                     className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
                       sortDirection === 'furthest'
                         ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                    Furthest
+                  </button>
+                </div>
+              </motion.div>
+
+              {/* Application Date Sorting Section */}
+              <motion.div className="flex flex-col gap-2" variants={slideUp}>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Application Date</span>
+                <div className="flex flex-row flex-wrap gap-2">
+                  <button
+                    onClick={() => onApplicationDateSortChange('soonest')}
+                    className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
+                      applicationDateSort === 'soonest'
+                        ? 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                    </svg>
+                    Soonest
+                  </button>
+                  <button
+                    onClick={() => onApplicationDateSortChange('furthest')}
+                    className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex flex-row items-center gap-1 ${
+                      applicationDateSort === 'furthest'
+                        ? 'bg-orange-100 text-orange-800 hover:bg-orange-200'
                         : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                     }`}
                   >

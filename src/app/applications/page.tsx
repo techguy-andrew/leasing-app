@@ -22,7 +22,7 @@ function ApplicationsContent() {
   const [applications, setApplications] = useState<Application[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const searchParams = useSearchParams()
-  const { statusFilter, setStatusFilter, sortDirection, calendarFilter, propertyFilter } = useFilter()
+  const { statusFilter, setStatusFilter, sortDirection, applicationDateSort, calendarFilter, propertyFilter } = useFilter()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Set status filter from URL params on mount
@@ -57,7 +57,7 @@ function ApplicationsContent() {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
     }
-  }, [statusFilter, propertyFilter, sortDirection, calendarFilter])
+  }, [statusFilter, propertyFilter, sortDirection, applicationDateSort, calendarFilter])
 
   const getStartOfWeek = useCallback(() => {
     const now = new Date()
@@ -135,18 +135,35 @@ function ApplicationsContent() {
       })
     }
 
-    // Sort by move-in date based on direction
+    // Sort by move-in date based on direction, then by application date
     return [...filtered].sort((a, b) => {
-      const dateA = parseMoveInDate(a.moveInDate)
-      const dateB = parseMoveInDate(b.moveInDate)
+      // Primary sort: Move-in date
+      const moveInDateA = parseMoveInDate(a.moveInDate)
+      const moveInDateB = parseMoveInDate(b.moveInDate)
 
+      let moveInComparison = 0
       if (sortDirection === 'furthest') {
-        return dateB.getTime() - dateA.getTime() // Furthest first (descending)
+        moveInComparison = moveInDateB.getTime() - moveInDateA.getTime() // Furthest first (descending)
       } else {
-        return dateA.getTime() - dateB.getTime() // Closest first (ascending)
+        moveInComparison = moveInDateA.getTime() - moveInDateB.getTime() // Closest first (ascending)
+      }
+
+      // If move-in dates are equal, use application date as tiebreaker
+      if (moveInComparison !== 0) {
+        return moveInComparison
+      }
+
+      // Secondary sort: Application date (createdAt)
+      const appDateA = parseMoveInDate(a.createdAt)
+      const appDateB = parseMoveInDate(b.createdAt)
+
+      if (applicationDateSort === 'furthest') {
+        return appDateB.getTime() - appDateA.getTime() // Furthest first (descending)
+      } else {
+        return appDateA.getTime() - appDateB.getTime() // Closest first (ascending)
       }
     })
-  }, [applications, statusFilter, propertyFilter, calendarFilter, sortDirection, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
+  }, [applications, statusFilter, propertyFilter, calendarFilter, sortDirection, applicationDateSort, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
 
   return (
     <div ref={scrollContainerRef} className="w-full h-full overflow-y-auto">
