@@ -321,7 +321,11 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
       setTasks(prev => {
         // Preserve any temporary tasks that might be in edit mode
         const tempTasks = prev.filter(t => t.id.startsWith('temp-'))
-        const updatedTasks = [...tempTasks, ...data.data]
+        // Filter server response to only include tasks of the correct type (defensive)
+        const serverTasks = data.data
+          .filter((t: Task) => t.type === taskType)
+          .map((t: Task) => ({ ...t, clientId: t.id }))
+        const updatedTasks = [...tempTasks, ...serverTasks]
         onTasksChange?.(updatedTasks)
         return updatedTasks
       })
@@ -357,23 +361,30 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
         <IconPack.Add
           onClick={handleAddTask}
           size="small"
+          disabled={isSaving}
         />
       </div>
 
-      {/* Tasks List */}
+      {/* Tasks List - Add cursor-wait during save operations */}
       <Reorder.Group
         axis="y"
         values={tasks}
         onReorder={handleReorder}
-        className="flex flex-col gap-[2%]"
+        className={`flex flex-col gap-[2%] ${isSaving ? 'cursor-wait' : ''}`}
       >
         {/* All Tasks (including new tasks in edit mode) */}
         {tasks.map((task) => (
           <Reorder.Item
             key={task.clientId || task.id}
             value={task}
-            className="flex items-start gap-3 cursor-grab active:cursor-grabbing"
-            drag={editingTaskId !== (task.clientId || task.id)} // Disable drag when editing
+            className={`flex items-start gap-3 ${
+              isSaving && editingTaskId === (task.clientId || task.id)
+                ? 'cursor-wait'
+                : editingTaskId !== (task.clientId || task.id)
+                ? 'cursor-grab active:cursor-grabbing'
+                : ''
+            }`}
+            drag={editingTaskId !== (task.clientId || task.id) && !isSaving} // Disable drag when editing or saving
             whileDrag={{
               scale: 1.02,
               opacity: 0.8,
@@ -399,9 +410,9 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
             )}
 
             {/* Task Description */}
-            <div className="flex-1 flex flex-col gap-[2%]">
+            <div className={`flex-1 flex flex-col gap-[2%] ${isSaving && editingTaskId === (task.clientId || task.id) ? 'cursor-wait' : ''}`}>
               {editingTaskId === (task.clientId || task.id) ? (
-                <div>
+                <div className={isSaving ? 'cursor-wait' : ''}>
                   <InlineTextField
                     ref={inputRef}
                     value={editingDescription}
@@ -409,6 +420,7 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
                     isEditMode={true}
                     placeholder="Task description"
                     onEnterPress={handleSaveEdit}
+                    className={isSaving ? 'cursor-wait pointer-events-none' : ''}
                   />
                 </div>
               ) : (

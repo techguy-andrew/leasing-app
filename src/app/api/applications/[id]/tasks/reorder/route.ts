@@ -65,14 +65,36 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     const { taskIds } = validationResult.data
 
-    // Verify all tasks belong to this application
-    const applicationTaskIds = new Set(existingApplication.tasks.map(t => t.id))
+    // Verify all tasks belong to this application and get their types
+    const tasksMap = new Map(existingApplication.tasks.map(t => [t.id, t]))
 
     for (const taskId of taskIds) {
-      if (!applicationTaskIds.has(taskId)) {
+      if (!tasksMap.has(taskId)) {
         return NextResponse.json(
           { error: `Task ${taskId} does not belong to this application` },
           { status: 403 }
+        )
+      }
+    }
+
+    // Determine the task type from the first task (all tasks in reorder must be same type)
+    const firstTask = tasksMap.get(taskIds[0])
+    if (!firstTask) {
+      return NextResponse.json(
+        { error: 'Invalid task ID' },
+        { status: 400 }
+      )
+    }
+
+    const taskType = firstTask.type
+
+    // Verify all tasks are of the same type
+    for (const taskId of taskIds) {
+      const task = tasksMap.get(taskId)
+      if (task && task.type !== taskType) {
+        return NextResponse.json(
+          { error: 'All tasks in reorder must be of the same type' },
+          { status: 400 }
         )
       }
     }
@@ -87,9 +109,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     )
 
-    // Fetch updated tasks
+    // Fetch updated tasks - ONLY return tasks of the type being reordered
     const updatedTasks = await prisma.task.findMany({
-      where: { applicationId },
+      where: {
+        applicationId,
+        type: taskType
+      },
       orderBy: { order: 'asc' }
     })
 
