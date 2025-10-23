@@ -271,16 +271,18 @@ export default function ApplicationDetailForm({
 
   // Auto-calculate prorated rent when move-in date or rent changes
   useEffect(() => {
-    // Only calculate if both moveInDate and rent have values
-    if (formData.moveInDate && formData.rent) {
-      const calculated = calculateProratedRent(formData.moveInDate, formData.rent)
-
-      // Only update if calculation was successful (returns non-empty string)
-      if (calculated) {
-        setFormData(prev => ({ ...prev, proratedRent: calculated }))
-      }
+    // If either field is empty, clear the prorated rent
+    if (!formData.moveInDate || !formData.rent) {
+      setFormData(prev => ({ ...prev, proratedRent: '' }))
+      return
     }
-    // If either field is empty, do nothing (allow manual entry)
+
+    // Calculate prorated rent based on both fields
+    const calculated = calculateProratedRent(formData.moveInDate, formData.rent)
+
+    // Always update prorated rent (even if empty string for invalid data)
+    // This ensures stale values are cleared when data becomes invalid
+    setFormData(prev => ({ ...prev, proratedRent: calculated }))
   }, [formData.moveInDate, formData.rent, calculateProratedRent])
 
   // Generic field change handler
