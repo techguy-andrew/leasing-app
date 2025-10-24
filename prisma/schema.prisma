@@ -10,7 +10,7 @@ datasource db {
 model Application {
   id               Int      @id @default(autoincrement())
   userId           String?  // Clerk user ID (optional for backward compatibility)
-  status           String[] @default(["New"])
+  status           String[] @default([])
   moveInDate       String
   property         String
   unitNumber       String
@@ -73,4 +73,18 @@ model Property {
 
   @@index([userId])
   @@index([name])
+}
+
+model Status {
+  id        String   @id @default(cuid())
+  name      String
+  color     String   @default("#6B7280") // Hex color code (default grey)
+  order     Int      @default(0)
+  userId    String?  // Clerk user ID (optional for backward compatibility)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, order], name: "unique_status_order_per_user")
+  @@index([userId])
+  @@index([userId, order])
 }

@@ -3,7 +3,6 @@
 import { memo } from 'react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
-import { STATUS_BADGE_COLORS } from '@/lib/constants'
 
 /**
  * ApplicationListItem Component
@@ -25,7 +24,7 @@ import { STATUS_BADGE_COLORS } from '@/lib/constants'
  * ```
  *
  * To adapt for new projects:
- * 1. Update STATUS_BADGE_COLORS in lib/constants.ts to match your statuses
+ * 1. Manage statuses via the Settings page (/settings)
  * 2. Modify displayed fields to match your data structure
  * 3. Change link destination (/applications/${id}) to your detail route
  * 4. Adjust responsive breakpoints (sm:, md:) as needed
@@ -40,9 +39,18 @@ interface ApplicationListItemProps {
   status: string[]
   moveInDate: string
   createdAt: string
+  statusColors?: Record<string, string>
 }
 
-const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, property, unitNumber, status, moveInDate }: ApplicationListItemProps) {
+const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, property, unitNumber, status, moveInDate, statusColors = {} }: ApplicationListItemProps) {
+  // Helper to get text color based on background
+  const getTextColorClass = (hexColor: string) => {
+    const r = parseInt(hexColor.slice(1, 3), 16)
+    const g = parseInt(hexColor.slice(3, 5), 16)
+    const b = parseInt(hexColor.slice(5, 7), 16)
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return luminance > 0.5 ? 'text-gray-900' : 'text-white'
+  }
   return (
     <Link
       href={`/applications/${id}`}
@@ -55,14 +63,19 @@ const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, p
               {applicant}
             </span>
             <div className="flex flex-wrap gap-1.5">
-              {status.map((s, index) => (
-                <span
-                  key={`${s}-${index}`}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-full w-fit ${STATUS_BADGE_COLORS[s] || 'bg-gray-100 text-gray-800'}`}
-                >
-                  {s}
-                </span>
-              ))}
+              {status.map((s, index) => {
+                const bgColor = statusColors[s] || '#6B7280' // Default grey
+                const textColor = getTextColorClass(bgColor)
+                return (
+                  <span
+                    key={`${s}-${index}`}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-full w-fit ${textColor}`}
+                    style={{ backgroundColor: bgColor }}
+                  >
+                    {s}
+                  </span>
+                )
+              })}
             </div>
           </div>
           <div className="flex flex-col gap-2 text-base text-gray-600">

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import ApplicationListItem from './ApplicationListItem'
 import LoadingScreen from '@/components/shared/LoadingScreen'
@@ -50,6 +51,13 @@ interface ApplicationsListProps {
   dateType: 'moveIn' | 'application'
 }
 
+interface ApiStatus {
+  id: string
+  name: string
+  color: string
+  order: number
+}
+
 export default function ApplicationsList({
   applications,
   isLoading,
@@ -57,6 +65,70 @@ export default function ApplicationsList({
   calendarFilter,
   dateType
 }: ApplicationsListProps) {
+  const [statusColors, setStatusColors] = useState<Record<string, string>>({})
+
+  // Fetch status colors
+  const fetchStatuses = useCallback(async () => {
+    try {
+      const response = await fetch('/api/statuses', { cache: 'no-store' })
+      const data = await response.json()
+
+      const colors: Record<string, string> = {}
+
+      if (response.ok && data.success && data.data.length > 0) {
+        const statuses: ApiStatus[] = data.data
+        statuses.forEach((status) => {
+          colors[status.name] = status.color
+        })
+      } else {
+        // Fallback colors for legacy statuses if Status table is empty
+        const defaultColors: Record<string, string> = {
+          'New': '#3B82F6',
+          'Pending': '#EAB308',
+          'Approved': '#10B981',
+          'Rejected': '#EF4444',
+          'Outstanding Tasks': '#F59E0B',
+          'Ready for Move-In': '#14B8A6',
+          'Archived': '#64748B'
+        }
+        Object.assign(colors, defaultColors)
+      }
+
+      setStatusColors(colors)
+    } catch (error) {
+      console.error('Failed to fetch statuses:', error)
+      // Set default colors even on error
+      const defaultColors: Record<string, string> = {
+        'New': '#3B82F6',
+        'Pending': '#EAB308',
+        'Approved': '#10B981',
+        'Rejected': '#EF4444',
+        'Outstanding Tasks': '#F59E0B',
+        'Ready for Move-In': '#14B8A6',
+        'Archived': '#64748B'
+      }
+      setStatusColors(defaultColors)
+    }
+  }, [])
+
+  // Initial fetch
+  useEffect(() => {
+    fetchStatuses()
+  }, [fetchStatuses])
+
+  // Refetch when window regains focus
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchStatuses()
+    }
+
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [fetchStatuses])
+
   return (
     <div className="flex flex-col w-full bg-white">
       <AnimatePresence mode="wait">
@@ -96,6 +168,7 @@ export default function ApplicationsList({
                   status={app.status}
                   moveInDate={app.moveInDate}
                   createdAt={app.createdAt}
+                  statusColors={statusColors}
                 />
               </motion.div>
             ))}

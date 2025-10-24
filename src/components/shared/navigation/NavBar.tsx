@@ -27,6 +27,7 @@ const navigationLinks = [
   { label: 'Applications', href: '/applications' },
   { label: 'New Application', href: '/newapp' },
   { label: 'Properties', href: '/properties' },
+  { label: 'Settings', href: '/settings' },
   { label: 'About', href: '/about' }
 ]
 

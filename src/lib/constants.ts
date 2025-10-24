@@ -1,14 +1,8 @@
 // Shared constants for application options
 
-export const STATUS_OPTIONS = [
-  { value: 'New', label: 'New' },
-  { value: 'Pending', label: 'Pending' },
-  { value: 'Approved', label: 'Approved' },
-  { value: 'Rejected', label: 'Rejected' },
-  { value: 'Outstanding Tasks', label: 'Outstanding Tasks' },
-  { value: 'Ready for Move-In', label: 'Ready for Move-In' },
-  { value: 'Archived', label: 'Archived' }
-]
+// STATUS_OPTIONS, STATUS_COLORS, and STATUS_BADGE_COLORS have been removed
+// Statuses are now managed dynamically via the /api/statuses endpoint
+// and can be configured in the Settings page
 
 export const PROPERTY_OPTIONS = [
   { value: 'Burbank Village Apartments', label: 'Burbank Village Apartments' },
@@ -22,24 +16,3 @@ export const PROPERTY_OPTIONS = [
   { value: 'Prairie Village', label: 'Prairie Village' },
   { value: 'West Glen Apartments', label: 'West Glen Apartments' }
 ]
-
-export const STATUS_COLORS: Record<string, string> = {
-  All: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
-  New: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-  Pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
-  Approved: 'bg-green-100 text-green-800 hover:bg-green-200',
-  Rejected: 'bg-red-100 text-red-800 hover:bg-red-200',
-  'Outstanding Tasks': 'bg-amber-100 text-amber-800 hover:bg-amber-200',
-  'Ready for Move-In': 'bg-teal-100 text-teal-800 hover:bg-teal-200',
-  Archived: 'bg-slate-100 text-slate-800 hover:bg-slate-200'
-} as const
-
-export const STATUS_BADGE_COLORS: Record<string, string> = {
-  New: 'bg-blue-100 text-blue-800',
-  Pending: 'bg-yellow-100 text-yellow-800',
-  Approved: 'bg-green-100 text-green-800',
-  Rejected: 'bg-red-100 text-red-800',
-  'Outstanding Tasks': 'bg-amber-100 text-amber-800',
-  'Ready for Move-In': 'bg-teal-100 text-teal-800',
-  Archived: 'bg-slate-100 text-slate-800'
-} as const

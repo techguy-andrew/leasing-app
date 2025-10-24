@@ -10,7 +10,6 @@ import SaveButton from '@/components/shared/buttons/SaveButton'
 import CancelButton from '@/components/shared/buttons/CancelButton'
 import ConfirmModal from '@/components/shared/modals/ConfirmModal'
 import Toast, { ToastType } from '@/components/shared/feedback/Toast'
-import { STATUS_OPTIONS } from '@/lib/constants'
 import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animations/variants'
 
 /**
@@ -47,7 +46,7 @@ import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animation
  *
  * To adapt for new projects:
  * 1. Update the FormData interface to match your database schema
- * 2. Modify STATUS_OPTIONS and PROPERTY_OPTIONS in lib/constants.ts
+ * 2. Manage statuses via the Settings page (/settings)
  * 3. Adjust field labels and placeholders as needed
  * 4. Update formatDate and formatPhone functions for your locale
  * 5. Modify the API endpoints in onSave callbacks
@@ -442,7 +441,6 @@ export default function ApplicationForm({
               <InlineStatusBadge
                 status={formData.status}
                 onChange={handleStatusChange}
-                options={STATUS_OPTIONS}
               />
             </motion.div>
 

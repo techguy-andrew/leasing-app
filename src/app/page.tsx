@@ -3,66 +3,110 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
-import { STATUS_BADGE_COLORS } from '@/lib/constants'
 import { staggerContainer, staggerItem } from '@/lib/animations/variants'
 import LoadingScreen from '@/components/shared/LoadingScreen'
 
 interface Application {
   id: number
-  status: string
+  status: string[]
+}
+
+interface Status {
+  id: string
+  name: string
+  color: string
+  order: number
 }
 
 interface StatusCount {
   status: string
   count: number
-  colorClass: string
+  color: string
 }
 
 export default function Home() {
   const [statusCounts, setStatusCounts] = useState<StatusCount[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // Helper to get text color based on background
+  const getTextColorClass = (hexColor: string) => {
+    const r = parseInt(hexColor.slice(1, 3), 16)
+    const g = parseInt(hexColor.slice(3, 5), 16)
+    const b = parseInt(hexColor.slice(5, 7), 16)
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return luminance > 0.5 ? 'text-gray-900' : 'text-white'
+  }
+
   useEffect(() => {
-    async function loadApplications() {
+    async function loadData() {
       try {
-        const response = await fetch('/api/applications')
-        const data = await response.json()
+        // Fetch both applications and statuses in parallel
+        const [appsResponse, statusesResponse] = await Promise.all([
+          fetch('/api/applications'),
+          fetch('/api/statuses')
+        ])
 
-        if (response.ok) {
-          const applications: Application[] = data.data
+        const appsData = await appsResponse.json()
+        const statusesData = await statusesResponse.json()
 
-          // Count applications by status (excluding Archived)
-          const counts = {
-            New: 0,
-            Pending: 0,
-            Approved: 0,
-            Rejected: 0
-          }
+        if (appsResponse.ok) {
+          const applications: Application[] = appsData.data
+
+          // Count applications by status
+          const counts: Record<string, number> = {}
 
           applications.forEach((app) => {
-            if (app.status in counts) {
-              counts[app.status as keyof typeof counts]++
-            }
+            // Each application can have multiple statuses
+            app.status.forEach((statusName) => {
+              counts[statusName] = (counts[statusName] || 0) + 1
+            })
           })
 
-          // Create status count array with colors
-          const statusCountsArray: StatusCount[] = [
-            { status: 'New', count: counts.New, colorClass: STATUS_BADGE_COLORS.New },
-            { status: 'Pending', count: counts.Pending, colorClass: STATUS_BADGE_COLORS.Pending },
-            { status: 'Approved', count: counts.Approved, colorClass: STATUS_BADGE_COLORS.Approved },
-            { status: 'Rejected', count: counts.Rejected, colorClass: STATUS_BADGE_COLORS.Rejected }
-          ]
+          let statusCountsArray: StatusCount[] = []
+
+          // If we have custom statuses, use those
+          if (statusesResponse.ok && statusesData.data.length > 0) {
+            const statuses: Status[] = statusesData.data
+            statusCountsArray = statuses
+              .map((status) => ({
+                status: status.name,
+                count: counts[status.name] || 0,
+                color: status.color
+              }))
+              .filter((item) => item.count > 0) // Only show statuses with applications
+          }
+          // Otherwise, create status counts from existing application statuses
+          else {
+            const defaultColors: Record<string, string> = {
+              'New': '#3B82F6',
+              'Pending': '#EAB308',
+              'Approved': '#10B981',
+              'Rejected': '#EF4444',
+              'Outstanding Tasks': '#F59E0B',
+              'Ready for Move-In': '#14B8A6',
+              'Archived': '#64748B'
+            }
+
+            statusCountsArray = Object.entries(counts)
+              .filter(([_, count]) => count > 0)
+              .map(([statusName, count]) => ({
+                status: statusName,
+                count,
+                color: defaultColors[statusName] || '#6B7280'
+              }))
+              .sort((a, b) => b.count - a.count) // Sort by count descending
+          }
 
           setStatusCounts(statusCountsArray)
         }
       } catch (err) {
-        console.error('Failed to fetch applications:', err)
+        console.error('Failed to fetch data:', err)
       } finally {
         setIsLoading(false)
       }
     }
 
-    loadApplications()
+    loadData()
   }, [])
 
   if (isLoading) {
@@ -77,22 +121,28 @@ export default function Home() {
         initial="hidden"
         animate="visible"
       >
-        {statusCounts.map(({ status, count, colorClass }) => (
-          <Link
-            key={status}
-            href={`/applications?status=${status}`}
-          >
-            <motion.div
-              className="flex items-center gap-4 p-6 bg-white border border-gray-200 rounded-2xl shadow-sm hover:bg-gray-50 cursor-pointer transition-colors duration-200"
-              variants={staggerItem}
+        {statusCounts.map(({ status, count, color }) => {
+          const textColor = getTextColorClass(color)
+          return (
+            <Link
+              key={status}
+              href={`/applications?status=${status}`}
             >
-              <span className="text-base font-semibold text-gray-900">{count}</span>
-              <span className={`px-3 py-1 text-xs font-medium rounded-full ${colorClass}`}>
-                {status}
-              </span>
-            </motion.div>
-          </Link>
-        ))}
+              <motion.div
+                className="flex items-center gap-4 p-6 bg-white border border-gray-200 rounded-2xl shadow-sm hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                variants={staggerItem}
+              >
+                <span className="text-base font-semibold text-gray-900">{count}</span>
+                <span
+                  className={`px-3 py-1 text-xs font-medium rounded-full ${textColor}`}
+                  style={{ backgroundColor: color }}
+                >
+                  {status}
+                </span>
+              </motion.div>
+            </Link>
+          )
+        })}
       </motion.div>
     </div>
   )

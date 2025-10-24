@@ -1,9 +1,14 @@
 import { z } from 'zod'
-import { STATUS_OPTIONS, PROPERTY_OPTIONS } from '@/lib/constants'
+import { PROPERTY_OPTIONS } from '@/lib/constants'
 
 // Extract valid values from options
-const statusValues = STATUS_OPTIONS.map(opt => opt.value) as [string, ...string[]]
 const propertyValues = PROPERTY_OPTIONS.map(opt => opt.value) as [string, ...string[]]
+
+// Status validation schema - accepts any array of non-empty strings (statuses are now dynamic)
+const statusSchema = z.array(z.string().min(1))
+  .refine((statuses) => new Set(statuses).size === statuses.length, {
+    message: 'Status values must be unique'
+  })
 
 // Date validation helper - validates MM/DD/YYYY format and actual date
 const dateSchema = z.string()
@@ -103,13 +108,9 @@ export const applicationCreateSchema = z.object({
   ),
   email: emailSchema,
   phone: phoneSchema,
-  status: z.array(z.enum(statusValues))
-    .min(1, 'At least one status is required')
-    .refine((statuses) => new Set(statuses).size === statuses.length, {
-      message: 'Status values must be unique'
-    })
+  status: statusSchema
     .optional()
-    .default(['New']),
+    .default([]),
   tasks: tasksSchema,
 
   // Payment fields (all optional)
@@ -144,11 +145,7 @@ export const applicationUpdateSchema = z.object({
   ),
   email: emailSchema,
   phone: phoneSchema,
-  status: z.array(z.enum(statusValues))
-    .min(1, 'At least one status is required')
-    .refine((statuses) => new Set(statuses).size === statuses.length, {
-      message: 'Status values must be unique'
-    })
+  status: statusSchema
     .optional(),
   tasks: tasksSchema,
 

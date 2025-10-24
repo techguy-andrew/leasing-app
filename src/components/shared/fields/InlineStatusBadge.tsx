@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
-import { STATUS_BADGE_COLORS } from '@/lib/constants'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { AnimatePresence, motion, Reorder } from 'motion/react'
 
 /**
  * InlineStatusBadge Component
@@ -26,31 +25,88 @@ import { STATUS_BADGE_COLORS } from '@/lib/constants'
  * ```
  *
  * To adapt for new projects:
- * 1. Update STATUS_BADGE_COLORS in constants.ts with your status types and colors
- * 2. Use Tailwind color classes (bg-blue-100 text-blue-800)
- * 3. Modify options array to match your workflow statuses
+ * 1. Manage statuses via the Settings page (/settings)
+ * 2. Statuses are fetched from /api/statuses with dynamic colors
+ * 3. Modify InlineTextField for custom status name editing
  * 4. Always clickable - no read-only mode
- * 5. Supports multiple simultaneous statuses
+ * 5. Supports multiple simultaneous statuses and drag-to-reorder
  */
 
 interface StatusOption {
   value: string
   label: string
+  color?: string
 }
 
 interface InlineStatusBadgeProps {
   status: string[]
   onChange: (status: string[]) => void
-  options: StatusOption[]
+  options?: StatusOption[]
+}
+
+interface ApiStatus {
+  id: string
+  name: string
+  color: string
+  order: number
 }
 
 export default function InlineStatusBadge({
   status,
   onChange,
-  options
+  options: legacyOptions
 }: InlineStatusBadgeProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [availableStatuses, setAvailableStatuses] = useState<ApiStatus[]>([])
   const badgeRef = useRef<HTMLDivElement>(null)
+
+  // Fetch available statuses from API
+  const fetchStatuses = useCallback(async () => {
+    try {
+      const response = await fetch('/api/statuses', { cache: 'no-store' })
+      const data = await response.json()
+      if (response.ok && data.data.length > 0) {
+        setAvailableStatuses(data.data)
+      } else {
+        // Fallback: create mock status objects for legacy statuses
+        const legacyStatuses: ApiStatus[] = [
+          { id: 'new', name: 'New', color: '#3B82F6', order: 0 },
+          { id: 'pending', name: 'Pending', color: '#EAB308', order: 1 },
+          { id: 'approved', name: 'Approved', color: '#10B981', order: 2 },
+          { id: 'rejected', name: 'Rejected', color: '#EF4444', order: 3 },
+          { id: 'tasks', name: 'Outstanding Tasks', color: '#F59E0B', order: 4 },
+          { id: 'ready', name: 'Ready for Move-In', color: '#14B8A6', order: 5 },
+          { id: 'archived', name: 'Archived', color: '#64748B', order: 6 }
+        ]
+        setAvailableStatuses(legacyStatuses)
+      }
+    } catch (error) {
+      console.error('Failed to fetch statuses:', error)
+      // Set fallback on error
+      const legacyStatuses: ApiStatus[] = [
+        { id: 'new', name: 'New', color: '#3B82F6', order: 0 },
+        { id: 'pending', name: 'Pending', color: '#EAB308', order: 1 },
+        { id: 'approved', name: 'Approved', color: '#10B981', order: 2 },
+        { id: 'rejected', name: 'Rejected', color: '#EF4444', order: 3 },
+        { id: 'tasks', name: 'Outstanding Tasks', color: '#F59E0B', order: 4 },
+        { id: 'ready', name: 'Ready for Move-In', color: '#14B8A6', order: 5 },
+        { id: 'archived', name: 'Archived', color: '#64748B', order: 6 }
+      ]
+      setAvailableStatuses(legacyStatuses)
+    }
+  }, [])
+
+  // Initial fetch
+  useEffect(() => {
+    fetchStatuses()
+  }, [fetchStatuses])
+
+  // Refetch when dropdown opens to get latest statuses
+  useEffect(() => {
+    if (isOpen) {
+      fetchStatuses()
+    }
+  }, [isOpen, fetchStatuses])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -67,36 +123,86 @@ export default function InlineStatusBadge({
 
   const handleToggle = (selectedStatus: string) => {
     if (status.includes(selectedStatus)) {
-      // Remove status if already selected, but keep at least one
-      if (status.length > 1) {
-        onChange(status.filter(s => s !== selectedStatus))
-      }
+      // Remove status if already selected (now allows empty array)
+      onChange(status.filter(s => s !== selectedStatus))
     } else {
       // Add status if not selected
       onChange([...status, selectedStatus])
     }
   }
 
-  const displayStatuses = status.length > 0 ? status : ['N/A']
+  const handleReorder = (newOrder: string[]) => {
+    onChange(newOrder)
+  }
+
+  // Get color for a status name
+  const getStatusColor = (statusName: string): string => {
+    const apiStatus = availableStatuses.find(s => s.name === statusName)
+    return apiStatus?.color || '#6B7280' // Default grey
+  }
+
+  // Helper to get text color based on background
+  const getTextColorClass = (hexColor: string) => {
+    const r = parseInt(hexColor.slice(1, 3), 16)
+    const g = parseInt(hexColor.slice(3, 5), 16)
+    const b = parseInt(hexColor.slice(5, 7), 16)
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return luminance > 0.5 ? 'text-gray-900' : 'text-white'
+  }
+
+  // Use API statuses if available, otherwise fallback to legacy options
+  const options = availableStatuses.length > 0
+    ? availableStatuses.map(s => ({ value: s.name, label: s.name, color: s.color }))
+    : legacyOptions || []
+
+  const displayStatuses = status.length > 0 ? status : []
 
   return (
     <div className="relative inline-block" ref={badgeRef}>
-      <div
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex flex-wrap gap-1 cursor-pointer"
-      >
-        {displayStatuses.map((s, index) => {
-          const colorClass = STATUS_BADGE_COLORS[s] || 'bg-gray-100 text-gray-800'
-          return (
-            <span
-              key={`${s}-${index}`}
-              className={`px-2 py-0.5 text-xs font-sans font-medium rounded-full hover:opacity-80 transition-opacity select-text ${colorClass}`}
-            >
-              {s}
-            </span>
-          )
-        })}
-      </div>
+      {displayStatuses.length > 0 ? (
+        <Reorder.Group
+          axis="x"
+          values={displayStatuses}
+          onReorder={handleReorder}
+          className="flex flex-wrap gap-1"
+          as="div"
+        >
+          {displayStatuses.map((s) => {
+            const bgColor = getStatusColor(s)
+            const textColorClass = getTextColorClass(bgColor)
+            return (
+              <Reorder.Item
+                key={s}
+                value={s}
+                className="cursor-grab active:cursor-grabbing"
+                whileDrag={{
+                  scale: 1.05,
+                  opacity: 0.8,
+                  zIndex: 10
+                }}
+                drag
+                onClick={() => setIsOpen(!isOpen)}
+              >
+                <span
+                  className={`px-2 py-0.5 text-xs font-sans font-medium rounded-full hover:opacity-80 transition-opacity select-none ${textColorClass}`}
+                  style={{ backgroundColor: bgColor }}
+                >
+                  {s}
+                </span>
+              </Reorder.Item>
+            )
+          })}
+        </Reorder.Group>
+      ) : (
+        <div
+          onClick={() => setIsOpen(!isOpen)}
+          className="cursor-pointer"
+        >
+          <span className="px-2 py-0.5 text-xs font-sans font-medium rounded-full bg-gray-100 text-gray-400 hover:opacity-80 transition-opacity">
+            No status
+          </span>
+        </div>
+      )}
 
       <AnimatePresence>
         {isOpen && (
@@ -110,7 +216,8 @@ export default function InlineStatusBadge({
             <div className="py-1">
               {options.map((option) => {
                 const isSelected = status.includes(option.value)
-                const optionColorClass = STATUS_BADGE_COLORS[option.value] || 'bg-gray-100 text-gray-800'
+                const bgColor = option.color || getStatusColor(option.value)
+                const textColorClass = getTextColorClass(bgColor)
                 return (
                   <button
                     key={option.value}
@@ -123,7 +230,10 @@ export default function InlineStatusBadge({
                       onChange={() => {}}
                       className="w-4 h-4 rounded border-gray-300"
                     />
-                    <span className={`px-2 py-0.5 text-xs font-sans font-medium rounded-full ${optionColorClass}`}>
+                    <span
+                      className={`px-2 py-0.5 text-xs font-sans font-medium rounded-full ${textColorClass}`}
+                      style={{ backgroundColor: bgColor }}
+                    >
                       {option.label}
                     </span>
                   </button>

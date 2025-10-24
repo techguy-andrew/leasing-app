@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { STATUS_COLORS } from '@/lib/constants'
 import { fadeIn, listStagger, slideUp } from '@/lib/animations/variants'
 
 /**
@@ -24,8 +23,8 @@ import { fadeIn, listStagger, slideUp } from '@/lib/animations/variants'
  * ```
  *
  * To adapt for new projects:
- * 1. Update STATUS_COLORS constant in lib/constants.ts with your status types
- * 2. Modify statusOptions array to match your application statuses
+ * 1. Manage statuses via the Settings page (/settings)
+ * 2. Statuses are fetched from /api/statuses with dynamic colors
  * 3. Adjust calendarOptions if needed for your date filtering requirements
  */
 
@@ -40,7 +39,13 @@ interface FilterBarProps {
   onPropertyChange: (property: string) => void
 }
 
-const statusOptions = ['All', 'New', 'Pending', 'Approved', 'Rejected', 'Outstanding Tasks', 'Ready for Move-In', 'Archived']
+interface ApiStatus {
+  id: string
+  name: string
+  color: string
+  order: number
+}
+
 const calendarOptions = ['All Time', 'This Week', 'This Month']
 
 export default function FilterBar({
@@ -54,7 +59,93 @@ export default function FilterBar({
   onPropertyChange
 }: FilterBarProps) {
   const [propertyOptions, setPropertyOptions] = useState<string[]>(['All'])
-  const [isOpen, setIsOpen] = useState(false)
+  const [statusOptions, setStatusOptions] = useState<string[]>(['All'])
+  const [statusColors, setStatusColors] = useState<Record<string, string>>({ All: '#9CA3AF' })
+  const [isOpen, setIsOpen] = useState(true) // Open by default to show statuses immediately
+
+  // Fetch statuses from database and applications
+  const fetchData = useCallback(async () => {
+    try {
+      // Fetch both statuses and applications in parallel
+      const [statusesResponse, appsResponse] = await Promise.all([
+        fetch('/api/statuses', { cache: 'no-store' }),
+        fetch('/api/applications', { cache: 'no-store' })
+      ])
+
+      const statusesData = await statusesResponse.json()
+      const appsData = await appsResponse.json()
+
+      let finalStatusOptions: string[] = ['All']
+      const colors: Record<string, string> = { All: '#9CA3AF' }
+
+      // If we have custom statuses in the database, use those
+      if (statusesResponse.ok && statusesData.success && statusesData.data.length > 0) {
+        const statuses: ApiStatus[] = statusesData.data
+        const statusNames = statuses.map((status) => status.name)
+        statuses.forEach((status) => {
+          colors[status.name] = status.color
+        })
+        finalStatusOptions = ['All', ...statusNames]
+      }
+      // Otherwise, extract unique statuses from applications (migration fallback)
+      else if (appsResponse.ok && appsData.success) {
+        const apps: Array<{ status: string[] }> = appsData.data
+        const uniqueStatuses = new Set<string>()
+        apps.forEach(app => {
+          app.status.forEach(s => uniqueStatuses.add(s))
+        })
+        const extractedStatuses = Array.from(uniqueStatuses).sort()
+        finalStatusOptions = ['All', ...extractedStatuses]
+        // Assign default colors for legacy statuses
+        const defaultColors: Record<string, string> = {
+          'New': '#3B82F6',
+          'Pending': '#EAB308',
+          'Approved': '#10B981',
+          'Rejected': '#EF4444',
+          'Outstanding Tasks': '#F59E0B',
+          'Ready for Move-In': '#14B8A6',
+          'Archived': '#64748B'
+        }
+        extractedStatuses.forEach(status => {
+          colors[status] = defaultColors[status] || '#6B7280'
+        })
+      }
+
+      setStatusOptions(finalStatusOptions)
+      setStatusColors(colors)
+    } catch (error) {
+      console.error('Failed to fetch data:', error)
+      setStatusOptions(['All'])
+    }
+  }, [])
+
+  // Initial fetch on mount
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  // Refetch when window regains focus (e.g., after adding a status in another tab or returning from Settings)
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchData()
+    }
+
+    window.addEventListener('focus', handleFocus)
+
+    // Also listen for visibility change
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchData()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [fetchData])
 
   // Fetch properties from database
   useEffect(() => {
@@ -114,6 +205,15 @@ export default function FilterBar({
         onStatusChange(newFilter)
       }
     }
+  }
+
+  // Helper to get text color based on background
+  const getTextColorClass = (hexColor: string) => {
+    const r = parseInt(hexColor.slice(1, 3), 16)
+    const g = parseInt(hexColor.slice(3, 5), 16)
+    const b = parseInt(hexColor.slice(5, 7), 16)
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    return luminance > 0.5 ? 'text-gray-900' : 'text-white'
   }
   return (
     <motion.div
@@ -188,15 +288,18 @@ export default function FilterBar({
                 <div className="flex flex-row flex-wrap gap-2">
                   {statusOptions.map((status) => {
                     const isSelected = statusFilter.includes(status)
+                    const bgColor = statusColors[status] || '#6B7280'
+                    const textColor = getTextColorClass(bgColor)
                     return (
                       <button
                         key={status}
                         onClick={() => handleStatusToggle(status)}
                         className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex items-center gap-1 ${
                           isSelected
-                            ? STATUS_COLORS[status]
+                            ? textColor
                             : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                         }`}
+                        style={isSelected ? { backgroundColor: bgColor } : {}}
                       >
                         {status !== 'All' && (
                           <input
