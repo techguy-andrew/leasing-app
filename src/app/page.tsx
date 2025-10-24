@@ -88,7 +88,7 @@ export default function Home() {
             }
 
             statusCountsArray = Object.entries(counts)
-              .filter(([_, count]) => count > 0)
+              .filter(([, count]) => count > 0)
               .map(([statusName, count]) => ({
                 status: statusName,
                 count,

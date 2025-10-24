@@ -10,7 +10,7 @@ interface ConfirmModalProps {
   confirmText?: string
   cancelText?: string
   onConfirm: () => void
-  onCancel: () => void
+  onCancel?: () => void
   isDestructive?: boolean
 }
 
@@ -35,7 +35,7 @@ export default function ConfirmModal({
             exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="absolute inset-0 bg-black/20 backdrop-blur-xl"
-            onClick={onCancel}
+            onClick={onCancel || undefined}
           />
 
           {/* Modal */}
@@ -95,13 +95,15 @@ export default function ConfirmModal({
 
               {/* Buttons */}
               <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={onCancel}
-                  className="px-6 py-3 text-base font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors duration-200"
-                >
-                  {cancelText}
-                </button>
+                {onCancel && (
+                  <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-6 py-3 text-base font-semibold text-gray-700 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+                  >
+                    {cancelText}
+                  </button>
+                )}
                 <SubmitButton
                   onClick={onConfirm}
                   variant={isDestructive ? 'destructive' : 'primary'}
