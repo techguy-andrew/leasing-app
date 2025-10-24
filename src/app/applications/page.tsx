@@ -103,8 +103,8 @@ function ApplicationsContent() {
     let filtered = applications
 
     if (statusFilter.includes('All')) {
-      // "All" means show all applications (no filtering by status)
-      filtered = applications
+      // "All" means show all non-archived applications
+      filtered = applications.filter(app => !app.status.includes('Archived'))
     } else if (statusFilter.length > 0) {
       // AND logic: application must have ALL selected statuses
       filtered = applications.filter(app =>
