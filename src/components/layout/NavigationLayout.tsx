@@ -32,6 +32,8 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
     setCalendarFilter,
     propertyFilter,
     setPropertyFilter,
+    sortDirection,
+    setSortDirection,
   } = useFilter()
 
   const { onSendStatusMessage } = useToolBar()
@@ -109,6 +111,8 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
           onCalendarChange={setCalendarFilter}
           propertyFilter={propertyFilter}
           onPropertyChange={setPropertyFilter}
+          sortDirection={sortDirection}
+          onSortDirectionChange={setSortDirection}
         />
       )}
 

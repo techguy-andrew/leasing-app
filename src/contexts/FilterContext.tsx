@@ -11,6 +11,8 @@ interface FilterContextType {
   setCalendarFilter: (filter: string) => void
   propertyFilter: string
   setPropertyFilter: (property: string) => void
+  sortDirection: 'asc' | 'desc'
+  setSortDirection: (direction: 'asc' | 'desc') => void
 }
 
 const FilterContext = createContext<FilterContextType | undefined>(undefined)
@@ -20,6 +22,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const [dateType, setDateType] = useState<'moveIn' | 'application'>('moveIn')
   const [calendarFilter, setCalendarFilter] = useState('All Time')
   const [propertyFilter, setPropertyFilter] = useState('All')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   return (
     <FilterContext.Provider
@@ -32,6 +35,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
         setCalendarFilter,
         propertyFilter,
         setPropertyFilter,
+        sortDirection,
+        setSortDirection,
       }}
     >
       {children}

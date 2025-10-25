@@ -22,7 +22,7 @@ function ApplicationsContent() {
   const [applications, setApplications] = useState<Application[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const searchParams = useSearchParams()
-  const { statusFilter, setStatusFilter, dateType, calendarFilter, propertyFilter } = useFilter()
+  const { statusFilter, setStatusFilter, dateType, calendarFilter, propertyFilter, sortDirection } = useFilter()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Set status filter from URL params on mount
@@ -57,7 +57,7 @@ function ApplicationsContent() {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' })
     }
-  }, [statusFilter, propertyFilter, dateType, calendarFilter])
+  }, [statusFilter, propertyFilter, dateType, calendarFilter, sortDirection])
 
   const getStartOfWeek = useCallback(() => {
     const now = new Date()
@@ -147,7 +147,7 @@ function ApplicationsContent() {
       })
     }
 
-    // Sort by selected date type (always earliest first - ascending)
+    // Sort by selected date type and direction
     return [...filtered].sort((a, b) => {
       const dateA = dateType === 'moveIn'
         ? parseMoveInDate(a.moveInDate)
@@ -156,9 +156,10 @@ function ApplicationsContent() {
         ? parseMoveInDate(b.moveInDate)
         : parseMoveInDate(b.createdAt)
 
-      return dateA.getTime() - dateB.getTime() // Earliest first (ascending)
+      const diff = dateA.getTime() - dateB.getTime()
+      return sortDirection === 'asc' ? diff : -diff
     })
-  }, [applications, statusFilter, propertyFilter, calendarFilter, dateType, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
+  }, [applications, statusFilter, propertyFilter, calendarFilter, dateType, sortDirection, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
 
   return (
     <div ref={scrollContainerRef} className="w-full h-full overflow-y-auto">
