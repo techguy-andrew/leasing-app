@@ -43,6 +43,7 @@ interface InlineTextFieldProps {
   prefix?: string
   type?: 'text' | 'number'
   formatType?: 'text' | 'phone' | 'currency' | 'date'
+  allowNA?: boolean
 }
 
 const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(function InlineTextField({
@@ -54,7 +55,8 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
   onEnterPress,
   prefix,
   type = 'text',
-  formatType = 'text'
+  formatType = 'text',
+  allowNA = false
 }, ref) {
   const contentRef = useRef<HTMLDivElement>(null)
   const isTypingRef = useRef(false)
@@ -63,6 +65,14 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
 
   // Track if field has content (for placeholder visibility)
   const [hasContent, setHasContent] = useState(value.length > 0)
+
+  // Track if field is in N/A mode
+  const [isNAMode, setIsNAMode] = useState(value === 'N/A')
+
+  // Sync isNAMode state when value prop changes externally (e.g., auto-calculation)
+  useEffect(() => {
+    setIsNAMode(value === 'N/A')
+  }, [value])
 
   // Expose the contentRef to parent components via ref
   useImperativeHandle(ref, () => contentRef.current as HTMLDivElement, [])
@@ -101,6 +111,8 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
 
   // Apply formatting based on formatType
   const applyFormatting = (rawValue: string): string => {
+    // Don't format N/A
+    if (rawValue === 'N/A') return 'N/A'
     if (formatType === 'currency') return formatCurrency(rawValue)
     if (formatType === 'phone') return formatPhone(rawValue)
     if (formatType === 'date') return formatDate(rawValue)
@@ -172,6 +184,9 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
 
     const rawValue = e.currentTarget.textContent || ''
 
+    // Update N/A mode state
+    setIsNAMode(rawValue === 'N/A')
+
     // Apply formatting IMMEDIATELY before state update
     const formattedValue = applyFormatting(rawValue)
 
@@ -227,6 +242,18 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
     // Mark as typing to prevent DOM updates during paste
     isTypingRef.current = true
 
+    // If allowNA is enabled and pasted text contains letters, convert to N/A
+    if (allowNA && /[a-zA-Z]/.test(plainText)) {
+      if (contentRef.current) {
+        contentRef.current.textContent = 'N/A'
+      }
+      onChange('N/A')
+      setIsNAMode(true)
+      setHasContent(true)
+      isTypingRef.current = false
+      return
+    }
+
     // Apply formatting to pasted text immediately
     const formattedText = applyFormatting(plainText)
 
@@ -247,6 +274,52 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
         onEnterPress()
       }
       return
+    }
+
+    // Smart N/A handling for currency fields
+    if (allowNA && formatType === 'currency') {
+      // If user types a letter, convert to N/A
+      if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+        e.preventDefault()
+        if (contentRef.current) {
+          contentRef.current.textContent = 'N/A'
+        }
+        onChange('N/A')
+        setIsNAMode(true)
+        setHasContent(true)
+        return
+      }
+
+      // If in N/A mode and user types a digit, clear and start fresh
+      if (isNAMode && /^\d$/.test(e.key)) {
+        e.preventDefault()
+        if (contentRef.current) {
+          contentRef.current.textContent = ''
+        }
+        setIsNAMode(false)
+        setHasContent(false)
+        // Trigger the input event manually with the digit
+        setTimeout(() => {
+          if (contentRef.current) {
+            contentRef.current.textContent = e.key
+            const inputEvent = new Event('input', { bubbles: true })
+            contentRef.current.dispatchEvent(inputEvent)
+          }
+        }, 0)
+        return
+      }
+
+      // If in N/A mode and user presses backspace, clear entirely
+      if (isNAMode && e.key === 'Backspace') {
+        e.preventDefault()
+        if (contentRef.current) {
+          contentRef.current.textContent = ''
+        }
+        onChange('')
+        setIsNAMode(false)
+        setHasContent(false)
+        return
+      }
     }
 
     // For number type, only allow digits
@@ -280,7 +353,7 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
   return (
     <div className="relative flex items-baseline">
       {prefix && (
-        <span className={`text-base sm:text-lg font-sans mr-1 ${value === '' ? 'text-gray-400' : 'text-gray-900'}`}>
+        <span className={`text-base sm:text-lg font-sans mr-1 ${value === '' || value === 'N/A' ? 'text-gray-400' : 'text-gray-900'}`}>
           {prefix}
         </span>
       )}
@@ -299,11 +372,11 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
               onInput={handleInput}
               onPaste={handlePaste}
               onKeyDown={handleKeyDown}
-              className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text text-gray-900 ${!hasContent ? 'min-h-[1.5rem]' : ''} ${className}`}
+              className={`text-base sm:text-lg font-sans bg-transparent outline-none cursor-text select-text ${isNAMode ? 'text-gray-400' : 'text-gray-900'} ${!hasContent ? 'min-h-[1.5rem]' : ''} ${className}`}
             />
           </>
         ) : (
-          <div className={`text-base sm:text-lg font-sans select-text ${value === '' ? 'text-gray-400' : 'text-gray-900'} ${className}`}>
+          <div className={`text-base sm:text-lg font-sans select-text ${value === '' || value === 'N/A' ? 'text-gray-400' : 'text-gray-900'} ${className}`}>
             {value || placeholder}
           </div>
         )}

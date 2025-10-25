@@ -165,6 +165,9 @@ export default function ApplicationForm({
   // Format currency with fixed decimal point
   // Decimal is always in place, user types digits and they fill in naturally
   const formatCurrency = useCallback((value: string): string => {
+    // Don't format N/A
+    if (value === 'N/A') return 'N/A'
+
     // Remove all non-digit characters
     const digitsOnly = value.replace(/\D/g, '')
 
@@ -235,7 +238,7 @@ export default function ApplicationForm({
     const currencyFields = ['deposit', 'rent', 'petFee', 'petRent', 'proratedRent', 'concession', 'rentersInsurance', 'adminFee'] as const
     currencyFields.forEach(field => {
       const value = formatted[field]
-      if (value && typeof value === 'string') {
+      if (value && typeof value === 'string' && value !== 'N/A') {
         formatted[field] = formatCurrency(value)
       }
     })
@@ -256,6 +259,12 @@ export default function ApplicationForm({
 
   // Auto-calculate prorated rent when move-in date or rent changes
   useEffect(() => {
+    // If rent is N/A, set prorated rent to N/A
+    if (formData.rent === 'N/A') {
+      setFormData(prev => ({ ...prev, proratedRent: 'N/A' }))
+      return
+    }
+
     // If either field is empty, clear the prorated rent
     if (!formData.moveInDate || !formData.rent) {
       setFormData(prev => ({ ...prev, proratedRent: '' }))
@@ -553,6 +562,7 @@ export default function ApplicationForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
+                allowNA={true}
               />
             </motion.div>
 
@@ -569,6 +579,7 @@ export default function ApplicationForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
+                allowNA={true}
               />
             </motion.div>
 
@@ -585,6 +596,7 @@ export default function ApplicationForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
+                allowNA={true}
               />
             </motion.div>
 
@@ -601,6 +613,7 @@ export default function ApplicationForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
+                allowNA={true}
               />
             </motion.div>
 
@@ -617,6 +630,7 @@ export default function ApplicationForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
+                allowNA={true}
               />
             </motion.div>
 
@@ -633,6 +647,7 @@ export default function ApplicationForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
+                allowNA={true}
               />
             </motion.div>
 
@@ -649,6 +664,7 @@ export default function ApplicationForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
+                allowNA={true}
               />
             </motion.div>
 
@@ -665,6 +681,7 @@ export default function ApplicationForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
+                allowNA={true}
               />
             </motion.div>
           </motion.div>
