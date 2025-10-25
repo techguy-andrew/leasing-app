@@ -3,6 +3,7 @@
 import { memo } from 'react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
+import Pill from '@/components/shared/Pill'
 
 /**
  * ApplicationListItem Component
@@ -43,14 +44,6 @@ interface ApplicationListItemProps {
 }
 
 const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, property, unitNumber, status, moveInDate, statusColors = {} }: ApplicationListItemProps) {
-  // Helper to get text color based on background
-  const getTextColorClass = (hexColor: string) => {
-    const r = parseInt(hexColor.slice(1, 3), 16)
-    const g = parseInt(hexColor.slice(3, 5), 16)
-    const b = parseInt(hexColor.slice(5, 7), 16)
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-    return luminance > 0.5 ? 'text-gray-900' : 'text-white'
-  }
   return (
     <Link
       href={`/applications/${id}`}
@@ -65,15 +58,13 @@ const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, p
             <div className="flex flex-wrap gap-1.5">
               {status.map((s, index) => {
                 const bgColor = statusColors[s] || '#6B7280' // Default grey
-                const textColor = getTextColorClass(bgColor)
                 return (
-                  <span
+                  <Pill
                     key={`${s}-${index}`}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-full w-fit ${textColor}`}
-                    style={{ backgroundColor: bgColor }}
-                  >
-                    {s}
-                  </span>
+                    label={s}
+                    color={bgColor}
+                    variant="default"
+                  />
                 )
               })}
             </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { fadeIn, listStagger, slideUp } from '@/lib/animations/variants'
+import Pill from '@/components/shared/Pill'
 
 /**
  * FilterBar Component
@@ -207,14 +208,6 @@ export default function FilterBar({
     }
   }
 
-  // Helper to get text color based on background
-  const getTextColorClass = (hexColor: string) => {
-    const r = parseInt(hexColor.slice(1, 3), 16)
-    const g = parseInt(hexColor.slice(3, 5), 16)
-    const b = parseInt(hexColor.slice(5, 7), 16)
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-    return luminance > 0.5 ? 'text-gray-900' : 'text-white'
-  }
   return (
     <motion.div
       data-filterbar
@@ -289,28 +282,16 @@ export default function FilterBar({
                   {statusOptions.map((status) => {
                     const isSelected = statusFilter.includes(status)
                     const bgColor = statusColors[status] || '#6B7280'
-                    const textColor = getTextColorClass(bgColor)
                     return (
-                      <button
+                      <Pill
                         key={status}
+                        label={status}
+                        color={bgColor}
+                        variant="filter"
                         onClick={() => handleStatusToggle(status)}
-                        className={`px-2 py-0.5 text-xs font-medium rounded-full transition-colors flex items-center gap-1 ${
-                          isSelected
-                            ? textColor
-                            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                        }`}
-                        style={isSelected ? { backgroundColor: bgColor } : {}}
-                      >
-                        {status !== 'All' && (
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => {}}
-                            className="w-3 h-3 rounded border-gray-300 pointer-events-none"
-                          />
-                        )}
-                        {status}
-                      </button>
+                        isSelected={isSelected}
+                        showCheckbox={true}
+                      />
                     )
                   })}
                 </div>

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import InlineTextField from '@/components/shared/fields/InlineTextField'
 import InlineSelectField from '@/components/shared/fields/InlineSelectField'
-import InlineStatusBadge from '@/components/shared/fields/InlineStatusBadge'
+import StatusBadge from '@/components/shared/StatusBadge'
 import EditMenuButton from '@/components/shared/buttons/EditMenuButton'
 import SaveButton from '@/components/shared/buttons/SaveButton'
 import CancelButton from '@/components/shared/buttons/CancelButton'
@@ -460,11 +460,8 @@ export default function ApplicationDetailForm({
           >
             {/* Status Badge */}
             <motion.div className="flex items-center gap-3" variants={formFieldItem}>
-              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
-                Status:
-              </span>
-              <InlineStatusBadge
-                status={formData.status}
+              <StatusBadge
+                statuses={formData.status}
                 onChange={handleStatusChange}
               />
             </motion.div>
