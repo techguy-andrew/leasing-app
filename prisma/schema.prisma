@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Application {
+  id               Int      @id @default(autoincrement())
+  userId           String?  // Clerk user ID (optional for backward compatibility)
+  status           String[] @default([])
+  moveInDate       String
+  property         String
+  unitNumber       String
+  applicant        String
+  email            String?
+  phone            String?
+  createdAt        String   // Application date in MM/DD/YYYY format
+  updatedAt        DateTime @updatedAt
+  tasks            Task[]   // One-to-many relationship with tasks
+
+  // Payment fields
+  deposit          String?  // Security deposit amount
+  rent             String?  // Monthly rent amount
+  petFee           String?  // Pet fee (if applicable)
+  petRent          String?  // Monthly pet rent
+  proratedRent     String?  // Prorated rent amount
+  concession       String?  // Concession amount
+  rentersInsurance String?  // Renters insurance cost
+  adminFee         String?  // Administrative fee
+
+  @@index([status])
+  @@index([moveInDate])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+enum TaskType {
+  AGENT
+  APPLICANT
+  NOTES
+}
+
+model Task {
+  id            String      @id @default(cuid())
+  description   String
+  completed     Boolean     @default(false)
+  type          TaskType    @default(AGENT)
+  order         Int         @default(0)
+  applicationId Int
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([applicationId, type, order], name: "unique_task_order_per_type")
+  @@index([applicationId])
+  @@index([applicationId, order])
+  @@index([applicationId, type])
+}
+
+model Property {
+  id             Int      @id @default(autoincrement())
+  userId         String?  // Clerk user ID (optional for backward compatibility)
+  name           String   // Property name
+  street         String   // Street address
+  city           String   // City
+  state          String   // State
+  zip            String   // ZIP code
+  energyProvider String   // Utility/energy company name and contact info
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([name])
+}
+
+model Status {
+  id        String   @id @default(cuid())
+  name      String
+  color     String   @default("#6B7280") // Hex color code (default grey)
+  order     Int      @default(0)
+  userId    String?  // Clerk user ID (optional for backward compatibility)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name], name: "unique_status_name_per_user")
+  @@unique([userId, order], name: "unique_status_order_per_user")
+  @@index([userId])
+  @@index([userId, order])
+}
