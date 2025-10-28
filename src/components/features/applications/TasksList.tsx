@@ -113,13 +113,13 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
       description: '',
       completed: false,
       type: taskType,
-      order: 0, // New tasks get order 0 (will be at the top)
+      order: tasks.length, // New tasks get the highest order (will be at the bottom)
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
 
-    // Add to beginning of list and set it to edit mode
-    setTasks(prev => [newTask, ...prev])
+    // Add to end of list and set it to edit mode
+    setTasks(prev => [...prev, newTask])
     setEditingTaskId(tempId)
   }
 
