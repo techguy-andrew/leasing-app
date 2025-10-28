@@ -57,7 +57,7 @@ interface Task {
   id: string
   description: string
   completed: boolean
-  type: 'AGENT' | 'APPLICANT' | 'NOTES'
+  type: 'AGENT' | 'APPLICANT' | 'NOTES' | 'TODO'
 }
 
 interface ApplicationData {

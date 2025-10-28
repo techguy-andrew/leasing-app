@@ -86,6 +86,19 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
               </motion.div>
               <motion.div variants={slideUp}>
                 <Link
+                  href="/to-do-list"
+                  onClick={onClose}
+                  className={`flex items-center px-5 py-4 rounded-xl transition-colors duration-200 text-base font-medium ${
+                    pathname === '/to-do-list'
+                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  To-Do List
+                </Link>
+              </motion.div>
+              <motion.div variants={slideUp}>
+                <Link
                   href="/properties"
                   onClick={onClose}
                   className={`flex items-center px-5 py-4 rounded-xl transition-colors duration-200 text-base font-medium ${

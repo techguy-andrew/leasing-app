@@ -14,7 +14,7 @@ interface Task {
   id: string
   description: string
   completed: boolean
-  type: 'AGENT' | 'APPLICANT' | 'NOTES'
+  type: 'AGENT' | 'APPLICANT' | 'NOTES' | 'TODO'
   order: number
   createdAt: string
   updatedAt: string
@@ -22,15 +22,16 @@ interface Task {
 }
 
 interface TasksListProps {
-  applicationId: number
+  applicationId?: number
   initialTasks?: Task[]
   onTasksChange?: (tasks: Task[]) => void
-  taskType: 'AGENT' | 'APPLICANT' | 'NOTES'
+  taskType: 'AGENT' | 'APPLICANT' | 'NOTES' | 'TODO'
   title: string
+  userLevel?: boolean // Flag to indicate if this is user-level tasks (not tied to application)
 }
 
 // Helper function to get section-specific labels
-function getSectionLabels(taskType: 'AGENT' | 'APPLICANT' | 'NOTES') {
+function getSectionLabels(taskType: 'AGENT' | 'APPLICANT' | 'NOTES' | 'TODO') {
   switch (taskType) {
     case 'AGENT':
       return { singular: 'Leasing Agent Task', plural: 'Leasing Agent Tasks', lowercase: 'leasing agent task' }
@@ -38,10 +39,12 @@ function getSectionLabels(taskType: 'AGENT' | 'APPLICANT' | 'NOTES') {
       return { singular: 'Applicant Task', plural: 'Applicant Tasks', lowercase: 'applicant task' }
     case 'NOTES':
       return { singular: 'Note', plural: 'Notes', lowercase: 'note' }
+    case 'TODO':
+      return { singular: 'To-Do', plural: 'To-Dos', lowercase: 'to-do' }
   }
 }
 
-export default function TasksList({ applicationId, initialTasks = [], onTasksChange, taskType, title }: TasksListProps) {
+export default function TasksList({ applicationId, initialTasks = [], onTasksChange, taskType, title, userLevel = false }: TasksListProps) {
   // Get section-specific labels
   const labels = getSectionLabels(taskType)
 
@@ -186,7 +189,10 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
     try {
       if (isNewTask) {
         // Create new task
-        const response = await fetch(`/api/applications/${applicationId}/tasks`, {
+        const endpoint = userLevel
+          ? '/api/tasks'
+          : `/api/applications/${applicationId}/tasks`
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -215,14 +221,14 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
         setToastMessage(`${labels.singular} added successfully!`)
       } else {
         // Update existing task
-        const response = await fetch(
-          `/api/applications/${applicationId}/tasks/${editingTaskId}`,
-          {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ description: taskToSave.description.trim() })
-          }
-        )
+        const endpoint = userLevel
+          ? `/api/tasks/${editingTaskId}`
+          : `/api/applications/${applicationId}/tasks/${editingTaskId}`
+        const response = await fetch(endpoint, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description: taskToSave.description.trim() })
+        })
 
         const data = await response.json()
 
@@ -265,12 +271,12 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
     if (!deletingTaskId) return
 
     try {
-      const response = await fetch(
-        `/api/applications/${applicationId}/tasks/${deletingTaskId}`,
-        {
-          method: 'DELETE'
-        }
-      )
+      const endpoint = userLevel
+        ? `/api/tasks/${deletingTaskId}`
+        : `/api/applications/${applicationId}/tasks/${deletingTaskId}`
+      const response = await fetch(endpoint, {
+        method: 'DELETE'
+      })
 
       const data = await response.json()
 
@@ -324,14 +330,14 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
     )
 
     try {
-      const response = await fetch(
-        `/api/applications/${applicationId}/tasks/${task.id}`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ completed: newCompletedStatus })
-        }
-      )
+      const endpoint = userLevel
+        ? `/api/tasks/${task.id}`
+        : `/api/applications/${applicationId}/tasks/${task.id}`
+      const response = await fetch(endpoint, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: newCompletedStatus })
+      })
 
       const data = await response.json()
 
@@ -386,14 +392,14 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
         return
       }
 
-      const response = await fetch(
-        `/api/applications/${applicationId}/tasks/reorder`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ taskIds })
-        }
-      )
+      const endpoint = userLevel
+        ? '/api/tasks/reorder'
+        : `/api/applications/${applicationId}/tasks/reorder`
+      const response = await fetch(endpoint, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ taskIds })
+      })
 
       const data = await response.json()
 

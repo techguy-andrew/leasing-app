@@ -7,11 +7,11 @@ import OptionsModal, { ModalAction } from '@/components/shared/modals/OptionsMod
 interface TaskMenuButtonProps {
   onEdit: () => void
   onDelete: () => void
-  taskType: 'AGENT' | 'APPLICANT' | 'NOTES'
+  taskType: 'AGENT' | 'APPLICANT' | 'NOTES' | 'TODO'
 }
 
 // Helper function to get section-specific labels
-function getSectionLabels(taskType: 'AGENT' | 'APPLICANT' | 'NOTES') {
+function getSectionLabels(taskType: 'AGENT' | 'APPLICANT' | 'NOTES' | 'TODO') {
   switch (taskType) {
     case 'AGENT':
       return { singular: 'Leasing Agent Task', plural: 'Leasing Agent Tasks', lowercase: 'leasing agent task' }
@@ -19,6 +19,8 @@ function getSectionLabels(taskType: 'AGENT' | 'APPLICANT' | 'NOTES') {
       return { singular: 'Applicant Task', plural: 'Applicant Tasks', lowercase: 'applicant task' }
     case 'NOTES':
       return { singular: 'Note', plural: 'Notes', lowercase: 'note' }
+    case 'TODO':
+      return { singular: 'To-Do', plural: 'To-Dos', lowercase: 'to-do' }
   }
 }
 

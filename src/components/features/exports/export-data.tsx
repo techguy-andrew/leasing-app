@@ -43,7 +43,7 @@ interface Task {
   id: string
   description: string
   completed: boolean
-  type: 'AGENT' | 'APPLICANT' | 'NOTES'
+  type: 'AGENT' | 'APPLICANT' | 'NOTES' | 'TODO'
   order: number
   applicationId: number
   createdAt: Date
