@@ -520,20 +520,38 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
             }}
             layout
           >
+            {/* Action Buttons - Fit-content container as left-most element */}
+            <div className="flex-shrink-0 flex items-center overflow-visible">
+              {editingTaskId === (task.clientId || task.id) ? (
+                <div className="flex items-center gap-2">
+                  <CancelButton onClick={handleCancelEdit} size="small" />
+                  <SaveButton onClick={handleSaveEdit} disabled={isSaving} size="small" />
+                </div>
+              ) : (
+                <div>
+                  <TaskMenuButton
+                    onEdit={() => handleEditTask(task)}
+                    onDelete={() => handleDeleteTask(task.id)}
+                    taskType={taskType}
+                  />
+                </div>
+              )}
+            </div>
+
             {/* Checkbox */}
             {task.completed ? (
               <IconPack.CheckboxChecked
                 onClick={() => handleToggleTask(task)}
                 size="small"
                 disabled={editingTaskId === (task.clientId || task.id)}
-                className="flex-shrink-0 mt-[2px]"
+                className="flex-shrink-0"
               />
             ) : (
               <IconPack.CheckboxEmpty
                 onClick={() => handleToggleTask(task)}
                 size="small"
                 disabled={editingTaskId === (task.clientId || task.id)}
-                className="flex-shrink-0 mt-[2px]"
+                className="flex-shrink-0"
               />
             )}
 
@@ -569,22 +587,6 @@ export default function TasksList({ applicationId, initialTasks = [], onTasksCha
                 />
               </div>
             </div>
-
-            {/* Action Buttons */}
-            {editingTaskId === (task.clientId || task.id) ? (
-              <div className="flex items-center gap-2">
-                <CancelButton onClick={handleCancelEdit} size="small" />
-                <SaveButton onClick={handleSaveEdit} disabled={isSaving} size="small" />
-              </div>
-            ) : (
-              <div>
-                <TaskMenuButton
-                  onEdit={() => handleEditTask(task)}
-                  onDelete={() => handleDeleteTask(task.id)}
-                  taskType={taskType}
-                />
-              </div>
-            )}
           </Reorder.Item>
         ))}
 
