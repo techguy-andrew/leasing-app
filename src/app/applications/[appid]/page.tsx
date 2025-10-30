@@ -75,14 +75,36 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   const [showStatusModal, setShowStatusModal] = useState(false)
   const { setOnSendStatusMessage } = useToolBar()
 
-  // Set up toolbar callback
-  useEffect(() => {
-    setOnSendStatusMessage(() => () => setShowStatusModal(true))
-    return () => setOnSendStatusMessage(null)
-  }, [setOnSendStatusMessage])
+  // Load application data - extracted for reusability
+  const loadApplication = async (id: number) => {
+    try {
+      const response = await fetch(`/api/applications/${id}`)
+      const data = await response.json()
 
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch application')
+      }
+
+      setApplication(data.data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    }
+  }
+
+  // Set up toolbar callback - refresh data before opening modal
   useEffect(() => {
-    async function loadApplication() {
+    setOnSendStatusMessage(() => async () => {
+      if (appId) {
+        await loadApplication(appId) // Refresh data first
+      }
+      setShowStatusModal(true) // Then open modal with fresh data
+    })
+    return () => setOnSendStatusMessage(null)
+  }, [setOnSendStatusMessage, appId])
+
+  // Initial load on mount
+  useEffect(() => {
+    async function initialize() {
       try {
         const { appid } = await params
         const id = parseInt(appid, 10)
@@ -94,15 +116,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
         }
 
         setAppId(id)
-
-        const response = await fetch(`/api/applications/${id}`)
-        const data = await response.json()
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch application')
-        }
-
-        setApplication(data.data)
+        await loadApplication(id)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
@@ -110,7 +124,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       }
     }
 
-    loadApplication()
+    initialize()
   }, [params])
 
   const handleSave = async (formData: FormData) => {
@@ -311,6 +325,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           deposit: application.deposit,
           rent: application.rent,
           petFee: application.petFee,
+          petRent: application.petRent,
           rentersInsurance: application.rentersInsurance,
           adminFee: application.adminFee,
           tasks: application.tasks || []

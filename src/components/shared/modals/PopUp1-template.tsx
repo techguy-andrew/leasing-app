@@ -1,13 +1,12 @@
 /**
  * Email Template Configuration for PopUp1 Modal
  *
- * This file contains the email template used for sending status messages to applicants.
+ * This file contains the Tasks Reminder Template used for sending outstanding items reminders to applicants.
  * You can easily customize the template by editing the configuration and template sections below.
  *
  * To modify:
- * 1. Edit TEMPLATE_CONFIG to change company info, phone numbers, placeholders, etc.
- * 2. Edit PAYMENT_FIELDS to add/remove/reorder payment fields
- * 3. Edit the generateEmailTemplate function to change the email structure and text
+ * 1. Edit TEMPLATE_CONFIG to change the message text and structure
+ * 2. Edit the generateEmailTemplate function to change the email structure
  */
 
 // ============================================================================
@@ -15,39 +14,12 @@
 // ============================================================================
 
 export const TEMPLATE_CONFIG = {
-  // Company Information
+  // Company name for sign-off
   companyName: 'Coves Living',
-  contactPhone: '515-207-3878',
 
-  // Portal Information
-  portalName: 'online resident portal',
-
-  // Default Placeholders (shown when data is missing)
-  defaultPropertyAddress: '[PROPERTY ADDRESS]',
-  defaultEnergyProvider: '[ENERGY COMPANY]',
-
-  // Section Toggles (set to false to hide sections)
-  showWelcomeMessage: true,
-  showAddress: true,
-  showMoveInDate: true,
-  showPaymentBreakdown: true,
-  showUtilitySetup: true,
+  // Section toggles (set to false to hide sections)
   showTasks: true,
-  showContactInfo: true,
 }
-
-// Payment Fields Configuration
-// Add, remove, or reorder payment fields here
-// Each field needs: key (database field name), label (display name)
-export const PAYMENT_FIELDS = [
-  { key: 'deposit', label: 'Deposit' },
-  { key: 'rent', label: 'Rent' },
-  { key: 'petFee', label: 'Pet Fee' },
-  { key: 'rentersInsurance', label: 'Renter\'s Insurance' },
-  { key: 'adminFee', label: 'Admin Fee' },
-  // Add more fields here as needed:
-  // { key: 'parkingFee', label: 'Parking Fee' },
-]
 
 // ============================================================================
 // HELPER FUNCTIONS - Utility functions for formatting and calculations
@@ -69,62 +41,51 @@ interface ApplicationData {
   deposit: string | null
   rent: string | null
   petFee: string | null
+  petRent: string | null
   rentersInsurance: string | null
   adminFee: string | null
   tasks: Task[]
 }
 
 /**
- * Format a number as currency with 2 decimal places
+ * Safely parse a string to a number, handling various formats
+ * Removes formatting characters like $, commas, and whitespace
  */
-export function formatCurrency(value: string | null): string {
-  if (!value) return '0.00'
-  const num = parseFloat(value)
-  return isNaN(num) ? '0.00' : num.toFixed(2)
+function safeParseFloat(value: string | null | undefined): number {
+  if (!value) return 0
+
+  // Remove common formatting: $, commas, whitespace
+  const cleaned = value.toString().trim()
+    .replace(/[$,]/g, '')
+    .replace(/\s+/g, '')
+
+  const parsed = parseFloat(cleaned)
+  return isNaN(parsed) ? 0 : parsed
 }
 
 /**
- * Calculate the total initial payment from all payment fields
+ * Calculate the initial payment from all payment fields
+ * Includes: Rent, Deposit, Insurance, Admin Fee, Pet Fee (if applicable), Pet Rent (if applicable)
  */
 export function calculateInitialPayment(data: ApplicationData): number {
-  let total = 0
+  const rent = safeParseFloat(data.rent)
+  const deposit = safeParseFloat(data.deposit)
+  const insurance = safeParseFloat(data.rentersInsurance)
+  const adminFee = safeParseFloat(data.adminFee)
+  const petFee = safeParseFloat(data.petFee)
+  const petRent = safeParseFloat(data.petRent)
 
-  PAYMENT_FIELDS.forEach(field => {
-    const value = data[field.key as keyof ApplicationData]
-    if (typeof value === 'string') {
-      const amount = parseFloat(value || '0')
-      total += isNaN(amount) ? 0 : amount
-    }
-  })
-
-  return total
+  return rent + deposit + insurance + adminFee + petFee + petRent
 }
 
 /**
- * Build payment breakdown string with only non-empty fields
+ * Format a number as currency with commas and 2 decimal places
  */
-export function buildPaymentBreakdown(data: ApplicationData): string {
-  const paymentItems: { amount: string; label: string }[] = []
-
-  PAYMENT_FIELDS.forEach(field => {
-    const value = data[field.key as keyof ApplicationData]
-    if (typeof value === 'string' && value && parseFloat(value) > 0) {
-      paymentItems.push({
-        amount: formatCurrency(value),
-        label: field.label
-      })
-    }
+export function formatCurrency(amount: number): string {
+  return amount.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
   })
-
-  const initialPayment = calculateInitialPayment(data)
-
-  if (paymentItems.length > 0) {
-    return paymentItems
-      .map(item => `$${item.amount} (${item.label})`)
-      .join(' + ') + ` = $${initialPayment.toFixed(2)}`
-  }
-
-  return `$${initialPayment.toFixed(2)}`
 }
 
 /**
@@ -139,7 +100,7 @@ export function formatTasksList(tasks: Task[]): string {
     return 'No outstanding tasks'
   }
 
-  return incompleteApplicantTasks.map(task => `- ${task.description}`).join('\n')
+  return incompleteApplicantTasks.map(task => task.description).join('\n')
 }
 
 // ============================================================================
@@ -157,58 +118,38 @@ export function formatTasksList(tasks: Task[]): string {
  */
 export function generateEmailTemplate(data: ApplicationData): string {
   const config = TEMPLATE_CONFIG
-  const initialPayment = calculateInitialPayment(data)
-  const propertyAddress = data.propertyAddress || config.defaultPropertyAddress
-  const energyProvider = data.energyProvider || config.defaultEnergyProvider
-  const paymentBreakdown = buildPaymentBreakdown(data)
   const tasksList = formatTasksList(data.tasks)
+  const initialPayment = calculateInitialPayment(data)
+  const formattedPayment = formatCurrency(initialPayment)
 
   // Build the email template
   // Edit the text below to customize your email
 
   let template = ''
 
-  // ---- GREETING SECTION ----
+  // ---- GREETING ----
   template += `Hello ${data.applicant},\n\n`
 
-  // ---- WELCOME MESSAGE ----
-  if (config.showWelcomeMessage) {
-    template += `Welcome to ${config.companyName} at ${data.property}!\n\n`
-  }
+  // ---- OPENING MESSAGE ----
+  template += `The following tasks are outstanding and require your immediate attention.\n\n`
 
-  // ---- ADDRESS SECTION ----
-  if (config.showAddress) {
-    template += `Address:\n${propertyAddress}\n\n`
-  }
+  // ---- MOVE-IN DATE ----
+  template += `Move-In Date: ${data.moveInDate}\n`
 
-  // ---- MOVE-IN DATE SECTION ----
-  if (config.showMoveInDate) {
-    template += `Your move-in date is scheduled for ${data.moveInDate}.\n\n`
-  }
+  // ---- INITIAL PAYMENT ----
+  template += `Initial Payment: $${formattedPayment}\n`
 
-  // ---- LEASE AGREEMENT SECTION ----
-  template += `The lease agreement is ready to sign. Please log in to your ${config.portalName} to sign the agreement and make your initial payment as soon as possible.\n\n`
-
-  // ---- PAYMENT BREAKDOWN SECTION ----
-  if (config.showPaymentBreakdown && initialPayment > 0) {
-    template += `Your initial payment is $${initialPayment.toFixed(2)}. Your initial payment must be made before your move-in date.\n\n`
-    template += `${paymentBreakdown}\n\n`
-  }
-
-  // ---- UTILITY SETUP SECTION ----
-  if (config.showUtilitySetup) {
-    template += `Please contact ${energyProvider} to set up the utilities in your name. You must set up your account and provide us with your account number before your move-in date.\n\n`
-  }
-
-  // ---- TASKS SECTION ----
+  // ---- OUTSTANDING TASKS SECTION ----
   if (config.showTasks) {
-    template += `Tasks:\n${tasksList}\n\n`
+    template += `Outstanding Tasks:\n${tasksList}\n\n`
   }
 
-  // ---- CONTACT INFORMATION SECTION ----
-  if (config.showContactInfo) {
-    template += `If you have any questions, please call ${config.companyName} at ${config.contactPhone}.`
-  }
+  // ---- WARNING AND SUPPORT MESSAGE ----
+  template += `These items are required and must be completed prior to move-in. Failure to complete them may result in a delay or rescheduling of your move-in date. We understand that moving can be busy, and we're here to support you through this process. If you're facing any difficulties or have questions about completing these requirements, please reach out to us directly so we can work together to get everything handled. Thank you for your attention to this matter. We're committed to ensuring your move-in goes smoothly!\n\n`
+
+  // ---- SIGN-OFF ----
+  template += `Best regards,\n`
+  template += `${config.companyName}`
 
   return template
 }

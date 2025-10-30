@@ -21,6 +21,7 @@ interface ApplicationData {
   deposit: string | null
   rent: string | null
   petFee: string | null
+  petRent: string | null
   rentersInsurance: string | null
   adminFee: string | null
   tasks: Task[]
