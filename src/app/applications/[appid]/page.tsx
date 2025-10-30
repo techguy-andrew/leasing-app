@@ -40,6 +40,8 @@ interface Application {
   rentersInsurance: string | null
   adminFee: string | null
   initialPayment: string | null
+  amountPaid: string | null
+  remainingBalance: string | null
   propertyAddress?: string | null
   energyProvider?: string | null
 }
@@ -62,6 +64,8 @@ interface FormData {
   rentersInsurance: string
   adminFee: string
   initialPayment: string
+  amountPaid: string
+  remainingBalance: string
 }
 
 interface PageProps {
@@ -159,7 +163,9 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       concession: formData.concession.trim() || null,
       rentersInsurance: formData.rentersInsurance.trim() || null,
       adminFee: formData.adminFee.trim() || null,
-      initialPayment: formData.initialPayment.trim() || null
+      initialPayment: formData.initialPayment.trim() || null,
+      amountPaid: formData.amountPaid.trim() || null,
+      remainingBalance: formData.remainingBalance.trim() || null
     }
 
     const response = await fetch(`/api/applications/${appId}`, {
@@ -225,7 +231,9 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       concession: application.concession?.trim() || null,
       rentersInsurance: application.rentersInsurance?.trim() || null,
       adminFee: application.adminFee?.trim() || null,
-      initialPayment: application.initialPayment?.trim() || null
+      initialPayment: application.initialPayment?.trim() || null,
+      amountPaid: application.amountPaid?.trim() || null,
+      remainingBalance: application.remainingBalance?.trim() || null
     }
 
     const response = await fetch(`/api/applications/${appId}`, {
@@ -306,7 +314,9 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           concession: application.concession || '',
           rentersInsurance: application.rentersInsurance || '',
           adminFee: application.adminFee || '',
-          initialPayment: application.initialPayment || ''
+          initialPayment: application.initialPayment || '',
+          amountPaid: application.amountPaid || '',
+          remainingBalance: application.remainingBalance || ''
         }}
         initialTasks={application.tasks || []}
         applicationId={appId}
@@ -333,6 +343,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           petRent: application.petRent,
           rentersInsurance: application.rentersInsurance,
           adminFee: application.adminFee,
+          amountPaid: application.amountPaid,
+          remainingBalance: application.remainingBalance,
           tasks: application.tasks || []
         }}
         onClose={() => setShowStatusModal(false)}

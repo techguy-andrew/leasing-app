@@ -121,7 +121,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { applicant, createdAt, moveInDate, property, unitNumber, email, phone, status, tasks, deposit, rent, petFee, petRent, proratedRent, concession, rentersInsurance, adminFee, initialPayment } = validationResult.data
+    const { applicant, createdAt, moveInDate, property, unitNumber, email, phone, status, tasks, deposit, rent, petFee, petRent, proratedRent, concession, rentersInsurance, adminFee, initialPayment, amountPaid, remainingBalance } = validationResult.data
 
     // Verify the application exists
     const existingApplication = await prisma.application.findUnique({
@@ -157,6 +157,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       rentersInsurance: string | null
       adminFee: string | null
       initialPayment: string | null
+      amountPaid: string | null
+      remainingBalance: string | null
       tasks?: {
         deleteMany?: { id: { in: string[] } }
         updateMany: { where: { id: string }; data: { description: string; completed: boolean } }[]
@@ -179,7 +181,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       concession: concession || null,
       rentersInsurance: rentersInsurance || null,
       adminFee: adminFee || null,
-      initialPayment: initialPayment || null
+      initialPayment: initialPayment || null,
+      amountPaid: amountPaid || null,
+      remainingBalance: remainingBalance || null
     }
 
     // Only process tasks if they are explicitly provided and not empty

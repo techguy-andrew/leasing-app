@@ -122,7 +122,9 @@ export const applicationCreateSchema = z.object({
   concession: optionalStringSchema.optional(),
   rentersInsurance: optionalStringSchema.optional(),
   adminFee: optionalStringSchema.optional(),
-  initialPayment: optionalStringSchema.optional()
+  initialPayment: optionalStringSchema.optional(),
+  amountPaid: optionalStringSchema.optional(),
+  remainingBalance: optionalStringSchema.optional()
 })
 
 // Schema for updating an application (PUT)
@@ -159,7 +161,9 @@ export const applicationUpdateSchema = z.object({
   concession: optionalStringSchema.optional(),
   rentersInsurance: optionalStringSchema.optional(),
   adminFee: optionalStringSchema.optional(),
-  initialPayment: optionalStringSchema.optional()
+  initialPayment: optionalStringSchema.optional(),
+  amountPaid: optionalStringSchema.optional(),
+  remainingBalance: optionalStringSchema.optional()
 })
 
 // Type exports for TypeScript

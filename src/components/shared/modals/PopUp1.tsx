@@ -24,6 +24,8 @@ interface ApplicationData {
   petRent: string | null
   rentersInsurance: string | null
   adminFee: string | null
+  amountPaid: string | null
+  remainingBalance: string | null
   tasks: Task[]
 }
 

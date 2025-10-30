@@ -31,6 +31,8 @@ model Application {
   rentersInsurance String?  // Renters insurance cost
   adminFee         String?  // Administrative fee
   initialPayment   String?  // Initial payment amount (auto-calculated)
+  amountPaid       String?  // Amount paid by applicant
+  remainingBalance String?  // Remaining balance (Initial Payment - Amount Paid, auto-calculated)
 
   @@index([status])
   @@index([moveInDate])

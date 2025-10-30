@@ -71,6 +71,8 @@ interface FormData {
   rentersInsurance: string
   adminFee: string
   initialPayment: string
+  amountPaid: string
+  remainingBalance: string
 }
 
 interface ApplicationFormProps {
@@ -101,7 +103,9 @@ const defaultFormData: FormData = {
   concession: '',
   rentersInsurance: '',
   adminFee: '',
-  initialPayment: ''
+  initialPayment: '',
+  amountPaid: '',
+  remainingBalance: ''
 }
 
 export default function ApplicationForm({
@@ -265,6 +269,31 @@ export default function ApplicationForm({
     return total.toFixed(2)
   }, [])
 
+  // Calculate remaining balance based on initial payment and amount paid
+  // Formula: Initial Payment - Amount Paid
+  const calculateRemainingBalance = useCallback((initialPayment: string, amountPaid: string): string => {
+    // Helper function to parse amount - returns 0 if invalid/empty
+    const parseAmount = (value: string): number => {
+      if (!value || value === 'N/A') return 0
+      const parsed = parseFloat(value.replace(/,/g, ''))
+      if (isNaN(parsed) || parsed <= 0) return 0
+      return parsed
+    }
+
+    // Parse both amounts
+    const initialAmount = parseAmount(initialPayment)
+    const paidAmount = parseAmount(amountPaid)
+
+    // Return empty if both are 0
+    if (initialAmount === 0 && paidAmount === 0) return ''
+
+    // Calculate remaining balance
+    const balance = initialAmount - paidAmount
+
+    // Return formatted as currency string
+    return balance.toFixed(2)
+  }, [])
+
   // Format initial data for display
   const formatInitialData = useCallback((data: Partial<FormData>): FormData => {
     const formatted = { ...defaultFormData, ...data }
@@ -275,7 +304,7 @@ export default function ApplicationForm({
     }
 
     // Format currency fields
-    const currencyFields = ['deposit', 'rent', 'petFee', 'petRent', 'proratedRent', 'concession', 'rentersInsurance', 'adminFee', 'initialPayment'] as const
+    const currencyFields = ['deposit', 'rent', 'petFee', 'petRent', 'proratedRent', 'concession', 'rentersInsurance', 'adminFee', 'initialPayment', 'amountPaid', 'remainingBalance'] as const
     currencyFields.forEach(field => {
       const value = formatted[field]
       if (value && typeof value === 'string' && value !== 'N/A') {
@@ -331,6 +360,15 @@ export default function ApplicationForm({
     )
     setFormData(prev => ({ ...prev, initialPayment: calculated }))
   }, [formData.rent, formData.deposit, formData.rentersInsurance, formData.adminFee, formData.petFee, formData.petRent, calculateInitialPayment])
+
+  // Auto-calculate remaining balance when initial payment or amount paid changes
+  useEffect(() => {
+    const calculated = calculateRemainingBalance(
+      formData.initialPayment,
+      formData.amountPaid
+    )
+    setFormData(prev => ({ ...prev, remainingBalance: calculated }))
+  }, [formData.initialPayment, formData.amountPaid, calculateRemainingBalance])
 
   // Generic field change handler
   const handleFieldChange = (field: keyof FormData, value: string) => {
@@ -743,6 +781,40 @@ export default function ApplicationForm({
               <InlineTextField
                 value={formData.initialPayment}
                 onChange={(value) => handleFieldChange('initialPayment', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
+                prefix="$"
+                type="number"
+                formatType="currency"
+                allowNA={true}
+              />
+            </motion.div>
+
+            {/* Amount Paid Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Amount Paid
+              </span>
+              <InlineTextField
+                value={formData.amountPaid}
+                onChange={(value) => handleFieldChange('amountPaid', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
+                prefix="$"
+                type="number"
+                formatType="currency"
+                allowNA={true}
+              />
+            </motion.div>
+
+            {/* Remaining Balance Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Remaining Balance
+              </span>
+              <InlineTextField
+                value={formData.remainingBalance}
+                onChange={(value) => handleFieldChange('remainingBalance', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"

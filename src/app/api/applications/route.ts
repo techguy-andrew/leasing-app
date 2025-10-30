@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { name, createdAt, moveInDate, property, unitNumber, email, phone, status, tasks, deposit, rent, petFee, petRent, rentersInsurance, adminFee, initialPayment } = validationResult.data
+    const { name, createdAt, moveInDate, property, unitNumber, email, phone, status, tasks, deposit, rent, petFee, petRent, rentersInsurance, adminFee, initialPayment, amountPaid, remainingBalance } = validationResult.data
 
     // Create the application in the database
     const application = await prisma.application.create({
@@ -85,6 +85,8 @@ export async function POST(request: NextRequest) {
         rentersInsurance: rentersInsurance || null,
         adminFee: adminFee || null,
         initialPayment: initialPayment || null,
+        amountPaid: amountPaid || null,
+        remainingBalance: remainingBalance || null,
         tasks: {
           create: tasks.map((task, index) => ({
             id: task.id,

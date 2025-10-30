@@ -44,6 +44,8 @@ interface ApplicationData {
   petRent: string | null
   rentersInsurance: string | null
   adminFee: string | null
+  amountPaid: string | null
+  remainingBalance: string | null
   tasks: Task[]
 }
 
@@ -120,7 +122,21 @@ export function generateEmailTemplate(data: ApplicationData): string {
   const config = TEMPLATE_CONFIG
   const tasksList = formatTasksList(data.tasks)
   const initialPayment = calculateInitialPayment(data)
-  const formattedPayment = formatCurrency(initialPayment)
+  const formattedInitialPayment = formatCurrency(initialPayment)
+
+  // Parse payment tracking fields
+  const amountPaid = safeParseFloat(data.amountPaid)
+  const remainingBalance = safeParseFloat(data.remainingBalance)
+  const formattedAmountPaid = formatCurrency(amountPaid)
+  const formattedRemainingBalance = formatCurrency(remainingBalance)
+
+  // Parse individual payment components for itemized breakdown
+  const rent = safeParseFloat(data.rent)
+  const deposit = safeParseFloat(data.deposit)
+  const insurance = safeParseFloat(data.rentersInsurance)
+  const adminFee = safeParseFloat(data.adminFee)
+  const petFee = safeParseFloat(data.petFee)
+  const petRent = safeParseFloat(data.petRent)
 
   // Build the email template
   // Edit the text below to customize your email
@@ -136,8 +152,10 @@ export function generateEmailTemplate(data: ApplicationData): string {
   // ---- MOVE-IN DATE ----
   template += `Move-In Date: ${data.moveInDate}\n`
 
-  // ---- INITIAL PAYMENT ----
-  template += `Initial Payment: $${formattedPayment}\n`
+  // ---- PAYMENT SUMMARY (each on separate line) ----
+  template += `Initial Payment: $${formattedInitialPayment}\n`
+  template += `Amount Paid: $${formattedAmountPaid}\n`
+  template += `Remaining Balance: $${formattedRemainingBalance}\n\n`
 
   // ---- OUTSTANDING TASKS SECTION ----
   if (config.showTasks) {
@@ -146,6 +164,23 @@ export function generateEmailTemplate(data: ApplicationData): string {
 
   // ---- WARNING AND SUPPORT MESSAGE ----
   template += `These items are required and must be completed prior to move-in. Failure to complete them may result in a delay or rescheduling of your move-in date. We understand that moving can be busy, and we're here to support you through this process. If you're facing any difficulties or have questions about completing these requirements, please reach out to us directly so we can work together to get everything handled. Thank you for your attention to this matter. We're committed to ensuring your move-in goes smoothly!\n\n`
+
+  // ---- INITIAL PAYMENT ITEMIZED BREAKDOWN ----
+  template += `Initial Payment Itemized:\n`
+  template += `Rent: $${formatCurrency(rent)}\n`
+  template += `Deposit: $${formatCurrency(deposit)}\n`
+  template += `Insurance: $${formatCurrency(insurance)}\n`
+  template += `Admin Fee: $${formatCurrency(adminFee)}\n`
+
+  // Only show pet items if applicable (> 0)
+  if (petFee > 0) {
+    template += `Pet Fee: $${formatCurrency(petFee)}\n`
+  }
+  if (petRent > 0) {
+    template += `Pet Rent: $${formatCurrency(petRent)}\n`
+  }
+
+  template += `Total Initial Payment: $${formattedInitialPayment}\n\n`
 
   // ---- SIGN-OFF ----
   template += `Best regards,\n`
