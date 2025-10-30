@@ -70,6 +70,7 @@ interface FormData {
   concession: string
   rentersInsurance: string
   adminFee: string
+  initialPayment: string
 }
 
 interface ApplicationFormProps {
@@ -99,7 +100,8 @@ const defaultFormData: FormData = {
   proratedRent: '',
   concession: '',
   rentersInsurance: '',
-  adminFee: ''
+  adminFee: '',
+  initialPayment: ''
 }
 
 export default function ApplicationForm({
@@ -225,6 +227,44 @@ export default function ApplicationForm({
     return rounded.toFixed(2)
   }, [])
 
+  // Calculate initial payment based on multiple payment fields
+  // Formula: Rent + Deposit + Renters Insurance + Admin Fee + Pet Fee + Pet Rent
+  // Only includes fields with positive values (excludes $0.00, empty, and N/A)
+  const calculateInitialPayment = useCallback((
+    rent: string,
+    deposit: string,
+    rentersInsurance: string,
+    adminFee: string,
+    petFee: string,
+    petRent: string
+  ): string => {
+    // Helper function to parse amount - returns 0 if invalid/empty
+    const parseAmount = (value: string): number => {
+      if (!value || value === 'N/A') return 0
+      const parsed = parseFloat(value.replace(/,/g, ''))
+      if (isNaN(parsed) || parsed <= 0) return 0  // Treat zero/negative as 0
+      return parsed
+    }
+
+    // Parse all payment fields
+    const rentAmount = parseAmount(rent)
+    const depositAmount = parseAmount(deposit)
+    const insuranceAmount = parseAmount(rentersInsurance)
+    const adminAmount = parseAmount(adminFee)
+    const petFeeAmount = parseAmount(petFee)
+    const petRentAmount = parseAmount(petRent)
+
+    // Calculate total - if all are 0, total will be 0
+    const total = rentAmount + depositAmount + insuranceAmount +
+                  adminAmount + petFeeAmount + petRentAmount
+
+    // Return empty if no valid amounts
+    if (total === 0) return ''
+
+    // Return formatted as currency string
+    return total.toFixed(2)
+  }, [])
+
   // Format initial data for display
   const formatInitialData = useCallback((data: Partial<FormData>): FormData => {
     const formatted = { ...defaultFormData, ...data }
@@ -235,7 +275,7 @@ export default function ApplicationForm({
     }
 
     // Format currency fields
-    const currencyFields = ['deposit', 'rent', 'petFee', 'petRent', 'proratedRent', 'concession', 'rentersInsurance', 'adminFee'] as const
+    const currencyFields = ['deposit', 'rent', 'petFee', 'petRent', 'proratedRent', 'concession', 'rentersInsurance', 'adminFee', 'initialPayment'] as const
     currencyFields.forEach(field => {
       const value = formatted[field]
       if (value && typeof value === 'string' && value !== 'N/A') {
@@ -278,6 +318,19 @@ export default function ApplicationForm({
     // This ensures stale values are cleared when data becomes invalid
     setFormData(prev => ({ ...prev, proratedRent: calculated }))
   }, [formData.moveInDate, formData.rent, calculateProratedRent])
+
+  // Auto-calculate initial payment when payment fields change
+  useEffect(() => {
+    const calculated = calculateInitialPayment(
+      formData.rent,
+      formData.deposit,
+      formData.rentersInsurance,
+      formData.adminFee,
+      formData.petFee,
+      formData.petRent
+    )
+    setFormData(prev => ({ ...prev, initialPayment: calculated }))
+  }, [formData.rent, formData.deposit, formData.rentersInsurance, formData.adminFee, formData.petFee, formData.petRent, calculateInitialPayment])
 
   // Generic field change handler
   const handleFieldChange = (field: keyof FormData, value: string) => {
@@ -673,6 +726,23 @@ export default function ApplicationForm({
               <InlineTextField
                 value={formData.adminFee}
                 onChange={(value) => handleFieldChange('adminFee', value)}
+                isEditMode={isEditMode}
+                placeholder="0.00"
+                prefix="$"
+                type="number"
+                formatType="currency"
+                allowNA={true}
+              />
+            </motion.div>
+
+            {/* Initial Payment Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Initial Payment
+              </span>
+              <InlineTextField
+                value={formData.initialPayment}
+                onChange={(value) => handleFieldChange('initialPayment', value)}
                 isEditMode={isEditMode}
                 placeholder="0.00"
                 prefix="$"

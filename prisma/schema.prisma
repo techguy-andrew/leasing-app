@@ -30,6 +30,7 @@ model Application {
   concession       String?  // Concession amount
   rentersInsurance String?  // Renters insurance cost
   adminFee         String?  // Administrative fee
+  initialPayment   String?  // Initial payment amount (auto-calculated)
 
   @@index([status])
   @@index([moveInDate])

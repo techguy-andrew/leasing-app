@@ -39,6 +39,7 @@ interface Application {
   concession: string | null
   rentersInsurance: string | null
   adminFee: string | null
+  initialPayment: string | null
   propertyAddress?: string | null
   energyProvider?: string | null
 }
@@ -60,6 +61,7 @@ interface FormData {
   concession: string
   rentersInsurance: string
   adminFee: string
+  initialPayment: string
 }
 
 interface PageProps {
@@ -156,7 +158,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       proratedRent: formData.proratedRent.trim() || null,
       concession: formData.concession.trim() || null,
       rentersInsurance: formData.rentersInsurance.trim() || null,
-      adminFee: formData.adminFee.trim() || null
+      adminFee: formData.adminFee.trim() || null,
+      initialPayment: formData.initialPayment.trim() || null
     }
 
     const response = await fetch(`/api/applications/${appId}`, {
@@ -221,7 +224,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       proratedRent: application.proratedRent?.trim() || null,
       concession: application.concession?.trim() || null,
       rentersInsurance: application.rentersInsurance?.trim() || null,
-      adminFee: application.adminFee?.trim() || null
+      adminFee: application.adminFee?.trim() || null,
+      initialPayment: application.initialPayment?.trim() || null
     }
 
     const response = await fetch(`/api/applications/${appId}`, {
@@ -301,7 +305,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           proratedRent: application.proratedRent || '',
           concession: application.concession || '',
           rentersInsurance: application.rentersInsurance || '',
-          adminFee: application.adminFee || ''
+          adminFee: application.adminFee || '',
+          initialPayment: application.initialPayment || ''
         }}
         initialTasks={application.tasks || []}
         applicationId={appId}
