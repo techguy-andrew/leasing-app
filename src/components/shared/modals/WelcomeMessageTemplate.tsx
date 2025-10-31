@@ -201,7 +201,7 @@ export function generateWelcomeTemplate(data: ApplicationData): string {
   }
 
   // ---- WARNING AND SUPPORT MESSAGE ----
-  template += `These items are required and must be completed prior to move-in. Failure to complete them may result in a delay or rescheduling of your move-in date. We understand that moving can be busy, and we're here to support you through this process. If you're facing any difficulties or have questions about completing these requirements, please reach out to us directly so we can work together to get everything handled. Thank you for your attention to this matter. We're committed to ensuring your move-in goes smoothly.\n\n`
+  template += `These items are required and must be completed prior to move-in. Failure to complete them may result in a delay or rescheduling of your move-in date. If you have any questions, please call Coves Living at 515-207-3878.\n\n`
 
   // ---- CONTACT INFORMATION ----
   template += `If you have any questions, please call ${config.companyName} at ${config.companyPhone}.\n\n`
