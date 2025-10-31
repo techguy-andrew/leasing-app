@@ -4,6 +4,34 @@ import { motion } from 'motion/react'
 import { UserButton } from '@clerk/nextjs'
 import { fadeIn, listStagger, slideUp } from '@/lib/animations/variants'
 
+/**
+ * 🎯 FOREVER-ADAPTABLE TOP BAR
+ *
+ * Based on Design Philosophy: Section 3 (Flexbox Layout)
+ *
+ * This top bar uses NATURAL DOCUMENT FLOW instead of fixed positioning.
+ * It's the first child in a flex-shrink-0 header container.
+ *
+ * Key Changes from Old Design:
+ * ❌ REMOVED: position: fixed
+ * ❌ REMOVED: z-50 stacking
+ * ❌ REMOVED: top-0, left-0, right-0
+ * ✅ ADDED: Natural flow in flex container
+ * ✅ ADDED: Responsive breakpoints (sm, md)
+ * ✅ ADDED: Flexible gap spacing
+ *
+ * Benefits:
+ * - Automatically stacks with other headers
+ * - No z-index conflicts
+ * - No JavaScript height tracking
+ * - Responsive padding and sizing
+ *
+ * @example
+ * ```tsx
+ * <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
+ * ```
+ */
+
 interface TopBarProps {
   isOpen: boolean
   onToggle: () => void
@@ -13,10 +41,10 @@ export default function TopBar({ isOpen, onToggle }: TopBarProps) {
   return (
     <motion.div
       data-topbar
-      className="w-full h-fit flex flex-row items-center gap-4 px-4 sm:px-6 py-4 bg-white/85 backdrop-blur-xl border-b border-gray-200 shadow-sm"
       variants={fadeIn}
       initial="initial"
       animate="animate"
+      className="w-full flex flex-row items-center gap-4 px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-white/85 backdrop-blur-xl border-b border-gray-200 shadow-sm"
     >
       <motion.div
         className="flex flex-row items-center gap-4 w-full"

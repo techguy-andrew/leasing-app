@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { Reorder } from 'motion/react'
 import Pill from '@/components/shared/Pill'
-import StatusSelectionModal from '@/components/shared/modals/StatusSelectionModal'
+import StatusUpdateModal from '@/components/shared/modals/StatusUpdateModal'
 
 /**
  * StatusListField Component
@@ -186,9 +186,8 @@ export default function StatusListField({
       )}
 
       {!readOnly && (
-        <StatusSelectionModal
+        <StatusUpdateModal
           isOpen={isModalOpen}
-          triggerRef={containerRef}
           selectedStatuses={statuses}
           onStatusToggle={handleStatusToggle}
           onClose={() => setIsModalOpen(false)}

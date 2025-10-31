@@ -113,8 +113,8 @@ function ApplicationsContent() {
     }
 
     // Then filter by property
-    if (propertyFilter !== 'All') {
-      filtered = filtered.filter(app => app.property === propertyFilter)
+    if (propertyFilter.length > 0 && !propertyFilter.includes('All')) {
+      filtered = filtered.filter(app => propertyFilter.includes(app.property))
     }
 
     // Then apply calendar filter based on selected date type

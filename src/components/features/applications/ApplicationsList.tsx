@@ -130,7 +130,7 @@ export default function ApplicationsList({
   }, [fetchStatuses])
 
   return (
-    <div className="flex flex-col w-full bg-white">
+    <div className="flex flex-col w-full bg-white p-4 sm:p-6 md:p-8">
       <AnimatePresence mode="wait">
         {isLoading ? (
           <LoadingScreen key="loading" />
@@ -141,7 +141,7 @@ export default function ApplicationsList({
             initial="initial"
             animate="animate"
             exit="exit"
-            className="flex items-center justify-center py-16 text-gray-500 text-sm"
+            className="flex items-center justify-center py-12 sm:py-16 text-gray-500 text-sm sm:text-base"
           >
             {statusFilter.includes('All') && calendarFilter === 'All Time'
               ? 'No applications found'

@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/* Design System - Three-Layer Architecture */
+@import "../styles/tokens.css";
+@import "../styles/utilities.css";
+
+:root {
+  /* Legacy tokens - kept for backward compatibility */
+  --background: var(--color-bg-secondary);
+  --foreground: var(--color-text-primary);
+  --surface: var(--color-bg-primary);
+  --surface-glass: var(--color-bg-glass);
+  --border: var(--color-border);
+  --accent: var(--color-primary);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-glass: var(--surface-glass);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-app);
+}
+
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-app), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Enhanced blur support for Safari */
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .blur-glass {
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+  }
+
+  .blur-heavy {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+}
+
+/* Mobile Safari optimizations */
+@supports (-webkit-touch-callout: none) {
+  body {
+    /* iOS Safari specific styles */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input, textarea, select {
+    /* Prevent zoom on iOS */
+    font-size: 16px;
+  }
+}
+
+/* Smooth scrolling for mobile */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide Next.js development indicator */
+#__next-build-watcher {
+  display: none !important;
+}
+
+nextjs-portal {
+  display: none !important;
+}
+
+/* Remove all focus outlines for minimal, flat design */
+*:focus,
+*:focus-visible {
+  outline: none !important;
+}
+
+button:focus,
+button:focus-visible,
+a:focus,
+a:focus-visible,
+input:focus,
+input:focus-visible,
+select:focus,
+select:focus-visible,
+textarea:focus,
+textarea:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}

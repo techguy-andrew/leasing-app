@@ -58,13 +58,7 @@ export default function PopUp1({
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed z-50 flex items-center justify-center p-4 sm:p-6"
-          style={{
-            top: 'var(--header-stack-height, 0px)',
-            bottom: 0,
-            left: 0,
-            right: 0
-          }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
         >
           {/* Backdrop */}
           <motion.div

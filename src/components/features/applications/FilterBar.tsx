@@ -1,9 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import StatusSelectionModal from '@/components/shared/modals/StatusSelectionModal'
-import FilterSelectionModal from '@/components/shared/modals/FilterSelectionModal'
-import SortingSelectionModal from '@/components/shared/modals/SortingSelectionModal'
+import { useState, useEffect, useMemo } from 'react'
+import FullScreenFilterModal, { FilterOption } from '@/components/shared/modals/FullScreenFilterModal'
 
 /**
  * FilterBar Component
@@ -35,14 +33,30 @@ interface FilterBarProps {
   onDateTypeChange: (type: 'moveIn' | 'application') => void
   calendarFilter: string
   onCalendarChange: (filter: string) => void
-  propertyFilter: string
-  onPropertyChange: (property: string) => void
+  propertyFilter: string[]
+  onPropertyChange: (property: string[]) => void
   sortDirection: 'asc' | 'desc'
   onSortDirectionChange: (direction: 'asc' | 'desc') => void
 }
 
-const calendarOptions = ['All Time', 'This Week', 'This Month']
-const dateTypeOptions = ['Move-In Date', 'Application Date']
+// Static filter options (date, calendar, sort)
+// Status options are fetched from API
+
+const dateTypeOptions: FilterOption[] = [
+  { value: 'moveIn', label: 'Move-In Date' },
+  { value: 'application', label: 'Application Date' }
+]
+
+const calendarOptions: FilterOption[] = [
+  { value: 'All Time', label: 'All Time' },
+  { value: 'This Week', label: 'This Week' },
+  { value: 'This Month', label: 'This Month' }
+]
+
+const sortOptions: FilterOption[] = [
+  { value: 'asc', label: 'Earliest First' },
+  { value: 'desc', label: 'Latest First' }
+]
 
 export default function FilterBar({
   statusFilter,
@@ -56,7 +70,8 @@ export default function FilterBar({
   sortDirection,
   onSortDirectionChange
 }: FilterBarProps) {
-  const [propertyOptions, setPropertyOptions] = useState<string[]>(['All'])
+  const [statusOptions, setStatusOptions] = useState<FilterOption[]>([{ value: 'All', label: 'All' }])
+  const [propertyOptions, setPropertyOptions] = useState<FilterOption[]>([{ value: 'All', label: 'All' }])
   const [isExpanded, setIsExpanded] = useState(true)
 
   // Modal states
@@ -66,31 +81,49 @@ export default function FilterBar({
   const [calendarModalOpen, setCalendarModalOpen] = useState(false)
   const [sortModalOpen, setSortModalOpen] = useState(false)
 
-  // Refs for modal positioning
-  const statusButtonRef = useRef<HTMLButtonElement>(null)
-  const propertyButtonRef = useRef<HTMLButtonElement>(null)
-  const dateTypeButtonRef = useRef<HTMLButtonElement>(null)
-  const calendarButtonRef = useRef<HTMLButtonElement>(null)
-  const sortButtonRef = useRef<HTMLButtonElement>(null)
+  // Fetch statuses from database
+  const fetchStatusOptions = async (): Promise<FilterOption[]> => {
+    try {
+      const response = await fetch('/api/statuses', { cache: 'no-store' })
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        const statuses = data.data.map((status: { name: string; color: string }) => ({
+          value: status.name,
+          label: status.name,
+          color: status.color
+        }))
+        return [{ value: 'All', label: 'All' }, ...statuses]
+      }
+    } catch (error) {
+      console.error('Failed to fetch statuses:', error)
+    }
+    return [{ value: 'All', label: 'All' }]
+  }
 
   // Fetch properties from database
-  useEffect(() => {
-    async function fetchProperties() {
-      try {
-        const response = await fetch('/api/properties')
-        const data = await response.json()
+  const fetchPropertyOptions = async (): Promise<FilterOption[]> => {
+    try {
+      const response = await fetch('/api/properties')
+      const data = await response.json()
 
-        if (response.ok && data.success) {
-          const properties = data.data.map((property: { name: string }) => property.name)
-          setPropertyOptions(['All', ...properties])
-        }
-      } catch (error) {
-        console.error('Failed to fetch properties:', error)
-        setPropertyOptions(['All'])
+      if (response.ok && data.success) {
+        const properties = data.data.map((property: { name: string }) => ({
+          value: property.name,
+          label: property.name
+        }))
+        return [{ value: 'All', label: 'All' }, ...properties]
       }
+    } catch (error) {
+      console.error('Failed to fetch properties:', error)
     }
+    return [{ value: 'All', label: 'All' }]
+  }
 
-    fetchProperties()
+  // Initialize options on mount
+  useEffect(() => {
+    fetchStatusOptions().then(setStatusOptions)
+    fetchPropertyOptions().then(setPropertyOptions)
   }, [])
 
   // Calculate active filter count
@@ -99,7 +132,7 @@ export default function FilterBar({
     if (statusFilter.length > 0 && !statusFilter.includes('All')) count++
     if (dateType !== 'moveIn') count++
     if (calendarFilter !== 'All Time') count++
-    if (propertyFilter !== 'All') count++
+    if (propertyFilter.length > 0 && !propertyFilter.includes('All')) count++
     if (sortDirection !== 'asc') count++
     return count
   }, [statusFilter, dateType, calendarFilter, propertyFilter, sortDirection])
@@ -109,45 +142,40 @@ export default function FilterBar({
     onStatusChange(['All'])
     onDateTypeChange('moveIn')
     onCalendarChange('All Time')
-    onPropertyChange('All')
+    onPropertyChange(['All'])
     onSortDirectionChange('asc')
   }
 
-  // Handle status filter toggle
-  const handleStatusToggle = (status: string) => {
-    if (status === 'All') {
-      onStatusChange(['All'])
-    } else {
-      if (statusFilter.includes(status)) {
-        const newFilter = statusFilter.filter(s => s !== status && s !== 'All')
-        onStatusChange(newFilter.length > 0 ? newFilter : ['All'])
-      } else {
-        const newFilter = [...statusFilter.filter(s => s !== 'All'), status]
-        onStatusChange(newFilter)
-      }
-    }
+  // Handle status filter changes
+  const handleStatusApply = (values: string[]) => {
+    onStatusChange(values)
+    setStatusModalOpen(false)
   }
 
-  // Handle property filter toggle
-  const handlePropertyToggle = (property: string) => {
-    if (property === 'All') {
-      onPropertyChange('All')
-    } else {
-      onPropertyChange(property)
-    }
+  // Handle property filter changes
+  const handlePropertyApply = (values: string[]) => {
+    onPropertyChange(values)
+    setPropertyModalOpen(false)
   }
 
-  // Handle date type toggle
-  const handleDateTypeToggle = (option: string) => {
-    const type = option === 'Move-In Date' ? 'moveIn' : 'application'
+  // Handle date type changes
+  const handleDateTypeApply = (values: string[]) => {
+    const type = values[0] as 'moveIn' | 'application'
     onDateTypeChange(type)
     setDateTypeModalOpen(false)
   }
 
-  // Handle calendar toggle
-  const handleCalendarToggle = (option: string) => {
-    onCalendarChange(option)
+  // Handle calendar filter changes
+  const handleCalendarApply = (values: string[]) => {
+    onCalendarChange(values[0] || 'All Time')
     setCalendarModalOpen(false)
+  }
+
+  // Handle sort direction changes
+  const handleSortApply = (values: string[]) => {
+    const direction = values[0] as 'asc' | 'desc'
+    onSortDirectionChange(direction)
+    setSortModalOpen(false)
   }
 
   // Get display labels
@@ -157,12 +185,18 @@ export default function FilterBar({
     return `${statusFilter.length} selected`
   }
 
+  const getPropertyLabel = () => {
+    if (propertyFilter.includes('All') || propertyFilter.length === 0) return 'All'
+    if (propertyFilter.length === 1) return propertyFilter[0]
+    return `${propertyFilter.length} selected`
+  }
+
   const getDateTypeLabel = () => {
-    return dateType === 'moveIn' ? 'Move-In Date' : 'Application Date'
+    return dateTypeOptions.find(opt => opt.value === dateType)?.label || 'Move-In Date'
   }
 
   const getSortLabel = () => {
-    return sortDirection === 'asc' ? 'Earliest First' : 'Latest First'
+    return sortOptions.find(opt => opt.value === sortDirection)?.label || 'Earliest First'
   }
 
   return (
@@ -218,7 +252,6 @@ export default function FilterBar({
               Status
             </label>
             <button
-              ref={statusButtonRef}
               onClick={() => setStatusModalOpen(!statusModalOpen)}
               className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[140px]"
             >
@@ -235,11 +268,10 @@ export default function FilterBar({
               Property
             </label>
             <button
-              ref={propertyButtonRef}
               onClick={() => setPropertyModalOpen(!propertyModalOpen)}
               className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[140px]"
             >
-              <span className="flex-1 text-left">{propertyFilter}</span>
+              <span className="flex-1 text-left">{getPropertyLabel()}</span>
               <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 12 8">
                 <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -252,7 +284,6 @@ export default function FilterBar({
               Date Type
             </label>
             <button
-              ref={dateTypeButtonRef}
               onClick={() => setDateTypeModalOpen(!dateTypeModalOpen)}
               className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[160px]"
             >
@@ -269,7 +300,6 @@ export default function FilterBar({
               Time Range
             </label>
             <button
-              ref={calendarButtonRef}
               onClick={() => setCalendarModalOpen(!calendarModalOpen)}
               className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[140px]"
             >
@@ -286,7 +316,6 @@ export default function FilterBar({
               Sort
             </label>
             <button
-              ref={sortButtonRef}
               onClick={() => setSortModalOpen(!sortModalOpen)}
               className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[140px]"
             >
@@ -300,50 +329,71 @@ export default function FilterBar({
       )}
 
       {/* Modals */}
-      <StatusSelectionModal
+      {/* Status Filter Modal - Multi-select with API fetch */}
+      <FullScreenFilterModal
         isOpen={statusModalOpen}
-        triggerRef={statusButtonRef}
-        selectedStatuses={statusFilter}
-        onStatusToggle={handleStatusToggle}
         onClose={() => setStatusModalOpen(false)}
+        title="Filter by Status"
+        icon="tag"
+        mode="multi"
+        options={statusOptions}
+        selectedValues={statusFilter}
+        onApply={handleStatusApply}
+        showApplyButton={true}
+        fetchOptions={fetchStatusOptions}
       />
 
-      <FilterSelectionModal
+      {/* Property Filter Modal - Multi-select with API fetch */}
+      <FullScreenFilterModal
         isOpen={propertyModalOpen}
-        triggerRef={propertyButtonRef}
-        options={propertyOptions}
-        selectedOptions={[propertyFilter]}
-        onOptionToggle={handlePropertyToggle}
         onClose={() => setPropertyModalOpen(false)}
-        multiSelect={false}
+        title="Filter by Property"
+        icon="building"
+        mode="multi"
+        options={propertyOptions}
+        selectedValues={propertyFilter}
+        onApply={handlePropertyApply}
+        showApplyButton={true}
+        fetchOptions={fetchPropertyOptions}
       />
 
-      <FilterSelectionModal
+      {/* Date Type Modal - Single-select */}
+      <FullScreenFilterModal
         isOpen={dateTypeModalOpen}
-        triggerRef={dateTypeButtonRef}
-        options={dateTypeOptions}
-        selectedOptions={[getDateTypeLabel()]}
-        onOptionToggle={handleDateTypeToggle}
         onClose={() => setDateTypeModalOpen(false)}
-        multiSelect={false}
+        title="Select Date Type"
+        icon="calendar"
+        mode="single"
+        options={dateTypeOptions}
+        selectedValues={[dateType]}
+        onApply={handleDateTypeApply}
+        autoCloseOnSelect={true}
       />
 
-      <FilterSelectionModal
+      {/* Calendar/Time Range Modal - Single-select */}
+      <FullScreenFilterModal
         isOpen={calendarModalOpen}
-        triggerRef={calendarButtonRef}
-        options={calendarOptions}
-        selectedOptions={[calendarFilter]}
-        onOptionToggle={handleCalendarToggle}
         onClose={() => setCalendarModalOpen(false)}
-        multiSelect={false}
+        title="Filter by Time Range"
+        icon="clock"
+        mode="single"
+        options={calendarOptions}
+        selectedValues={[calendarFilter]}
+        onApply={handleCalendarApply}
+        autoCloseOnSelect={true}
       />
 
-      <SortingSelectionModal
+      {/* Sort Direction Modal - Single-select */}
+      <FullScreenFilterModal
         isOpen={sortModalOpen}
-        triggerRef={sortButtonRef}
-        selectedDirection={sortDirection}
-        onDirectionChange={onSortDirectionChange}
         onClose={() => setSortModalOpen(false)}
+        title="Sort Applications"
+        icon="sort"
+        mode="single"
+        options={sortOptions}
+        selectedValues={[sortDirection]}
+        onApply={handleSortApply}
+        autoCloseOnSelect={true}
       />
     </div>
   )

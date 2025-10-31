@@ -9,8 +9,8 @@ interface FilterContextType {
   setDateType: (type: 'moveIn' | 'application') => void
   calendarFilter: string
   setCalendarFilter: (filter: string) => void
-  propertyFilter: string
-  setPropertyFilter: (property: string) => void
+  propertyFilter: string[]
+  setPropertyFilter: (property: string[]) => void
   sortDirection: 'asc' | 'desc'
   setSortDirection: (direction: 'asc' | 'desc') => void
 }
@@ -21,7 +21,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   const [statusFilter, setStatusFilter] = useState<string[]>(['All'])
   const [dateType, setDateType] = useState<'moveIn' | 'application'>('moveIn')
   const [calendarFilter, setCalendarFilter] = useState('All Time')
-  const [propertyFilter, setPropertyFilter] = useState('All')
+  const [propertyFilter, setPropertyFilter] = useState<string[]>(['All'])
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   return (

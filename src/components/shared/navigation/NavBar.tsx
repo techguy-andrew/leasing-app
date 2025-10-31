@@ -38,8 +38,7 @@ export default function NavBar() {
     <motion.nav
       key={`navbar-${pathname}`}
       data-navbar
-      className="fixed left-0 right-0 w-full h-fit flex items-center gap-4 text-base font-sans text-gray-600 px-6 md:px-8 py-6 bg-white border-b border-gray-200 z-40"
-      style={{ top: 'var(--topbar-height, 0px)' }}
+      className="w-full flex items-center gap-4 text-base font-sans text-gray-600 px-4 sm:px-6 md:px-8 py-4 sm:py-6 bg-white border-b border-gray-200"
       variants={fadeIn}
       initial="initial"
       animate="animate"

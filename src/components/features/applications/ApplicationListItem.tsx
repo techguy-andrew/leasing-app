@@ -47,15 +47,15 @@ const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, p
   return (
     <Link
       href={`/applications/${id}`}
-      className="flex items-center justify-between w-full px-6 md:px-8 py-5 sm:py-6 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer group"
+      className="flex items-center justify-between w-full px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 border-b border-gray-200 hover:bg-gray-50 transition-colors cursor-pointer group"
     >
-      <div className="flex items-start sm:items-center gap-4 flex-1 min-w-0">
-        <div className="flex flex-col gap-3 flex-1 min-w-0">
+      <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
+        <div className="flex flex-col gap-2 sm:gap-3 flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-            <span className="font-semibold text-base text-gray-900 truncate">
+            <span className="font-semibold text-sm sm:text-base text-gray-900 truncate">
               {applicant}
             </span>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1 sm:gap-1.5">
               {status.map((s, index) => {
                 const bgColor = statusColors[s] || '#6B7280' // Default grey
                 return (
@@ -69,17 +69,17 @@ const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, p
               })}
             </div>
           </div>
-          <div className="flex flex-col gap-2 text-base text-gray-600">
+          <div className="flex flex-col gap-1 sm:gap-2 text-sm sm:text-base text-gray-600">
             <span className="truncate font-medium">{property}</span>
-            <div className="flex flex-col sm:flex-row sm:gap-6">
-              <span className="text-gray-500">Unit {unitNumber}</span>
-              <span className="text-gray-500">Move-in: {moveInDate}</span>
+            <div className="flex flex-col sm:flex-row sm:gap-4 md:gap-6">
+              <span className="text-gray-500 text-xs sm:text-sm">Unit {unitNumber}</span>
+              <span className="text-gray-500 text-xs sm:text-sm">Move-in: {moveInDate}</span>
             </div>
           </div>
         </div>
       </div>
       <motion.div
-        className="flex items-center gap-3 text-base text-gray-500 ml-4"
+        className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base text-gray-500 ml-3 sm:ml-4"
         whileHover={{ x: 3 }}
         transition={{ duration: 0.15 }}
       >

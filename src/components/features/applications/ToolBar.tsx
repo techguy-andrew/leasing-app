@@ -4,22 +4,33 @@ import { motion } from 'motion/react'
 import { fadeIn, slideUp } from '@/lib/animations/variants'
 
 /**
- * ToolBar Component
+ * 🎯 FOREVER-ADAPTABLE TOOLBAR
  *
- * A reusable toolbar component for application detail pages.
- * Provides action buttons and tools for managing individual applications.
+ * Based on Design Philosophy: Section 3 (Flexbox Layout)
+ *
+ * This toolbar uses NATURAL DOCUMENT FLOW instead of fixed positioning.
+ * It's wrapped in a flex-shrink-0 header container in NavigationLayout.
+ *
+ * Key Changes from Old Design:
+ * ❌ REMOVED: position: fixed
+ * ❌ REMOVED: style={{ top: 'var(--topbar-height)' }}
+ * ❌ REMOVED: z-index stacking
+ * ✅ ADDED: Natural flow in flex container
+ * ✅ ADDED: Responsive breakpoints
+ *
+ * Benefits:
+ * - No overlap issues
+ * - No JavaScript height calculations
+ * - Works on all screen sizes automatically
+ * - No z-index fighting
  *
  * @example
  * ```tsx
  * <ToolBar
  *   onSendStatusMessage={() => setShowModal(true)}
+ *   onUpdateStatus={() => setShowUpdateModal(true)}
  * />
  * ```
- *
- * To adapt for new projects:
- * 1. Add new tool button props as needed
- * 2. Extend the interface with additional callbacks
- * 3. Add new button sections following the same pattern
  */
 
 interface ToolBarProps {
@@ -37,11 +48,11 @@ export default function ToolBar({
       variants={fadeIn}
       initial="initial"
       animate="animate"
-      className="w-full h-fit flex flex-row items-center justify-start gap-4 px-6 py-4 bg-white border-b border-gray-200"
+      className="w-full flex flex-row items-center justify-start gap-4 px-4 sm:px-6 py-3 sm:py-4 bg-white border-b border-gray-200"
     >
-      {/* Tools Container */}
+      {/* Tools Container with responsive wrapping */}
       <motion.div
-        className="flex flex-row flex-wrap gap-3"
+        className="flex flex-row flex-wrap gap-2 sm:gap-3"
         variants={slideUp}
         initial="hidden"
         animate="visible"
@@ -49,7 +60,7 @@ export default function ToolBar({
         {/* Update Status Button */}
         <button
           onClick={onUpdateStatus}
-          className="px-2 py-0.5 text-xs font-medium text-white rounded-full transition-colors hover:opacity-90 cursor-pointer"
+          className="px-3 py-1.5 text-xs sm:text-sm font-medium text-white rounded-full transition-all hover:opacity-90 hover:scale-105 active:scale-95 cursor-pointer"
           style={{ backgroundColor: '#10B981' }}
         >
           Update Status
@@ -58,12 +69,11 @@ export default function ToolBar({
         {/* Send Status Message Button */}
         <button
           onClick={onSendStatusMessage}
-          className="px-2 py-0.5 text-xs font-medium text-white rounded-full transition-colors hover:opacity-90 cursor-pointer"
+          className="px-3 py-1.5 text-xs sm:text-sm font-medium text-white rounded-full transition-all hover:opacity-90 hover:scale-105 active:scale-95 cursor-pointer"
           style={{ backgroundColor: '#457b9d' }}
         >
           Send Status Message
         </button>
-
       </motion.div>
     </motion.div>
   )

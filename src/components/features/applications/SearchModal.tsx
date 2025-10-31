@@ -80,9 +80,10 @@ export default function SearchModal({ isOpen, results, onClose, searchTerm }: Se
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.15 }}
-          className="fixed left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] max-w-2xl bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+          className="fixed left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] max-w-2xl bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto"
           style={{
-            top: 'calc(var(--topbar-height, 0px) + var(--searchbox-height, 0px) + 8px)'
+            top: '12rem',
+            zIndex: 45
           }}
         >
           {results.length === 0 ? (
