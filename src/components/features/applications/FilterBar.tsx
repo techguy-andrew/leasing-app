@@ -168,8 +168,7 @@ export default function FilterBar({
   return (
     <div
       data-filterbar
-      className="fixed left-0 right-0 w-full h-fit flex flex-col px-6 py-3 bg-white border-b border-gray-200 z-30"
-      style={{ top: 'calc(var(--topbar-height, 0px) + var(--searchbox-height, 0px))' }}
+      className="w-full h-fit flex flex-col px-6 py-3 bg-white border-b border-gray-200"
     >
       {/* Header Row */}
       <div className="flex items-center gap-3">

@@ -116,8 +116,7 @@ export default function SearchBox() {
         variants={fadeIn}
         initial="initial"
         animate="animate"
-        className="fixed left-0 right-0 w-full px-4 sm:px-6 py-3 bg-white border-b border-gray-200 z-40"
-        style={{ top: 'var(--topbar-height, 0px)' }}
+        className="w-full px-4 sm:px-6 py-3 bg-white border-b border-gray-200"
       >
         <div className="max-w-2xl mx-auto" data-search-box>
           <div className="relative">
