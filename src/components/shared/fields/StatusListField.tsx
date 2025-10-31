@@ -4,7 +4,6 @@ import { useState, useRef, useCallback } from 'react'
 import { Reorder } from 'motion/react'
 import Pill from '@/components/shared/Pill'
 import StatusSelectionModal from '@/components/shared/modals/StatusSelectionModal'
-import IconPack from '@/components/shared/IconPack'
 
 /**
  * StatusListField Component
