@@ -80,13 +80,13 @@ export default function StatusList({ initialStatuses = [], onStatusesChange }: S
       clientId: tempId,
       name: '',
       color: '#6B7280', // Default grey
-      order: 0,
+      order: statuses.length,
       userId: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
 
-    setStatuses(prev => [newStatus, ...prev])
+    setStatuses(prev => [...prev, newStatus])
     setEditingStatusId(tempId)
   }
 

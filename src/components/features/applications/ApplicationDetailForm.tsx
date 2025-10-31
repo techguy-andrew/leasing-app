@@ -12,6 +12,7 @@ import ConfirmModal from '@/components/shared/modals/ConfirmModal'
 import Toast, { ToastType } from '@/components/shared/feedback/Toast'
 import TasksList from './TasksList'
 import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animations/variants'
+import { useToolBar } from '@/contexts/ToolBarContext'
 
 /**
  * ApplicationDetailForm Component
@@ -140,6 +141,9 @@ export default function ApplicationDetailForm({
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [toastType, setToastType] = useState<ToastType>('success')
   const [propertyOptions, setPropertyOptions] = useState<{ value: string; label: string }[]>([])
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
+
+  const { setOnUpdateStatus } = useToolBar()
 
   const [formData, setFormData] = useState<FormData>(() => ({
     ...defaultFormData,
@@ -174,6 +178,17 @@ export default function ApplicationDetailForm({
 
     fetchProperties()
   }, [])
+
+  // Register toolbar callback to open status modal
+  useEffect(() => {
+    setOnUpdateStatus(() => () => {
+      setIsStatusModalOpen(true)
+    })
+
+    return () => {
+      setOnUpdateStatus(null)
+    }
+  }, [setOnUpdateStatus])
 
   // Format phone as XXX-XXX-XXXX
   const formatPhone = useCallback((value: string): string => {
@@ -558,6 +573,10 @@ export default function ApplicationDetailForm({
               <StatusBadge
                 statuses={formData.status}
                 onChange={handleStatusChange}
+                externalModalControl={{
+                  isOpen: isStatusModalOpen,
+                  onOpenChange: setIsStatusModalOpen
+                }}
               />
             </motion.div>
 

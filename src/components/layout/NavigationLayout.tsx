@@ -36,7 +36,7 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
     setSortDirection,
   } = useFilter()
 
-  const { onSendStatusMessage } = useToolBar()
+  const { onSendStatusMessage, onUpdateStatus } = useToolBar()
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
   const closeSidebar = () => setIsSidebarOpen(false)
@@ -117,9 +117,10 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
       )}
 
       {/* Tool Bar - Fixed below TopBar, only on application detail pages */}
-      {isAppDetailPage && onSendStatusMessage && (
+      {isAppDetailPage && onSendStatusMessage && onUpdateStatus && (
         <ToolBar
           onSendStatusMessage={onSendStatusMessage}
+          onUpdateStatus={onUpdateStatus}
         />
       )}
 

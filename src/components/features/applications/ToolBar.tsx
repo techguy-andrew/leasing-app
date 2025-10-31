@@ -24,10 +24,12 @@ import { fadeIn, slideUp } from '@/lib/animations/variants'
 
 interface ToolBarProps {
   onSendStatusMessage: () => void
+  onUpdateStatus: () => void
 }
 
 export default function ToolBar({
-  onSendStatusMessage
+  onSendStatusMessage,
+  onUpdateStatus
 }: ToolBarProps) {
   return (
     <motion.div
@@ -45,6 +47,15 @@ export default function ToolBar({
         initial="hidden"
         animate="visible"
       >
+        {/* Update Status Button */}
+        <button
+          onClick={onUpdateStatus}
+          className="px-2 py-0.5 text-xs font-medium text-white rounded-full transition-colors hover:opacity-90 cursor-pointer"
+          style={{ backgroundColor: '#10B981' }}
+        >
+          Update Status
+        </button>
+
         {/* Send Status Message Button */}
         <button
           onClick={onSendStatusMessage}
@@ -53,8 +64,6 @@ export default function ToolBar({
         >
           Send Status Message
         </button>
-
-        {/* Future tools can be added here */}
 
       </motion.div>
     </motion.div>

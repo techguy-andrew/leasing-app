@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { colorPalette } from '@/styles/tokens'
 
 interface ColorPickerProps {
   selectedColor: string
@@ -10,26 +11,8 @@ interface ColorPickerProps {
   className?: string
 }
 
-// Predefined color palette with Tailwind colors
-const COLOR_PALETTE = [
-  { hex: '#3B82F6', name: 'Blue' },
-  { hex: '#10B981', name: 'Emerald' },
-  { hex: '#EAB308', name: 'Yellow' },
-  { hex: '#EF4444', name: 'Red' },
-  { hex: '#8B5CF6', name: 'Violet' },
-  { hex: '#EC4899', name: 'Pink' },
-  { hex: '#6366F1', name: 'Indigo' },
-  { hex: '#14B8A6', name: 'Teal' },
-  { hex: '#F59E0B', name: 'Amber' },
-  { hex: '#059669', name: 'Green' },
-  { hex: '#06B6D4', name: 'Cyan' },
-  { hex: '#F43F5E', name: 'Rose' },
-  { hex: '#A855F7', name: 'Purple' },
-  { hex: '#D946EF', name: 'Fuchsia' },
-  { hex: '#84CC16', name: 'Lime' },
-  { hex: '#F97316', name: 'Orange' },
-  { hex: '#6B7280', name: 'Grey' }
-]
+// Use design tokens for color palette
+const COLOR_PALETTE = colorPalette
 
 export default function ColorPicker({ selectedColor, onChange, disabled = false, className = '' }: ColorPickerProps) {
   const [isOpen, setIsOpen] = useState(false)

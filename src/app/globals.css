@@ -1,12 +1,17 @@
 @import "tailwindcss";
 
+/* Design System - Three-Layer Architecture */
+@import "../styles/tokens.css";
+@import "../styles/utilities.css";
+
 :root {
-  --background: #f8f9fa;
-  --foreground: #1a1a1a;
-  --surface: #ffffff;
-  --surface-glass: rgba(255, 255, 255, 0.85);
-  --border: #e5e7eb;
-  --accent: #3b82f6;
+  /* Legacy tokens - kept for backward compatibility */
+  --background: var(--color-bg-secondary);
+  --foreground: var(--color-text-primary);
+  --surface: var(--color-bg-primary);
+  --surface-glass: var(--color-bg-glass);
+  --border: var(--color-border);
+  --accent: var(--color-primary);
 }
 
 @theme inline {

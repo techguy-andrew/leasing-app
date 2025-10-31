@@ -1,12 +1,14 @@
 'use client'
 
 import { Reorder } from 'motion/react'
+import styles from './Pill.module.css'
 
 /**
  * Pill Component
  *
  * A universal, reusable pill/badge component for displaying status labels throughout the app.
  * Based on the ApplicationListItem pill styling with variants for different use cases.
+ * Uses design tokens from tokens.css for consistent styling.
  *
  * @example
  * ```tsx
@@ -63,14 +65,22 @@ export default function Pill({
 
   const textColorClass = getTextColorClass(color)
 
-  // Base classes from ApplicationListItem
-  const baseClasses = `px-3 py-1.5 text-xs font-semibold rounded-full w-fit ${textColorClass} ${className}`
-
-  // Default variant - static display pill
+  // Default variant - static display pill (clickable if onClick provided)
   if (variant === 'default') {
+    if (onClick) {
+      return (
+        <button
+          onClick={onClick}
+          className={`${styles['pill-default']} ${textColorClass} ${className}`}
+          style={{ backgroundColor: color }}
+        >
+          {label}
+        </button>
+      )
+    }
     return (
       <span
-        className={baseClasses}
+        className={`${styles['pill-default']} ${textColorClass} ${className}`}
         style={{ backgroundColor: color }}
       >
         {label}
@@ -80,12 +90,14 @@ export default function Pill({
 
   // Filter variant - clickable pill with optional checkbox
   if (variant === 'filter') {
+    const filterClasses = `${styles['pill-filter']} ${
+      !isSelected ? styles.unselected : ''
+    } ${textColorClass} ${className}`;
+
     return (
       <button
         onClick={onClick}
-        className={`${baseClasses} transition-colors flex items-center gap-1 ${
-          !isSelected ? 'bg-gray-50 text-gray-600 hover:bg-gray-100' : ''
-        }`}
+        className={`${filterClasses} flex items-center gap-1`}
         style={isSelected ? { backgroundColor: color } : {}}
       >
         {showCheckbox && label !== 'All' && (
@@ -105,7 +117,7 @@ export default function Pill({
   if (variant === 'draggable') {
     return (
       <span
-        className={`${baseClasses} hover:opacity-80 transition-opacity select-none cursor-grab active:cursor-grabbing`}
+        className={`${styles['pill-draggable']} ${textColorClass} ${className}`}
         style={{ backgroundColor: color }}
         onClick={onClick}
       >
