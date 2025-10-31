@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import { useToolBar } from '@/contexts/ToolBarContext'
 import ApplicationDetailForm from '@/components/features/applications/ApplicationDetailForm'
-import PopUp1 from '@/components/shared/modals/PopUp1'
+import StatusMessageModal from '@/components/shared/modals/StatusMessageModal'
+import WelcomeMessageModal from '@/components/shared/modals/WelcomeMessageModal'
 import LoadingScreen from '@/components/shared/LoadingScreen'
 import { fadeIn } from '@/lib/animations/variants'
 
@@ -79,7 +80,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
   const [error, setError] = useState<string | null>(null)
   const [appId, setAppId] = useState<number | null>(null)
   const [showStatusModal, setShowStatusModal] = useState(false)
-  const { setOnSendStatusMessage } = useToolBar()
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
+  const { setOnSendStatusMessage, setOnSendWelcomeMessage } = useToolBar()
 
   // Load application data - extracted for reusability
   const loadApplication = async (id: number) => {
@@ -97,7 +99,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     }
   }
 
-  // Set up toolbar callback - refresh data before opening modal
+  // Set up toolbar callbacks - refresh data before opening modals
   useEffect(() => {
     setOnSendStatusMessage(() => async () => {
       if (appId) {
@@ -107,6 +109,16 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     })
     return () => setOnSendStatusMessage(null)
   }, [setOnSendStatusMessage, appId])
+
+  useEffect(() => {
+    setOnSendWelcomeMessage(() => async () => {
+      if (appId) {
+        await loadApplication(appId) // Refresh data first
+      }
+      setShowWelcomeModal(true) // Then open modal with fresh data
+    })
+    return () => setOnSendWelcomeMessage(null)
+  }, [setOnSendWelcomeMessage, appId])
 
   // Initial load on mount
   useEffect(() => {
@@ -328,8 +340,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
         showDeleteButton={true}
       />
 
-      {/* Outstanding Tasks Popup */}
-      <PopUp1
+      {/* Status Message Modal */}
+      <StatusMessageModal
         isOpen={showStatusModal}
         applicationData={{
           applicant: application.applicant,
@@ -348,6 +360,28 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           tasks: application.tasks || []
         }}
         onClose={() => setShowStatusModal(false)}
+      />
+
+      {/* Welcome Message Modal */}
+      <WelcomeMessageModal
+        isOpen={showWelcomeModal}
+        applicationData={{
+          applicant: application.applicant,
+          property: application.property,
+          propertyAddress: application.propertyAddress ?? undefined,
+          energyProvider: application.energyProvider ?? undefined,
+          moveInDate: application.moveInDate,
+          deposit: application.deposit,
+          rent: application.rent,
+          petFee: application.petFee,
+          petRent: application.petRent,
+          rentersInsurance: application.rentersInsurance,
+          adminFee: application.adminFee,
+          amountPaid: application.amountPaid,
+          remainingBalance: application.remainingBalance,
+          tasks: application.tasks || []
+        }}
+        onClose={() => setShowWelcomeModal(false)}
       />
     </>
   )

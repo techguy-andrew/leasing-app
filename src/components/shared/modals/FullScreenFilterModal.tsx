@@ -9,7 +9,7 @@ import Pill from '@/components/shared/Pill'
  * 🎯 FULL-SCREEN FILTER MODAL
  *
  * Unified modal component for all filter selections.
- * Based on StatusUpdateModal and PopUp1 architecture.
+ * Based on StatusUpdateModal and StatusMessageModal architecture.
  *
  * Features:
  * - Single or multi-select modes

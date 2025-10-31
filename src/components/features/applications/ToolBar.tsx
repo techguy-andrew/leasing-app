@@ -35,11 +35,13 @@ import { fadeIn, slideUp } from '@/lib/animations/variants'
 
 interface ToolBarProps {
   onSendStatusMessage: () => void
+  onSendWelcomeMessage: () => void
   onUpdateStatus: () => void
 }
 
 export default function ToolBar({
   onSendStatusMessage,
+  onSendWelcomeMessage,
   onUpdateStatus
 }: ToolBarProps) {
   return (
@@ -73,6 +75,15 @@ export default function ToolBar({
           style={{ backgroundColor: '#457b9d' }}
         >
           Send Status Message
+        </button>
+
+        {/* Welcome Message Button */}
+        <button
+          onClick={onSendWelcomeMessage}
+          className="px-3 py-1.5 text-xs sm:text-sm font-medium text-white rounded-full transition-all hover:opacity-90 hover:scale-105 active:scale-95 cursor-pointer"
+          style={{ backgroundColor: '#8B5CF6' }}
+        >
+          Welcome Message
         </button>
       </motion.div>
     </motion.div>

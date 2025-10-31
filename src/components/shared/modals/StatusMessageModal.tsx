@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import IconPack from '@/components/shared/icons/IconPack'
-import { generateEmailTemplate } from './PopUp1-template'
+import { generateEmailTemplate } from './StatusMessageTemplate'
 
 interface Task {
   id: string

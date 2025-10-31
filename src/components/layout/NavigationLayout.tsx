@@ -76,7 +76,7 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
     setSortDirection,
   } = useFilter()
 
-  const { onSendStatusMessage, onUpdateStatus } = useToolBar()
+  const { onSendStatusMessage, onSendWelcomeMessage, onUpdateStatus } = useToolBar()
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
   const closeSidebar = () => setIsSidebarOpen(false)
@@ -123,9 +123,10 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
         )}
 
         {/* Application Detail Page Toolbar - Conditionally rendered */}
-        {isAppDetailPage && onSendStatusMessage && onUpdateStatus && (
+        {isAppDetailPage && onSendStatusMessage && onSendWelcomeMessage && onUpdateStatus && (
           <ToolBar
             onSendStatusMessage={onSendStatusMessage}
+            onSendWelcomeMessage={onSendWelcomeMessage}
             onUpdateStatus={onUpdateStatus}
           />
         )}
