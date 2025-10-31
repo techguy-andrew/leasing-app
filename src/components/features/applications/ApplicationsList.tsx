@@ -66,19 +66,22 @@ export default function ApplicationsList({
   dateType
 }: ApplicationsListProps) {
   const [statusColors, setStatusColors] = useState<Record<string, string>>({})
+  const [statusOrder, setStatusOrder] = useState<Record<string, number>>({})
 
-  // Fetch status colors
+  // Fetch status colors and order
   const fetchStatuses = useCallback(async () => {
     try {
       const response = await fetch('/api/statuses', { cache: 'no-store' })
       const data = await response.json()
 
       const colors: Record<string, string> = {}
+      const order: Record<string, number> = {}
 
       if (response.ok && data.success && data.data.length > 0) {
         const statuses: ApiStatus[] = data.data
         statuses.forEach((status) => {
           colors[status.name] = status.color
+          order[status.name] = status.order
         })
       } else {
         // Fallback colors for legacy statuses if Status table is empty
@@ -95,6 +98,7 @@ export default function ApplicationsList({
       }
 
       setStatusColors(colors)
+      setStatusOrder(order)
     } catch (error) {
       console.error('Failed to fetch statuses:', error)
       // Set default colors even on error
@@ -169,6 +173,7 @@ export default function ApplicationsList({
                   moveInDate={app.moveInDate}
                   createdAt={app.createdAt}
                   statusColors={statusColors}
+                  statusOrder={statusOrder}
                 />
               </motion.div>
             ))}

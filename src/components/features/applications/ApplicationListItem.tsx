@@ -41,9 +41,16 @@ interface ApplicationListItemProps {
   moveInDate: string
   createdAt: string
   statusColors?: Record<string, string>
+  statusOrder?: Record<string, number>
 }
 
-const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, property, unitNumber, status, moveInDate, statusColors = {} }: ApplicationListItemProps) {
+const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, property, unitNumber, status, moveInDate, statusColors = {}, statusOrder = {} }: ApplicationListItemProps) {
+  // Sort statuses by custom order from settings
+  const sortedStatuses = [...status].sort((a, b) => {
+    const orderA = statusOrder[a] ?? 9999 // Put unknown statuses at the end
+    const orderB = statusOrder[b] ?? 9999
+    return orderA - orderB
+  })
   return (
     <Link
       href={`/applications/${id}`}
@@ -57,7 +64,7 @@ const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, p
 
         {/* Status Pills */}
         <div className="flex flex-wrap gap-1.5">
-          {status.map((s, index) => {
+          {sortedStatuses.map((s, index) => {
             const bgColor = statusColors[s] || '#6B7280' // Default grey
             return (
               <Pill
