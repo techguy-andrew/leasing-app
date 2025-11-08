@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import ApplicationForm from '@/components/features/applications/ApplicationForm'
+import ApplicationForm from '@/components/ApplicationForm'
 import { getDefaultTasks } from '@/lib/applicantDefaultTasks'
 
 interface FormData {

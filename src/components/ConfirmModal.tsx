@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'motion/react'
-import SubmitButton from '@/components/shared/buttons/SubmitButton'
+import SubmitButton from '@/components/SubmitButton'
 
 interface ConfirmModalProps {
   isOpen: boolean

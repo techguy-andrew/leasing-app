@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import FullScreenFilterModal, { FilterOption } from '@/components/shared/modals/FullScreenFilterModal'
+import FullScreenFilterModal, { FilterOption } from '@/components/FullScreenFilterModal'
 
 /**
  * FilterBar Component

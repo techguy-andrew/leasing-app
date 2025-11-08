@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import PropertyDetailForm from '@/components/features/properties/PropertyDetailForm'
+import PropertyDetailForm from '@/components/PropertyDetailForm'
 
 interface FormData {
   name: string

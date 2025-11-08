@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import Pill from '@/components/shared/Pill'
-import StatusUpdateModal from '@/components/shared/modals/StatusUpdateModal'
+import Pill from '@/components/Pill'
+import StatusUpdateModal from '@/components/StatusUpdateModal'
 import { statusColors as defaultStatusColors } from '@/styles/tokens'
 
 /**

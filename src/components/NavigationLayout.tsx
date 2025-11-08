@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { SignIn } from '@clerk/nextjs'
-import TopBar from './TopBar'
-import SideBar from './SideBar'
-import SearchBox from '@/components/features/applications/SearchBox'
-import FilterBar from '@/components/features/applications/FilterBar'
-import ToolBar from '@/components/features/applications/ToolBar'
+import TopBar from '@/components/TopBar'
+import SideBar from '@/components/SideBar'
+import SearchModal from '@/components/SearchModal'
+import FilterBar from '@/components/FilterBar'
+import ToolBar from '@/components/ToolBar'
 import { FilterProvider, useFilter } from '@/contexts/FilterContext'
 import { ToolBarProvider, useToolBar } from '@/contexts/ToolBarContext'
 
@@ -36,7 +36,7 @@ interface NavigationLayoutProps {
  * ┌────────────────────────────────────┐
  * │  Header (flex-shrink-0)            │ ← Auto height based on content
  * │  - TopBar                          │
- * │  - SearchBox (conditional)         │
+ * │  - SearchModal (conditional)       │
  * │  - FilterBar (conditional)         │
  * │  - ToolBar (conditional)           │
  * ├────────────────────────────────────┤
@@ -106,7 +106,7 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
         {/* Applications Page Headers - Conditionally rendered */}
         {isApplicationsPage && (
           <>
-            <SearchBox />
+            <SearchModal />
             <FilterBar
               statusFilter={statusFilter}
               onStatusChange={setStatusFilter}

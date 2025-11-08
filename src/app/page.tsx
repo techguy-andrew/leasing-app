@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import { staggerContainer, staggerItem } from '@/lib/animations/variants'
-import LoadingScreen from '@/components/shared/LoadingScreen'
+import LoadingScreen from '@/components/LoadingScreen'
 
 interface Application {
   id: number

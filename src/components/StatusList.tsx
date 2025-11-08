@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Reorder } from 'motion/react'
-import StatusMenuButton from './StatusMenuButton'
-import ColorPicker from '@/components/shared/ColorPicker'
-import InlineTextField from '@/components/shared/fields/InlineTextField'
-import SaveButton from '@/components/shared/buttons/SaveButton'
-import CancelButton from '@/components/shared/buttons/CancelButton'
-import Toast, { ToastType } from '@/components/shared/feedback/Toast'
-import ConfirmModal from '@/components/shared/modals/ConfirmModal'
-import IconPack from '@/components/shared/icons/IconPack'
+import StatusMenuButton from '@/components/StatusMenuButton'
+import ColorPicker from '@/components/ColorPicker'
+import InlineTextField from '@/components/InlineTextField'
+import SaveButton from '@/components/SaveButton'
+import CancelButton from '@/components/CancelButton'
+import Toast, { ToastType } from '@/components/Toast'
+import ConfirmModal from '@/components/ConfirmModal'
+import IconPack from '@/components/IconPack'
 
 export interface Status {
   id: string

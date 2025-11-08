@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import PropertyListItem from './PropertyListItem'
+import PropertyListItem from '@/components/PropertyListItem'
 import { listStagger, staggerItem } from '@/lib/animations/variants'
 
 interface Property {

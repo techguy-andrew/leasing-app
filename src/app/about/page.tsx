@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react'
 import { staggerContainer, staggerItem, fadeInUp } from '@/lib/animations/variants'
-import NavBar from '@/components/shared/navigation/NavBar'
+import NavBar from '@/components/NavBar'
 
 export default function AboutVersion2() {
   return (

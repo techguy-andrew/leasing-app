@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Reorder } from 'motion/react'
-import TaskMenuButton from './TaskMenuButton'
-import InlineTextField from '@/components/shared/fields/InlineTextField'
-import SaveButton from '@/components/shared/buttons/SaveButton'
-import CancelButton from '@/components/shared/buttons/CancelButton'
-import Toast, { ToastType } from '@/components/shared/feedback/Toast'
-import ConfirmModal from '@/components/shared/modals/ConfirmModal'
-import IconPack from '@/components/shared/icons/IconPack'
+import TaskMenuButton from '@/components/TaskMenuButton'
+import InlineTextField from '@/components/InlineTextField'
+import SaveButton from '@/components/SaveButton'
+import CancelButton from '@/components/CancelButton'
+import Toast, { ToastType } from '@/components/Toast'
+import ConfirmModal from '@/components/ConfirmModal'
+import IconPack from '@/components/IconPack'
 
 interface Task {
   id: string

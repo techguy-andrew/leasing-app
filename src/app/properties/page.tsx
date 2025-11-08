@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
-import PropertiesList from '@/components/features/properties/PropertiesList'
-import LoadingScreen from '@/components/shared/LoadingScreen'
+import PropertiesList from '@/components/PropertiesList'
+import LoadingScreen from '@/components/LoadingScreen'
 import { fadeIn } from '@/lib/animations/variants'
 
 interface Property {

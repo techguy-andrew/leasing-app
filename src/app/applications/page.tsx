@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useFilter } from '@/contexts/FilterContext'
-import ApplicationsList from '@/components/features/applications/ApplicationsList'
+import ApplicationsList from '@/components/ApplicationsList'
 
 interface Application {
   id: number

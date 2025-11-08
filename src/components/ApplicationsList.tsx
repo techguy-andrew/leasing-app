@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import ApplicationListItem from './ApplicationListItem'
-import LoadingScreen from '@/components/shared/LoadingScreen'
+import ApplicationListItem from '@/components/ApplicationListItem'
+import LoadingScreen from '@/components/LoadingScreen'
 import { listStagger, slideUp, scaleIn } from '@/lib/animations/variants'
 
 /**

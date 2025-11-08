@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import IconPack from '@/components/shared/icons/IconPack'
-import { generateEmailTemplate } from './StatusMessageTemplate'
+import IconPack from '@/components/IconPack'
+import { generateEmailTemplate } from '@/components/StatusMessageTemplate'
 
 interface Task {
   id: string

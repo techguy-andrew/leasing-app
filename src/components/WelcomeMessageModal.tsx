@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import IconPack from '@/components/shared/icons/IconPack'
-import { generateWelcomeTemplate } from './WelcomeMessageTemplate'
+import IconPack from '@/components/IconPack'
+import { generateWelcomeTemplate } from '@/components/WelcomeMessageTemplate'
 
 interface Task {
   id: string

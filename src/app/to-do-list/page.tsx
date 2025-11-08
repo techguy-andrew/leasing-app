@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
-import TasksList from '@/components/features/applications/TasksList'
+import TasksList from '@/components/TasksList'
 
 interface Task {
   id: string

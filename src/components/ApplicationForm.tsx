@@ -2,20 +2,18 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import InlineTextField from '@/components/shared/fields/InlineTextField'
-import InlineSelectField from '@/components/shared/fields/InlineSelectField'
-import StatusBadge from '@/components/shared/StatusBadge'
-import EditMenuButton from '@/components/shared/buttons/EditMenuButton'
-import SaveButton from '@/components/shared/buttons/SaveButton'
-import CancelButton from '@/components/shared/buttons/CancelButton'
-import ConfirmModal from '@/components/shared/modals/ConfirmModal'
-import Toast, { ToastType } from '@/components/shared/feedback/Toast'
-import TasksList from './TasksList'
+import InlineTextField from '@/components/InlineTextField'
+import InlineSelectField from '@/components/InlineSelectField'
+import StatusBadge from '@/components/StatusBadge'
+import EditMenuButton from '@/components/EditMenuButton'
+import SaveButton from '@/components/SaveButton'
+import CancelButton from '@/components/CancelButton'
+import ConfirmModal from '@/components/ConfirmModal'
+import Toast, { ToastType } from '@/components/Toast'
 import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animations/variants'
-import { useToolBar } from '@/contexts/ToolBarContext'
 
 /**
- * ApplicationDetailForm Component
+ * ApplicationForm Component
  *
  * A fully self-contained, reusable form component for creating and editing applications.
  * Supports both create and edit modes with inline editing, field validation, and toast notifications.
@@ -29,14 +27,14 @@ import { useToolBar } from '@/contexts/ToolBarContext'
  * @example
  * ```tsx
  * // Create mode
- * <ApplicationDetailForm
+ * <ApplicationForm
  *   mode="create"
  *   onSave={(data) => createApplication(data)}
  *   onCancel={() => router.push('/')}
  * />
  *
  * // Edit mode
- * <ApplicationDetailForm
+ * <ApplicationForm
  *   mode="edit"
  *   initialData={applicationData}
  *   applicationId={123}
@@ -77,27 +75,15 @@ interface FormData {
   remainingBalance: string
 }
 
-interface Task {
-  id: string
-  description: string
-  completed: boolean
-  type: 'AGENT' | 'APPLICANT' | 'NOTES' | 'TODO'
-  order: number
-  createdAt: string
-  updatedAt: string
-}
-
-interface ApplicationDetailFormProps {
+interface ApplicationFormProps {
   mode: 'create' | 'edit'
   initialData?: Partial<FormData>
-  initialTasks?: Task[]
   applicationId?: number
   onSave: (data: FormData) => Promise<void>
   onCancel: () => void
   onDelete?: (id: number) => Promise<void>
   showDeleteButton?: boolean
   onStatusChange?: (status: string[]) => Promise<void>
-  onTasksChange?: (tasks: Task[], taskType: 'AGENT' | 'APPLICANT' | 'NOTES') => void
 }
 
 const defaultFormData: FormData = {
@@ -122,18 +108,16 @@ const defaultFormData: FormData = {
   remainingBalance: ''
 }
 
-export default function ApplicationDetailForm({
+export default function ApplicationForm({
   mode,
   initialData,
-  initialTasks = [],
   applicationId,
   onSave,
   onCancel,
   onDelete,
   showDeleteButton = true,
-  onStatusChange,
-  onTasksChange
-}: ApplicationDetailFormProps) {
+  onStatusChange
+}: ApplicationFormProps) {
   const [isEditMode, setIsEditMode] = useState(mode === 'create')
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -141,9 +125,6 @@ export default function ApplicationDetailForm({
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [toastType, setToastType] = useState<ToastType>('success')
   const [propertyOptions, setPropertyOptions] = useState<{ value: string; label: string }[]>([])
-  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
-
-  const { setOnUpdateStatus } = useToolBar()
 
   const [formData, setFormData] = useState<FormData>(() => ({
     ...defaultFormData,
@@ -178,17 +159,6 @@ export default function ApplicationDetailForm({
 
     fetchProperties()
   }, [])
-
-  // Register toolbar callback to open status modal
-  useEffect(() => {
-    setOnUpdateStatus(() => () => {
-      setIsStatusModalOpen(true)
-    })
-
-    return () => {
-      setOnUpdateStatus(null)
-    }
-  }, [setOnUpdateStatus])
 
   // Format phone as XXX-XXX-XXXX
   const formatPhone = useCallback((value: string): string => {
@@ -378,9 +348,8 @@ export default function ApplicationDetailForm({
     setFormData(prev => ({ ...prev, proratedRent: calculated }))
   }, [formData.moveInDate, formData.rent, calculateProratedRent])
 
-  // Auto-calculate initial payment when any contributing field changes
+  // Auto-calculate initial payment when payment fields change
   useEffect(() => {
-    // Calculate initial payment based on all 6 fields
     const calculated = calculateInitialPayment(
       formData.rent,
       formData.deposit,
@@ -389,9 +358,6 @@ export default function ApplicationDetailForm({
       formData.petFee,
       formData.petRent
     )
-
-    // Always update initial payment (even if empty string when all fields are 0/empty)
-    // The calculateInitialPayment function handles N/A by treating it as 0
     setFormData(prev => ({ ...prev, initialPayment: calculated }))
   }, [formData.rent, formData.deposit, formData.rentersInsurance, formData.adminFee, formData.petFee, formData.petRent, calculateInitialPayment])
 
@@ -520,12 +486,11 @@ export default function ApplicationDetailForm({
     setShowDeleteModal(false)
   }
 
-
   return (
     <>
-      <div className="flex flex-col w-full flex-1 p-4 sm:p-6 md:p-8 bg-white">
+      <div className="flex flex-col w-full flex-1 p-4 sm:p-6 md:p-8 pb-0 bg-white">
         <motion.div
-          className="max-w-4xl mx-auto w-full p-4 sm:p-6 md:p-8 relative"
+          className="max-w-4xl mx-auto w-full p-4 sm:p-6 md:p-8 pb-4 relative"
           variants={pageTransition}
           initial="initial"
           animate="animate"
@@ -573,10 +538,6 @@ export default function ApplicationDetailForm({
               <StatusBadge
                 statuses={formData.status}
                 onChange={handleStatusChange}
-                externalModalControl={{
-                  isOpen: isStatusModalOpen,
-                  onOpenChange: setIsStatusModalOpen
-                }}
               />
             </motion.div>
 
@@ -604,7 +565,6 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleFieldChange('unitNumber', value)}
                 isEditMode={isEditMode}
                 placeholder="Unit Number"
-                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -618,7 +578,6 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleFieldChange('moveInDate', value)}
                 isEditMode={isEditMode}
                 placeholder="MM/DD/YYYY"
-                onEnterPress={handleSave}
                 formatType="date"
               />
             </motion.div>
@@ -633,7 +592,6 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleFieldChange('createdAt', value)}
                 isEditMode={isEditMode}
                 placeholder="MM/DD/YYYY"
-                onEnterPress={handleSave}
                 formatType="date"
               />
             </motion.div>
@@ -648,7 +606,6 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleFieldChange('applicant', value)}
                 isEditMode={isEditMode}
                 placeholder="Applicant Name"
-                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -662,7 +619,6 @@ export default function ApplicationDetailForm({
                 onChange={(value) => handleFieldChange('email', value)}
                 isEditMode={isEditMode}
                 placeholder="Email"
-                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -678,7 +634,6 @@ export default function ApplicationDetailForm({
                 placeholder="Phone"
                 type="number"
                 formatType="phone"
-                onEnterPress={handleSave}
               />
             </motion.div>
 
@@ -695,7 +650,6 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
@@ -713,7 +667,6 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
@@ -731,7 +684,6 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
@@ -749,7 +701,6 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
@@ -767,7 +718,6 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
@@ -785,7 +735,6 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
@@ -803,7 +752,6 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
@@ -821,7 +769,6 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
@@ -839,7 +786,6 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
@@ -857,7 +803,6 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
@@ -875,49 +820,9 @@ export default function ApplicationDetailForm({
                 prefix="$"
                 type="number"
                 formatType="currency"
-                onEnterPress={handleSave}
                 allowNA={true}
               />
             </motion.div>
-
-            {/* Notes Section */}
-            {applicationId && (
-              <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
-                <TasksList
-                  applicationId={applicationId}
-                  initialTasks={initialTasks}
-                  onTasksChange={(tasks) => onTasksChange?.(tasks, 'NOTES')}
-                  taskType="NOTES"
-                  title="Notes"
-                />
-              </motion.div>
-            )}
-
-            {/* Leasing Agent Tasks Section */}
-            {applicationId && (
-              <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
-                <TasksList
-                  applicationId={applicationId}
-                  initialTasks={initialTasks}
-                  onTasksChange={(tasks) => onTasksChange?.(tasks, 'AGENT')}
-                  taskType="AGENT"
-                  title="Leasing Agent Tasks"
-                />
-              </motion.div>
-            )}
-
-            {/* Applicant Tasks Section */}
-            {applicationId && (
-              <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
-                <TasksList
-                  applicationId={applicationId}
-                  initialTasks={initialTasks}
-                  onTasksChange={(tasks) => onTasksChange?.(tasks, 'APPLICANT')}
-                  taskType="APPLICANT"
-                  title="Applicant Tasks"
-                />
-              </motion.div>
-            )}
           </motion.div>
         </motion.div>
       </div>

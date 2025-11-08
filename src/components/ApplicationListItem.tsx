@@ -3,7 +3,7 @@
 import { memo } from 'react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
-import Pill from '@/components/shared/Pill'
+import Pill from '@/components/Pill'
 
 /**
  * ApplicationListItem Component

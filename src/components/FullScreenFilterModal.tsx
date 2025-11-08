@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import IconPack from '@/components/shared/icons/IconPack'
-import Pill from '@/components/shared/Pill'
+import IconPack from '@/components/IconPack'
+import Pill from '@/components/Pill'
 
 /**
  * 🎯 FULL-SCREEN FILTER MODAL

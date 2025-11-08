@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
-import NavBar from '@/components/shared/navigation/NavBar'
-import StatusList, { Status } from '@/components/features/settings/StatusList'
+import NavBar from '@/components/NavBar'
+import StatusList, { Status } from '@/components/StatusList'
 import { fadeInUp } from '@/lib/animations/variants'
-import { IconPack } from '@/components/shared/icons/IconPack'
-import { exportApplicationsToCSV } from '@/components/features/exports/export-data'
+import { IconPack } from '@/components/IconPack'
+import { exportApplicationsToCSV } from '@/components/export-data'
 
 export default function SettingsPage() {
   const [statuses, setStatuses] = useState<Status[]>([])

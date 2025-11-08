@@ -1,4 +1,4 @@
-import IconPack from '@/components/shared/icons/IconPack'
+import IconPack from '@/components/IconPack'
 
 /**
  * CancelButton Component

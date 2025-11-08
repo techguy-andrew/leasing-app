@@ -2,8 +2,8 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { Reorder } from 'motion/react'
-import Pill from '@/components/shared/Pill'
-import StatusUpdateModal from '@/components/shared/modals/StatusUpdateModal'
+import Pill from '@/components/Pill'
+import StatusUpdateModal from '@/components/StatusUpdateModal'
 
 /**
  * StatusListField Component

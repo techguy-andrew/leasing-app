@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import InlineTextField from '@/components/shared/fields/InlineTextField'
-import EditMenuButton from '@/components/shared/buttons/EditMenuButton'
-import SaveButton from '@/components/shared/buttons/SaveButton'
-import CancelButton from '@/components/shared/buttons/CancelButton'
-import ConfirmModal from '@/components/shared/modals/ConfirmModal'
-import Toast, { ToastType } from '@/components/shared/feedback/Toast'
+import InlineTextField from '@/components/InlineTextField'
+import EditMenuButton from '@/components/EditMenuButton'
+import SaveButton from '@/components/SaveButton'
+import CancelButton from '@/components/CancelButton'
+import ConfirmModal from '@/components/ConfirmModal'
+import Toast, { ToastType } from '@/components/Toast'
 import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animations/variants'
 
 interface FormData {
