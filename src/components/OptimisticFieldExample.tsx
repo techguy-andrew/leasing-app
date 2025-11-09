@@ -128,11 +128,14 @@ export default function OptimisticFieldExample({
   return (
     <div className="space-y-4">
       {/* Rent Field - Updates instantly as user types */}
-      <div>
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-semibold text-gray-500">
+          Monthly Rent
+        </span>
         <InlineTextField
-          label="Monthly Rent"
           value={rent}
           onChange={updateRent}
+          isEditMode={true}
           placeholder="$0.00"
           type="text"
         />
@@ -142,11 +145,14 @@ export default function OptimisticFieldExample({
       </div>
 
       {/* Deposit Field - Updates instantly as user types */}
-      <div>
+      <div className="flex flex-col gap-1">
+        <span className="text-xs font-semibold text-gray-500">
+          Security Deposit
+        </span>
         <InlineTextField
-          label="Security Deposit"
           value={deposit}
           onChange={updateDeposit}
+          isEditMode={true}
           placeholder="$0.00"
           type="text"
         />
