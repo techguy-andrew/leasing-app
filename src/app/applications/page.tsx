@@ -4,6 +4,7 @@ import { Suspense, useState, useEffect, useMemo, useCallback, useRef } from 'rea
 import { useSearchParams } from 'next/navigation'
 import { useFilter } from '@/contexts/FilterContext'
 import ApplicationsList from '@/components/ApplicationsList'
+import GenericSearchBar from '@/components/GenericSearchBar'
 
 interface Application {
   id: number
@@ -162,15 +163,39 @@ function ApplicationsContent() {
   }, [applications, statusFilter, propertyFilter, calendarFilter, dateType, sortDirection, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
 
   return (
-    <div ref={scrollContainerRef} className="w-full h-full overflow-y-auto">
-      <ApplicationsList
-        applications={filteredApplications}
-        isLoading={isLoading}
-        statusFilter={statusFilter}
-        calendarFilter={calendarFilter}
-        dateType={dateType}
+    <>
+      {/* Search Bar */}
+      <GenericSearchBar<Application>
+        apiEndpoint="/api/applications"
+        placeholder="Search by name or unit number..."
+        searchFields={(app, term) =>
+          app.applicant.toLowerCase().includes(term) ||
+          app.unitNumber.toLowerCase().includes(term)
+        }
+        filterResults={(app) => !app.status.includes('Archived')}
+        renderResult={(app) => (
+          <>
+            <span className="font-medium text-gray-900">{app.applicant}</span>
+            <span className="text-gray-500">
+              Unit {app.unitNumber} • {app.property}
+            </span>
+          </>
+        )}
+        getResultLink={(app) => `/applications/${app.id}`}
+        getResultMeta={(app) => app.status.join(', ')}
+        getItemId={(app) => app.id}
       />
-    </div>
+
+      <div ref={scrollContainerRef} className="w-full h-full overflow-y-auto">
+        <ApplicationsList
+          applications={filteredApplications}
+          isLoading={isLoading}
+          statusFilter={statusFilter}
+          calendarFilter={calendarFilter}
+          dateType={dateType}
+        />
+      </div>
+    </>
   )
 }
 

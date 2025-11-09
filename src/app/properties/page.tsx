@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import PropertiesList from '@/components/PropertiesList'
 import LoadingScreen from '@/components/LoadingScreen'
@@ -23,7 +22,6 @@ interface Property {
 }
 
 function PropertiesPageContent() {
-  const router = useRouter()
   const [properties, setProperties] = useState<Property[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -59,10 +57,6 @@ function PropertiesPageContent() {
 
     fetchProperties()
   }, [])
-
-  const handleNewProperty = () => {
-    router.push('/properties/new')
-  }
 
   // Get unique cities and states for filter options
   const cities = useMemo(() => {
@@ -167,22 +161,6 @@ function PropertiesPageContent() {
         sortDirection={sortDirection}
         onSortDirectionChange={setSortDirection}
       />
-
-      {/* Header with Add Button */}
-      <div className="flex items-center justify-between px-6 md:px-8 py-6 border-b border-gray-200 bg-white">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Properties</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            {filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'}
-          </p>
-        </div>
-        <button
-          onClick={handleNewProperty}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
-        >
-          + Add Property
-        </button>
-      </div>
 
       {/* Properties List */}
       <PropertiesList properties={filteredProperties} />

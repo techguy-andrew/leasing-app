@@ -206,7 +206,7 @@ export default function GenericSearchBar<T>({
               onChange={handleSearchChange}
               onFocus={handleFocus}
               placeholder={placeholder}
-              className="w-full px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
             {searchTerm && (
               <button

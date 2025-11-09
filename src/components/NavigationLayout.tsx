@@ -6,7 +6,6 @@ import { useUser } from '@clerk/nextjs'
 import { SignIn } from '@clerk/nextjs'
 import TopBar from '@/components/TopBar'
 import SideBar from '@/components/SideBar'
-import SearchModal from '@/components/SearchModal'
 import FilterBar from '@/components/FilterBar'
 import ToolBar from '@/components/ToolBar'
 import { FilterProvider, useFilter } from '@/contexts/FilterContext'
@@ -118,23 +117,20 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
         {/* Top Bar - Always visible */}
         <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
 
-        {/* Applications Page Headers - Conditionally rendered */}
+        {/* Applications Page Filter Bar - Conditionally rendered */}
         {isApplicationsPage && (
-          <>
-            <SearchModal />
-            <FilterBar
-              statusFilter={statusFilter}
-              onStatusChange={setStatusFilter}
-              dateType={dateType}
-              onDateTypeChange={setDateType}
-              calendarFilter={calendarFilter}
-              onCalendarChange={setCalendarFilter}
-              propertyFilter={propertyFilter}
-              onPropertyChange={setPropertyFilter}
-              sortDirection={sortDirection}
-              onSortDirectionChange={setSortDirection}
-            />
-          </>
+          <FilterBar
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            dateType={dateType}
+            onDateTypeChange={setDateType}
+            calendarFilter={calendarFilter}
+            onCalendarChange={setCalendarFilter}
+            propertyFilter={propertyFilter}
+            onPropertyChange={setPropertyFilter}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+          />
         )}
 
         {/* Application Detail Page Toolbar - Conditionally rendered */}

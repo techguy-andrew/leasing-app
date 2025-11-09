@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import { UnitsFilterProvider, useUnitsFilter } from '@/contexts/UnitsFilterContext'
 import UnitsFilterBar from '@/components/UnitsFilterBar'
@@ -28,7 +27,6 @@ interface Unit {
 }
 
 function UnitsPageContent() {
-  const router = useRouter()
   const [units, setUnits] = useState<Unit[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -144,10 +142,6 @@ function UnitsPageContent() {
     return sorted
   }, [units, propertyFilter, bedroomsFilter, statusFilter, minPrice, maxPrice, availableByDate, sortField, sortDirection])
 
-  const handleNewUnit = () => {
-    router.push('/units/new')
-  }
-
   if (isLoading) {
     return <LoadingScreen />
   }
@@ -202,22 +196,6 @@ function UnitsPageContent() {
         animate="animate"
         className="flex flex-col flex-1 w-full"
       >
-        {/* Header with Add Button */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Units</h1>
-            <p className="text-sm text-gray-600 mt-1">
-              {filteredAndSortedUnits.length} {filteredAndSortedUnits.length === 1 ? 'unit' : 'units'}
-            </p>
-          </div>
-          <button
-            onClick={handleNewUnit}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
-          >
-            + Add Unit
-          </button>
-        </div>
-
         {/* Units Table */}
         <UnitsTable units={filteredAndSortedUnits} />
       </motion.div>
