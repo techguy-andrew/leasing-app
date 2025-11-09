@@ -6,8 +6,8 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  // Connection pooling is automatically enabled by Prisma
-  // Default pool size is determined by the formula: num_physical_cpus * 2 + 1
+  // Using Neon's connection pooling via DATABASE_URL (pooled connection)
+  // Migrations use DATABASE_URL_UNPOOLED (direct connection) configured in schema.prisma
 })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
