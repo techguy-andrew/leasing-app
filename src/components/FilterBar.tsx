@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import Pill from '@/components/Pill'
 import FilterDropdown, { FilterOption } from '@/components/FilterDropdown'
 
 /**

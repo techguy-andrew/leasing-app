@@ -113,11 +113,11 @@ export async function POST(request: NextRequest) {
       { success: true, data: unit },
       { status: 201 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating unit:', error)
 
     // Handle unique constraint violation
-    if (error.code === 'P2002') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return NextResponse.json(
         { error: 'A unit with this number already exists for this property' },
         { status: 400 }

@@ -1,6 +1,5 @@
 'use client'
 
-import { Reorder } from 'motion/react'
 import styles from '@/components/Pill.module.css'
 
 /**

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useUnitsFilter } from '@/contexts/UnitsFilterContext'
-import FullScreenFilterModal, { FilterOption } from '@/components/FullScreenFilterModal'
+import FilterDropdown, { FilterOption } from '@/components/FilterDropdown'
 import PriceRangeFilterModal from '@/components/PriceRangeFilterModal'
 import DateFilterModal from '@/components/DateFilterModal'
 
@@ -57,16 +57,24 @@ export default function UnitsFilterBar() {
   } = useUnitsFilter()
 
   const [propertyOptions, setPropertyOptions] = useState<FilterOption[]>([{ value: 'All', label: 'All' }])
-  const [isExpanded, setIsExpanded] = useState(true)
 
-  // Modal states
-  const [propertyModalOpen, setPropertyModalOpen] = useState(false)
-  const [bedroomsModalOpen, setBedroomsModalOpen] = useState(false)
-  const [statusModalOpen, setStatusModalOpen] = useState(false)
+  // Dropdown states
+  const [propertyDropdownOpen, setPropertyDropdownOpen] = useState(false)
+  const [bedroomsDropdownOpen, setBedroomsDropdownOpen] = useState(false)
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false)
   const [priceModalOpen, setPriceModalOpen] = useState(false)
   const [availableByModalOpen, setAvailableByModalOpen] = useState(false)
-  const [sortFieldModalOpen, setSortFieldModalOpen] = useState(false)
-  const [sortDirectionModalOpen, setSortDirectionModalOpen] = useState(false)
+  const [sortFieldDropdownOpen, setSortFieldDropdownOpen] = useState(false)
+  const [sortDirectionDropdownOpen, setSortDirectionDropdownOpen] = useState(false)
+
+  // Refs for pill buttons
+  const propertyPillRef = useRef<HTMLButtonElement>(null)
+  const bedroomsPillRef = useRef<HTMLButtonElement>(null)
+  const statusPillRef = useRef<HTMLButtonElement>(null)
+  const pricePillRef = useRef<HTMLButtonElement>(null)
+  const availableByPillRef = useRef<HTMLButtonElement>(null)
+  const sortFieldPillRef = useRef<HTMLButtonElement>(null)
+  const sortDirectionPillRef = useRef<HTMLButtonElement>(null)
 
   // Fetch properties from database
   const fetchPropertyOptions = async (): Promise<FilterOption[]> => {
@@ -92,45 +100,20 @@ export default function UnitsFilterBar() {
     fetchPropertyOptions().then(setPropertyOptions)
   }, [])
 
-  // Calculate active filter count
-  const activeFilterCount = useMemo(() => {
-    let count = 0
-    if (propertyFilter.length > 0 && !propertyFilter.includes('All')) count++
-    if (bedroomsFilter.length > 0 && !bedroomsFilter.includes('All')) count++
-    if (statusFilter.length > 0 && !statusFilter.includes('All')) count++
-    if (minPrice || maxPrice) count++
-    if (availableByDate) count++
-    if (sortField !== 'property') count++
-    if (sortDirection !== 'asc') count++
-    return count
-  }, [propertyFilter, bedroomsFilter, statusFilter, minPrice, maxPrice, availableByDate, sortField, sortDirection])
-
-  // Clear all filters
-  const handleClearFilters = () => {
-    setPropertyFilter(['All'])
-    setBedroomsFilter(['All'])
-    setStatusFilter(['All'])
-    setMinPrice('')
-    setMaxPrice('')
-    setAvailableByDate('')
-    setSortField('property')
-    setSortDirection('asc')
-  }
-
   // Handle filter changes
   const handlePropertyApply = (values: string[]) => {
     setPropertyFilter(values)
-    setPropertyModalOpen(false)
+    setPropertyDropdownOpen(false)
   }
 
   const handleBedroomsApply = (values: string[]) => {
     setBedroomsFilter(values)
-    setBedroomsModalOpen(false)
+    setBedroomsDropdownOpen(false)
   }
 
   const handleStatusApply = (values: string[]) => {
     setStatusFilter(values)
-    setStatusModalOpen(false)
+    setStatusDropdownOpen(false)
   }
 
   const handlePriceApply = (min: string, max: string) => {
@@ -147,46 +130,46 @@ export default function UnitsFilterBar() {
   const handleSortFieldApply = (values: string[]) => {
     const field = values[0] as 'unitNumber' | 'bedrooms' | 'price' | 'property' | 'availableOn'
     setSortField(field)
-    setSortFieldModalOpen(false)
+    setSortFieldDropdownOpen(false)
   }
 
   const handleSortDirectionApply = (values: string[]) => {
     const direction = values[0] as 'asc' | 'desc'
     setSortDirection(direction)
-    setSortDirectionModalOpen(false)
+    setSortDirectionDropdownOpen(false)
   }
 
   // Get display labels
   const getPropertyLabel = () => {
-    if (propertyFilter.includes('All') || propertyFilter.length === 0) return 'All'
-    if (propertyFilter.length === 1) return propertyFilter[0]
-    return `${propertyFilter.length} selected`
+    if (propertyFilter.includes('All') || propertyFilter.length === 0) return 'Property: All'
+    if (propertyFilter.length === 1) return `Property: ${propertyFilter[0]}`
+    return `Property: ${propertyFilter.length} selected`
   }
 
   const getBedroomsLabel = () => {
-    if (bedroomsFilter.includes('All') || bedroomsFilter.length === 0) return 'All'
-    if (bedroomsFilter.length === 1) return bedroomsFilter[0]
-    return `${bedroomsFilter.length} selected`
+    if (bedroomsFilter.includes('All') || bedroomsFilter.length === 0) return 'Bedrooms: All'
+    if (bedroomsFilter.length === 1) return `Bedrooms: ${bedroomsFilter[0]}`
+    return `Bedrooms: ${bedroomsFilter.length} selected`
   }
 
   const getStatusLabel = () => {
-    if (statusFilter.includes('All') || statusFilter.length === 0) return 'All'
-    if (statusFilter.length === 1) return statusFilter[0]
-    return `${statusFilter.length} selected`
+    if (statusFilter.includes('All') || statusFilter.length === 0) return 'Status: All'
+    if (statusFilter.length === 1) return `Status: ${statusFilter[0]}`
+    return `Status: ${statusFilter.length} selected`
   }
 
   const getPriceLabel = () => {
-    if (!minPrice && !maxPrice) return 'Any'
-    if (minPrice && maxPrice) return `$${minPrice} - $${maxPrice}`
-    if (minPrice) return `>= $${minPrice}`
-    if (maxPrice) return `<= $${maxPrice}`
-    return 'Any'
+    if (!minPrice && !maxPrice) return 'Price: Any'
+    if (minPrice && maxPrice) return `Price: $${minPrice}-$${maxPrice}`
+    if (minPrice) return `Price: $${minPrice}+`
+    if (maxPrice) return `Price: <$${maxPrice}`
+    return 'Price: Any'
   }
 
   const getAvailableByLabel = () => {
-    if (!availableByDate) return 'Any Date'
+    if (!availableByDate) return 'Available: Any Date'
     const date = new Date(availableByDate)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    return `Available: ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
   }
 
   const getSortFieldLabel = () => {
@@ -200,171 +183,76 @@ export default function UnitsFilterBar() {
   return (
     <div
       data-unitsfilterbar
-      className="w-full h-fit flex flex-col px-6 py-3 bg-white border-b border-gray-200"
+      className="w-full flex items-center gap-2 px-6 py-3 bg-white border-b border-gray-200"
     >
-      {/* Header Row */}
-      <div className="flex items-center gap-3">
-        {/* Expand/Collapse Button */}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-        >
-          <svg
-            className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Filters
-        </button>
+      {/* Property Filter Pill */}
+      <button
+        ref={propertyPillRef}
+        onClick={() => setPropertyDropdownOpen(!propertyDropdownOpen)}
+        className="px-3 py-1 text-[10pt] font-semibold rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+      >
+        {getPropertyLabel()}
+      </button>
 
-        {/* Active Filter Count */}
-        {activeFilterCount > 0 && (
-          <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
-            {activeFilterCount} active
-          </span>
-        )}
+      {/* Bedrooms Filter Pill */}
+      <button
+        ref={bedroomsPillRef}
+        onClick={() => setBedroomsDropdownOpen(!bedroomsDropdownOpen)}
+        className="px-3 py-1 text-[10pt] font-semibold rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+      >
+        {getBedroomsLabel()}
+      </button>
 
-        {/* Clear All Button */}
-        {activeFilterCount > 0 && (
-          <button
-            onClick={handleClearFilters}
-            className="ml-auto px-3 py-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-          >
-            Clear All
-          </button>
-        )}
-      </div>
+      {/* Status Filter Pill */}
+      <button
+        ref={statusPillRef}
+        onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
+        className="px-3 py-1 text-[10pt] font-semibold rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+      >
+        {getStatusLabel()}
+      </button>
 
-      {/* Filter Options */}
-      {isExpanded && (
-        <div className="flex gap-3 items-center flex-wrap mt-3">
-          {/* Property Filter */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Property
-            </label>
-            <button
-              onClick={() => setPropertyModalOpen(!propertyModalOpen)}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[140px]"
-            >
-              <span className="flex-1 text-left">{getPropertyLabel()}</span>
-              <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 12 8">
-                <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
+      {/* Price Range Pill */}
+      <button
+        ref={pricePillRef}
+        onClick={() => setPriceModalOpen(!priceModalOpen)}
+        className="px-3 py-1 text-[10pt] font-semibold rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+      >
+        {getPriceLabel()}
+      </button>
 
-          {/* Bedrooms Filter */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Bedrooms
-            </label>
-            <button
-              onClick={() => setBedroomsModalOpen(!bedroomsModalOpen)}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[140px]"
-            >
-              <span className="flex-1 text-left">{getBedroomsLabel()}</span>
-              <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 12 8">
-                <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
+      {/* Available By Pill */}
+      <button
+        ref={availableByPillRef}
+        onClick={() => setAvailableByModalOpen(!availableByModalOpen)}
+        className="px-3 py-1 text-[10pt] font-semibold rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+      >
+        {getAvailableByLabel()}
+      </button>
 
-          {/* Status Filter */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Status
-            </label>
-            <button
-              onClick={() => setStatusModalOpen(!statusModalOpen)}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[140px]"
-            >
-              <span className="flex-1 text-left">{getStatusLabel()}</span>
-              <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 12 8">
-                <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
+      {/* Sort Field Pill */}
+      <button
+        ref={sortFieldPillRef}
+        onClick={() => setSortFieldDropdownOpen(!sortFieldDropdownOpen)}
+        className="px-3 py-1 text-[10pt] font-semibold rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+      >
+        Sort: {getSortFieldLabel()}
+      </button>
 
-          {/* Price Range Filter */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Price Range
-            </label>
-            <button
-              onClick={() => setPriceModalOpen(!priceModalOpen)}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[140px]"
-            >
-              <span className="flex-1 text-left">{getPriceLabel()}</span>
-              <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 12 8">
-                <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
+      {/* Sort Direction Pill */}
+      <button
+        ref={sortDirectionPillRef}
+        onClick={() => setSortDirectionDropdownOpen(!sortDirectionDropdownOpen)}
+        className="px-3 py-1 text-[10pt] font-semibold rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+      >
+        {getSortDirectionLabel()}
+      </button>
 
-          {/* Available By Filter */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Available By
-            </label>
-            <button
-              onClick={() => setAvailableByModalOpen(!availableByModalOpen)}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[160px]"
-            >
-              <span className="flex-1 text-left">{getAvailableByLabel()}</span>
-              <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 12 8">
-                <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
-
-          {/* Sort Field */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Sort By
-            </label>
-            <button
-              onClick={() => setSortFieldModalOpen(!sortFieldModalOpen)}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[140px]"
-            >
-              <span className="flex-1 text-left">{getSortFieldLabel()}</span>
-              <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 12 8">
-                <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
-
-          {/* Sort Direction */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              Direction
-            </label>
-            <button
-              onClick={() => setSortDirectionModalOpen(!sortDirectionModalOpen)}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-800 hover:border-gray-300 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition-all flex items-center gap-2 min-w-[120px]"
-            >
-              <span className="flex-1 text-left">{getSortDirectionLabel()}</span>
-              <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 12 8">
-                <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Modals */}
-      {/* Property Filter Modal */}
-      <FullScreenFilterModal
-        isOpen={propertyModalOpen}
-        onClose={() => setPropertyModalOpen(false)}
-        title="Filter by Property"
-        icon="building"
+      {/* Dropdowns */}
+      <FilterDropdown
+        isOpen={propertyDropdownOpen}
+        onClose={() => setPropertyDropdownOpen(false)}
+        triggerRef={propertyPillRef}
         mode="multi"
         options={propertyOptions}
         selectedValues={propertyFilter}
@@ -373,11 +261,10 @@ export default function UnitsFilterBar() {
         fetchOptions={fetchPropertyOptions}
       />
 
-      {/* Bedrooms Filter Modal */}
-      <FullScreenFilterModal
-        isOpen={bedroomsModalOpen}
-        onClose={() => setBedroomsModalOpen(false)}
-        title="Filter by Bedrooms"
+      <FilterDropdown
+        isOpen={bedroomsDropdownOpen}
+        onClose={() => setBedroomsDropdownOpen(false)}
+        triggerRef={bedroomsPillRef}
         mode="multi"
         options={bedroomsOptions}
         selectedValues={bedroomsFilter}
@@ -385,17 +272,37 @@ export default function UnitsFilterBar() {
         showApplyButton={true}
       />
 
-      {/* Status Filter Modal */}
-      <FullScreenFilterModal
-        isOpen={statusModalOpen}
-        onClose={() => setStatusModalOpen(false)}
-        title="Filter by Status"
-        icon="tag"
+      <FilterDropdown
+        isOpen={statusDropdownOpen}
+        onClose={() => setStatusDropdownOpen(false)}
+        triggerRef={statusPillRef}
         mode="multi"
         options={statusOptions}
         selectedValues={statusFilter}
         onApply={handleStatusApply}
         showApplyButton={true}
+      />
+
+      <FilterDropdown
+        isOpen={sortFieldDropdownOpen}
+        onClose={() => setSortFieldDropdownOpen(false)}
+        triggerRef={sortFieldPillRef}
+        mode="single"
+        options={sortFieldOptions}
+        selectedValues={[sortField]}
+        onApply={handleSortFieldApply}
+        autoCloseOnSelect={true}
+      />
+
+      <FilterDropdown
+        isOpen={sortDirectionDropdownOpen}
+        onClose={() => setSortDirectionDropdownOpen(false)}
+        triggerRef={sortDirectionPillRef}
+        mode="single"
+        options={sortDirectionOptions}
+        selectedValues={[sortDirection]}
+        onApply={handleSortDirectionApply}
+        autoCloseOnSelect={true}
       />
 
       {/* Price Range Modal */}
@@ -415,32 +322,6 @@ export default function UnitsFilterBar() {
         label="Show units available by:"
         date={availableByDate}
         onApply={handleAvailableByApply}
-      />
-
-      {/* Sort Field Modal */}
-      <FullScreenFilterModal
-        isOpen={sortFieldModalOpen}
-        onClose={() => setSortFieldModalOpen(false)}
-        title="Sort Units By"
-        icon="sort"
-        mode="single"
-        options={sortFieldOptions}
-        selectedValues={[sortField]}
-        onApply={handleSortFieldApply}
-        autoCloseOnSelect={true}
-      />
-
-      {/* Sort Direction Modal */}
-      <FullScreenFilterModal
-        isOpen={sortDirectionModalOpen}
-        onClose={() => setSortDirectionModalOpen(false)}
-        title="Sort Direction"
-        icon="sort"
-        mode="single"
-        options={sortDirectionOptions}
-        selectedValues={[sortDirection]}
-        onApply={handleSortDirectionApply}
-        autoCloseOnSelect={true}
       />
     </div>
   )

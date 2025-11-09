@@ -8,7 +8,7 @@ const taskCreateSchema = z.object({
   type: z.enum(['TODO']).default('TODO')
 })
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const { userId } = await auth()
 

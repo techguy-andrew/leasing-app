@@ -154,11 +154,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       { success: true, data: unit },
       { status: 200 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating unit:', error)
 
     // Handle unique constraint violation
-    if (error.code === 'P2002') {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
       return NextResponse.json(
         { error: 'A unit with this number already exists for this property' },
         { status: 400 }

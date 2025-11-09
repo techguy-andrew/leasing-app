@@ -209,7 +209,7 @@ const CommunicationModal: React.FC<CommunicationModalProps> = ({ personId, perso
         }
 
         // Convert string dates to Date objects
-        const commsWithDates = data.data.map((comm: any) => ({
+        const commsWithDates = data.data.map((comm: { createdAt: string | Date; [key: string]: unknown }) => ({
           ...comm,
           createdAt: new Date(comm.createdAt)
         }));

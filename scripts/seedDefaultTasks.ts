@@ -16,7 +16,7 @@
  *   npm install -D ts-node
  */
 
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, TaskType } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -25,32 +25,32 @@ const DEFAULT_AGENT_TASKS = [
   {
     description: '1. Acknowledgement',
     completed: false,
-    type: 'AGENT'
+    type: 'AGENT' as TaskType
   },
   {
     description: '2. Screening',
     completed: false,
-    type: 'AGENT'
+    type: 'AGENT' as TaskType
   },
   {
     description: '3. Approval Message',
     completed: false,
-    type: 'AGENT'
+    type: 'AGENT' as TaskType
   },
   {
     description: '4. Lease Agreement',
     completed: false,
-    type: 'AGENT'
+    type: 'AGENT' as TaskType
   },
   {
     description: '5. Welcome Message',
     completed: false,
-    type: 'AGENT'
+    type: 'AGENT' as TaskType
   },
   {
     description: '6. Arrange Move-In',
     completed: false,
-    type: 'AGENT'
+    type: 'AGENT' as TaskType
   }
 ]
 
@@ -59,17 +59,17 @@ const DEFAULT_APPLICANT_TASKS = [
   {
     description: '1. Sign the lease agreement.',
     completed: false,
-    type: 'APPLICANT'
+    type: 'APPLICANT' as TaskType
   },
   {
     description: '2. Complete the total initial payment. Log in to your online resident portal. Press the "Make Payment" button, enter your remaining balance, and complete the payment.',
     completed: false,
-    type: 'APPLICANT'
+    type: 'APPLICANT' as TaskType
   },
   {
     description: '3. Set up utilities and provide us with proof of activation.',
     completed: false,
-    type: 'APPLICANT'
+    type: 'APPLICANT' as TaskType
   }
 ]
 

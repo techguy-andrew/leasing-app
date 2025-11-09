@@ -41,7 +41,7 @@ interface InlineTextFieldProps {
   className?: string
   onEnterPress?: () => void
   prefix?: string
-  type?: 'text' | 'number'
+  type?: 'text' | 'number' | 'date'
   formatType?: 'text' | 'phone' | 'currency' | 'date'
   allowNA?: boolean
 }

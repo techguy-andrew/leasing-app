@@ -123,7 +123,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     // Update status transition dates
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       firstName,
       lastName,
       email: email || null,
