@@ -1,10 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import PeopleList from '@/components/PeopleList'
 import LoadingScreen from '@/components/LoadingScreen'
+import GenericSearchBar from '@/components/GenericSearchBar'
+import PeopleFilterBar from '@/components/PeopleFilterBar'
+import { PeopleFilterProvider, usePeopleFilter } from '@/contexts/PeopleFilterContext'
 import { fadeIn } from '@/lib/animations/variants'
 
 interface Person {
@@ -18,11 +21,20 @@ interface Person {
   updatedAt: Date
 }
 
-export default function PeoplePage() {
+function PeoplePageContent() {
   const router = useRouter()
   const [people, setPeople] = useState<Person[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const {
+    statusFilter,
+    setStatusFilter,
+    sortField,
+    setSortField,
+    sortDirection,
+    setSortDirection
+  } = usePeopleFilter()
 
   useEffect(() => {
     async function fetchPeople() {
@@ -48,6 +60,41 @@ export default function PeoplePage() {
   const handleNewPerson = () => {
     router.push('/people/new')
   }
+
+  // Get unique statuses for filter options
+  const statuses = useMemo(() => {
+    const uniqueStatuses = Array.from(new Set(people.map(p => p.status)))
+    return uniqueStatuses.sort()
+  }, [people])
+
+  // Apply filters and sorting
+  const filteredPeople = useMemo(() => {
+    let filtered = [...people]
+
+    // Apply status filter
+    if (statusFilter.length > 0) {
+      filtered = filtered.filter(p => statusFilter.includes(p.status))
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let comparison = 0
+
+      if (sortField === 'name') {
+        const nameA = `${a.firstName} ${a.lastName}`
+        const nameB = `${b.firstName} ${b.lastName}`
+        comparison = nameA.localeCompare(nameB)
+      } else if (sortField === 'status') {
+        comparison = a.status.localeCompare(b.status)
+      } else if (sortField === 'createdAt') {
+        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison
+    })
+
+    return filtered
+  }, [people, statusFilter, sortField, sortDirection])
 
   if (isLoading) {
     return <LoadingScreen />
@@ -75,11 +122,49 @@ export default function PeoplePage() {
       animate="animate"
       className="flex flex-col flex-1 w-full"
     >
+      {/* Search Bar */}
+      <GenericSearchBar<Person>
+        apiEndpoint="/api/people"
+        placeholder="Search by name, email, or phone..."
+        searchFields={(person, term) =>
+          `${person.firstName} ${person.lastName}`.toLowerCase().includes(term) ||
+          person.email?.toLowerCase().includes(term) ||
+          person.phone?.toLowerCase().includes(term) ||
+          false
+        }
+        renderResult={(person) => (
+          <>
+            <span className="font-medium text-gray-900">
+              {person.firstName} {person.lastName}
+            </span>
+            <span className="text-gray-500">
+              {person.email || person.phone || 'No contact info'}
+            </span>
+          </>
+        )}
+        getResultLink={(person) => `/people/${person.id}`}
+        getResultMeta={(person) => person.status}
+        getItemId={(person) => person.id}
+      />
+
+      {/* Filter Bar */}
+      <PeopleFilterBar
+        statuses={statuses}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        sortField={sortField}
+        onSortFieldChange={setSortField}
+        sortDirection={sortDirection}
+        onSortDirectionChange={setSortDirection}
+      />
+
       {/* Header with Add Button */}
       <div className="flex items-center justify-between px-6 md:px-8 py-6 border-b border-gray-200 bg-white">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">People</h1>
-          <p className="text-sm text-gray-600 mt-1">Manage contacts and track status transitions</p>
+          <p className="text-sm text-gray-600 mt-1">
+            {filteredPeople.length} {filteredPeople.length === 1 ? 'person' : 'people'}
+          </p>
         </div>
         <button
           onClick={handleNewPerson}
@@ -90,7 +175,15 @@ export default function PeoplePage() {
       </div>
 
       {/* People List */}
-      <PeopleList people={people} />
+      <PeopleList people={filteredPeople} />
     </motion.div>
+  )
+}
+
+export default function PeoplePage() {
+  return (
+    <PeopleFilterProvider>
+      <PeoplePageContent />
+    </PeopleFilterProvider>
   )
 }

@@ -6,6 +6,7 @@ import { motion } from 'motion/react'
 import { UnitsFilterProvider, useUnitsFilter } from '@/contexts/UnitsFilterContext'
 import UnitsFilterBar from '@/components/UnitsFilterBar'
 import UnitsTable from '@/components/UnitsTable'
+import GenericSearchBar from '@/components/GenericSearchBar'
 import LoadingScreen from '@/components/LoadingScreen'
 import { fadeIn } from '@/lib/animations/variants'
 
@@ -168,6 +169,29 @@ function UnitsPageContent() {
 
   return (
     <>
+      {/* Search Bar */}
+      <GenericSearchBar<Unit>
+        apiEndpoint="/api/units"
+        placeholder="Search by unit number or property name..."
+        searchFields={(unit, term) =>
+          unit.unitNumber.toLowerCase().includes(term) ||
+          unit.property.name.toLowerCase().includes(term)
+        }
+        renderResult={(unit) => (
+          <>
+            <span className="font-medium text-gray-900">
+              Unit {unit.unitNumber}
+            </span>
+            <span className="text-gray-500">
+              {unit.property.name} • {unit.bedrooms || '?'} bed, {unit.bathrooms || '?'} bath
+            </span>
+          </>
+        )}
+        getResultLink={(unit) => `/units/${unit.id}`}
+        getResultMeta={(unit) => unit.status}
+        getItemId={(unit) => unit.id}
+      />
+
       {/* Filter Bar */}
       <UnitsFilterBar />
 
@@ -182,7 +206,9 @@ function UnitsPageContent() {
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Units</h1>
-            <p className="text-sm text-gray-600 mt-1">Manage rental units across all properties</p>
+            <p className="text-sm text-gray-600 mt-1">
+              {filteredAndSortedUnits.length} {filteredAndSortedUnits.length === 1 ? 'unit' : 'units'}
+            </p>
           </div>
           <button
             onClick={handleNewUnit}
