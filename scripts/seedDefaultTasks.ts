@@ -20,21 +20,61 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-// Default tasks configuration (same as in applicantDefaultTasks.ts)
-const DEFAULT_TASKS = [
+// Default agent tasks configuration (same as in agentDefaultTasks.ts)
+const DEFAULT_AGENT_TASKS = [
   {
-    description: '1. Sign the lease agreement.',
-    completed: false
+    description: '1. Acknowledgement',
+    completed: false,
+    type: 'AGENT'
   },
   {
-    description: '2. Make your initial payment.',
-    completed: false
+    description: '2. Screening',
+    completed: false,
+    type: 'AGENT'
   },
   {
-    description: '3. Provide us with your utilities account number.',
-    completed: false
+    description: '3. Approval Message',
+    completed: false,
+    type: 'AGENT'
+  },
+  {
+    description: '4. Lease Agreement',
+    completed: false,
+    type: 'AGENT'
+  },
+  {
+    description: '5. Welcome Message',
+    completed: false,
+    type: 'AGENT'
+  },
+  {
+    description: '6. Arrange Move-In',
+    completed: false,
+    type: 'AGENT'
   }
 ]
+
+// Default applicant tasks configuration (same as in applicantDefaultTasks.ts)
+const DEFAULT_APPLICANT_TASKS = [
+  {
+    description: '1. Sign the lease agreement.',
+    completed: false,
+    type: 'APPLICANT'
+  },
+  {
+    description: '2. Complete the total initial payment. Log in to your online resident portal. Press the "Make Payment" button, enter your remaining balance, and complete the payment.',
+    completed: false,
+    type: 'APPLICANT'
+  },
+  {
+    description: '3. Set up utilities and provide us with proof of activation.',
+    completed: false,
+    type: 'APPLICANT'
+  }
+]
+
+// Combine both task lists
+const DEFAULT_TASKS = [...DEFAULT_AGENT_TASKS, ...DEFAULT_APPLICANT_TASKS]
 
 /**
  * Generates a unique ID for a task
@@ -79,24 +119,16 @@ async function seedDefaultTasks() {
         completed: task.completed,
         applicationId: application.id,
         order: index,
-        type: 'APPLICANT' // Default to AGENT type
+        type: task.type
       }))
 
       // Use a transaction to create all tasks at once
       await prisma.$transaction(
-        tasksToCreate.map((task) => {
-          // Ensure 'type' is actually of the correct enum type (TaskType)
-          // Assuming TaskType is imported from your Prisma client:
-          //
-          // import { TaskType } from '@prisma/client'
-          //
-          return prisma.task.create({
-            data: {
-              ...task,
-              type: 'APPLICANT', // You may want to use TaskType.AGENT if type is an enum
-            }
+        tasksToCreate.map((task) =>
+          prisma.task.create({
+            data: task
           })
-        })
+        )
       )
 
       console.log(`✅ Added ${DEFAULT_TASKS.length} default tasks to application ${application.id} (${application.applicant})`)

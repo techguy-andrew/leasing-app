@@ -44,7 +44,7 @@ export default function TopBar({ isOpen, onToggle }: TopBarProps) {
       variants={fadeIn}
       initial="initial"
       animate="animate"
-      className="w-full flex flex-row items-center gap-4 px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-white/85 backdrop-blur-xl border-b border-gray-200 shadow-sm"
+      className="w-full flex flex-row items-center gap-4 px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-white/85 backdrop-blur-xl border-b border-gray-200 shadow-sm relative z-60"
     >
       <motion.div
         className="flex flex-row items-center gap-4 w-full"

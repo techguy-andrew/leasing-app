@@ -48,7 +48,7 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
             animate={{ opacity: 1, backdropFilter: 'blur(20px)' }}
             exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
             transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="fixed inset-0 bg-black/20 backdrop-blur-xl z-40"
+            className="fixed inset-x-0 top-[64px] bottom-0 bg-black/20 backdrop-blur-xl z-40"
             onClick={onClose}
           />
 
@@ -58,7 +58,7 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '-100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed left-0 top-0 bottom-0 w-72 sm:w-80 bg-white/90 backdrop-blur-xl border-r border-gray-200 z-50 flex flex-col overflow-y-auto shadow-2xl"
+            className="fixed left-0 top-[64px] bottom-0 w-72 sm:w-80 bg-white/90 backdrop-blur-xl border-r border-gray-200 z-50 flex flex-col overflow-y-auto shadow-2xl"
           >
             <motion.nav
               className="flex flex-col gap-1 p-4 sm:p-6"
@@ -90,6 +90,19 @@ export default function SideBar({ isOpen, onClose }: SideBarProps) {
                   }`}
                 >
                   Applications
+                </Link>
+              </motion.div>
+              <motion.div variants={slideUp}>
+                <Link
+                  href="/people"
+                  onClick={onClose}
+                  className={`flex items-center px-5 py-4 rounded-xl transition-colors duration-200 text-base font-medium ${
+                    pathname.startsWith('/people')
+                      ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 shadow-sm'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  People
                 </Link>
               </motion.div>
               <motion.div variants={slideUp}>

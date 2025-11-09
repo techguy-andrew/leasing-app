@@ -62,11 +62,11 @@ const DEFAULT_TASKS = [
     completed: false
   },
   {
-    description: '2. Make your initial payment.',
+    description: '2. Complete the total initial payment. Log in to your online resident portal. Press the "Make Payment" button, enter your remaining balance, and complete the payment.',
     completed: false
   },
   {
-    description: '3. Provide us with your utilities account number.',
+    description: '3. Set up utilities and provide us with proof of activation.',
     completed: false
   }
 ]

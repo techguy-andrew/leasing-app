@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import ApplicationForm from '@/components/ApplicationForm'
 import { getDefaultTasks } from '@/lib/applicantDefaultTasks'
+import { getDefaultAgentTasks } from '@/lib/agentDefaultTasks'
 
 interface FormData {
   status: string[]
@@ -53,7 +54,7 @@ export default function NewApplicationPage() {
       petFee: formData.petFee.trim() || null,
       rentersInsurance: formData.rentersInsurance.trim() || null,
       adminFee: formData.adminFee.trim() || null,
-      tasks: getDefaultTasks() // Add default tasks to new applications
+      tasks: [...getDefaultAgentTasks(), ...getDefaultTasks()] // Add default agent tasks and applicant tasks to new applications
     }
 
     const response = await fetch('/api/applications', {

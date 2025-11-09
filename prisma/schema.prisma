@@ -12,14 +12,24 @@ model Application {
   userId           String?  // Clerk user ID (optional for backward compatibility)
   status           String[] @default([])
   moveInDate       String
-  property         String
-  unitNumber       String
-  applicant        String
+
+  // NEW: Unit relationship (optional - backward compatible)
+  unitId           Int?
+  unit             Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
+
+  // LEGACY: Keep original text fields for backward compatibility
+  property         String   // Can still be used if unitId is null
+  unitNumber       String   // Can still be used if unitId is null
+  applicant        String   // Can still be used if no persons linked
   email            String?
   phone            String?
+
   createdAt        String   // Application date in MM/DD/YYYY format
   updatedAt        DateTime @updatedAt
-  tasks            Task[]   // One-to-many relationship with tasks
+
+  // Relationships
+  tasks            Task[]              // One-to-many relationship with tasks
+  persons          ApplicationPerson[] // Many-to-many with persons (co-applicants)
 
   // Payment fields
   deposit          String?  // Security deposit amount
@@ -38,6 +48,7 @@ model Application {
   @@index([moveInDate])
   @@index([createdAt])
   @@index([userId])
+  @@index([unitId])
 }
 
 enum TaskType {
@@ -81,6 +92,9 @@ model Property {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  // NEW: Relationships
+  units          Unit[]   // One-to-many with units
+
   @@index([userId])
   @@index([name])
 }
@@ -98,4 +112,89 @@ model Status {
   @@unique([userId, order], name: "unique_status_order_per_user")
   @@index([userId])
   @@index([userId, order])
+}
+
+// NEW: Person Model - Central entity for tracking individuals (Prospects, Applicants, Residents)
+model Person {
+  id              Int      @id @default(autoincrement())
+  userId          String?  // Clerk user ID (optional for backward compatibility)
+
+  // Basic Information
+  firstName       String
+  lastName        String
+  email           String?
+  phone           String?
+
+  // Status Tracking (lifecycle: Prospect → Applicant → Current Resident → Past Resident)
+  status          String   @default("Prospect")
+
+  // Timestamps for status transitions
+  createdAt       DateTime @default(now()) // When first entered as prospect
+  updatedAt       DateTime @updatedAt
+  becameApplicant DateTime? // When they applied (first application created)
+  becameResident  DateTime? // When they moved in (first lease/move-in date)
+  becamePast      DateTime? // When they moved out
+
+  // Relationships
+  applications    ApplicationPerson[] // Many-to-many with applications (supports co-applicants)
+
+  @@index([userId])
+  @@index([status])
+  @@index([email])
+  @@index([lastName])
+}
+
+// NEW: Unit Model - Each unit is a distinct entity with its own properties and history
+model Unit {
+  id           Int      @id @default(autoincrement())
+  userId       String?  // Clerk user ID (optional for backward compatibility)
+
+  // Unit Details
+  propertyId   Int      // Foreign key to Property
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  unitNumber   String   // e.g., "101", "2A", "Building B-205"
+
+  // Unit Specifications
+  bedrooms     Int?     // Number of bedrooms
+  bathrooms    Float?   // Number of bathrooms (1.5, 2.0, etc.)
+  squareFeet   Int?     // Square footage
+  floor        Int?     // Floor number
+
+  // Pricing
+  baseRent     String?  // Current base rent amount
+
+  // Status
+  status       String   @default("Vacant") // Vacant, Occupied, Under Maintenance, etc.
+
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relationships
+  applications Application[] // Applications for this unit
+
+  @@unique([propertyId, unitNumber]) // Each unit number must be unique within a property
+  @@index([userId])
+  @@index([propertyId])
+  @@index([status])
+}
+
+// NEW: ApplicationPerson Join Table - Supports multiple co-applicants per application
+model ApplicationPerson {
+  id            Int         @id @default(autoincrement())
+
+  applicationId Int
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  personId      Int
+  person        Person      @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  isPrimary     Boolean     @default(false) // True for primary applicant, false for co-applicants
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([applicationId, personId]) // Each person can only be on an application once
+  @@index([applicationId])
+  @@index([personId])
 }
