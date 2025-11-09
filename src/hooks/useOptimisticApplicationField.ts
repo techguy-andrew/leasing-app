@@ -31,7 +31,7 @@ interface UseOptimisticApplicationFieldOptions {
   fieldName: string
   initialValue: string
   debounceMs?: number
-  onSuccess?: (data: any) => void
+  onSuccess?: (data: unknown) => void
   onError?: (error: Error) => void
 }
 

@@ -58,7 +58,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import InlineTextField from '@/components/InlineTextField'
 import ErrorModal from '@/components/ErrorModal'
 import { useOptimisticApplicationField } from '@/hooks/useOptimisticApplicationField'
@@ -188,20 +188,20 @@ export default function OptimisticFieldExample({
         <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
           <li>Type in a field → UI updates INSTANTLY (no waiting)</li>
           <li>After you stop typing for 500ms → auto-saves to server</li>
-          <li>If save succeeds → ✅ done (you won't notice anything)</li>
+          <li>If save succeeds → ✅ done (you will not notice anything)</li>
           <li>If save fails → ❌ error modal appears</li>
-          <li>Click "Retry" → tries to save again</li>
-          <li>Click "Cancel" → reverts to last successfully saved value</li>
+          <li>Click &quot;Retry&quot; → tries to save again</li>
+          <li>Click &quot;Cancel&quot; → reverts to last successfully saved value</li>
         </ul>
 
         <div className="mt-4 p-3 bg-white rounded border border-blue-300">
           <p className="text-xs font-mono text-gray-700">
             <strong>Test error handling:</strong><br />
             1. Open DevTools → Network tab<br />
-            2. Set to "Offline" mode<br />
+            2. Set to &quot;Offline&quot; mode<br />
             3. Edit a field → see instant update<br />
             4. Wait 3 seconds → error modal appears<br />
-            5. Turn network back on → click "Retry" → saves!
+            5. Turn network back on → click &quot;Retry&quot; → saves!
           </p>
         </div>
       </div>

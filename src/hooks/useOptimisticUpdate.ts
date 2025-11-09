@@ -21,7 +21,7 @@ export interface UseOptimisticUpdateOptions<T> {
   debounceMs?: number
   onSuccess?: (data: T) => void
   onError?: (error: Error) => void
-  getPayload?: (value: T) => any
+  getPayload?: (value: T) => Record<string, unknown>
 }
 
 export interface UseOptimisticUpdateReturn<T> {
@@ -98,8 +98,8 @@ export function useOptimisticUpdate<T>(
         }
 
         onSuccess?.(data.data || newValue)
-      } catch (err: any) {
-        if (err.name === 'AbortError') {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
           // Request was cancelled, ignore
           return
         }

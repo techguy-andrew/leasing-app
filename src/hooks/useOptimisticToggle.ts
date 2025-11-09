@@ -20,7 +20,7 @@ export interface UseOptimisticToggleOptions {
   fieldName?: string
   onSuccess?: (newValue: boolean) => void
   onError?: (error: Error) => void
-  getPayload?: (value: boolean) => any
+  getPayload?: (value: boolean) => Record<string, unknown>
 }
 
 export interface UseOptimisticToggleReturn {

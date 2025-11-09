@@ -3,7 +3,7 @@
  * Useful for optimistic updates on rapid user input (e.g., typing)
  */
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {
@@ -20,7 +20,7 @@ export function debounce<T extends (...args: any[]) => any>(
   }
 }
 
-export function debounceAsync<T extends (...args: any[]) => Promise<any>>(
+export function debounceAsync<T extends (...args: never[]) => Promise<unknown>>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => Promise<void> {
