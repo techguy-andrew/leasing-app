@@ -1,40 +1,21 @@
-'use client'
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 
-import { useState, useEffect, useCallback } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
-import IconPack from '@/components/IconPack'
-import Pill from '@/components/Pill'
+type IconName = 'tag' | 'building' | 'calendar' | 'clock' | 'sort' | 'search' | 'check' | 'x';
 
-/**
- * 🎯 FULL-SCREEN FILTER MODAL
- *
- * Unified modal component for all filter selections.
- * Based on StatusUpdateModal and StatusMessageModal architecture.
- *
- * Features:
- * - Single or multi-select modes
- * - Static or API-fetched options
- * - Radio buttons or checkboxes
- * - Apply/Cancel or immediate selection
- * - Custom icons and titles
- * - Full-screen centered design
- * - Backdrop blur
- *
- * @example
- * ```tsx
- * <FullScreenFilterModal
- *   isOpen={isOpen}
- *   onClose={() => setIsOpen(false)}
- *   title="Select Status"
- *   icon="tag"
- *   mode="multi"
- *   options={statuses.map(s => ({ value: s.name, label: s.name, color: s.color }))}
- *   selectedValues={selectedStatuses}
- *   onApply={(values) => setSelectedStatuses(values)}
- *   showApplyButton={true}
- * />
- * ```
- */
+const Icon: React.FC<{ name: IconName; className?: string }> = ({ name, className = "w-6 h-6" }) => {
+  const icons: Record<IconName, React.ReactElement> = {
+    tag: <><path strokeLinecap="round" strokeLinejoin="round" d="M12.586 2.586a2 2 0 00-2.828 0L2 10.172V14h3.828l7.586-7.586a2 2 0 000-2.828z" /><path strokeLinecap="round" strokeLinejoin="round" d="M7 14l6-6-4-4-6 6v4h4z" /></>,
+    building: <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0v-4m6 4v-4m6 4v-4m-9-4h5M9 7h1v1H9V7z" />,
+    calendar: <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />,
+    clock: <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />,
+    sort: <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9M3 12h9m-9 4h13m-3-4v8m0 0l-4-4m4 4l4-4" />,
+    search: <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />,
+    check: <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />,
+    x: <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />,
+  };
+  return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>{icons[name]}</svg>;
+};
 
 export interface FilterOption {
   value: string
@@ -43,17 +24,17 @@ export interface FilterOption {
 }
 
 interface FullScreenFilterModalProps {
-  isOpen: boolean
-  onClose: () => void
-  title: string
-  icon?: 'tag' | 'building' | 'calendar' | 'clock' | 'sort'
-  mode: 'single' | 'multi'
-  options: FilterOption[]
-  selectedValues: string[]
-  onApply: (values: string[]) => void
-  autoCloseOnSelect?: boolean
-  showApplyButton?: boolean
-  fetchOptions?: () => Promise<FilterOption[]>
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  icon?: IconName;
+  mode: 'single' | 'multi';
+  options: FilterOption[];
+  selectedValues: string[];
+  onApply: (values: string[]) => void;
+  showApplyButton?: boolean;
+  autoCloseOnSelect?: boolean;
+  fetchOptions?: () => Promise<FilterOption[]>;
 }
 
 export default function FullScreenFilterModal({
@@ -62,224 +43,172 @@ export default function FullScreenFilterModal({
   title,
   icon = 'tag',
   mode,
-  options: initialOptions,
+  options,
   selectedValues,
   onApply,
-  autoCloseOnSelect = false,
   showApplyButton = false,
+  autoCloseOnSelect = false,
   fetchOptions
 }: FullScreenFilterModalProps) {
-  const [options, setOptions] = useState<FilterOption[]>(initialOptions)
-  const [tempSelectedValues, setTempSelectedValues] = useState<string[]>(selectedValues)
+  const [currentSelection, setCurrentSelection] = useState<string[]>(selectedValues);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentOptions, setCurrentOptions] = useState<FilterOption[]>(options);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch options if needed
   useEffect(() => {
-    if (isOpen && fetchOptions) {
-      fetchOptions().then(setOptions)
+    setCurrentSelection(selectedValues);
+  }, [selectedValues, isOpen]);
+
+  useEffect(() => {
+    setCurrentOptions(options);
+  }, [options]);
+
+  const refreshOptions = useCallback(async () => {
+    if (!fetchOptions) return;
+    setIsLoading(true);
+    try {
+        const newOptions = await fetchOptions();
+        setCurrentOptions(newOptions);
+    } catch(e) {
+        console.error("Failed to refresh options", e);
+    } finally {
+        setIsLoading(false);
     }
-  }, [isOpen, fetchOptions])
+  }, [fetchOptions]);
 
-  // Reset temp selection when modal opens
   useEffect(() => {
-    if (isOpen) {
-      setTempSelectedValues(selectedValues)
+    if(isOpen) {
+        refreshOptions();
     }
-  }, [isOpen, selectedValues])
+  }, [isOpen, refreshOptions]);
 
-  // Update options when initialOptions change
-  useEffect(() => {
-    setOptions(initialOptions)
-  }, [initialOptions])
-
-  const handleToggle = useCallback((value: string) => {
+  const handleSelect = (value: string) => {
+    let newSelection: string[];
     if (mode === 'single') {
-      setTempSelectedValues([value])
-      if (autoCloseOnSelect) {
-        onApply([value])
-        onClose()
-      }
+      newSelection = [value];
     } else {
-      // Multi-select with smart "All" logic
-      setTempSelectedValues(prev => {
-        if (value === 'All') {
-          // Clicking "All" clears all other selections
-          return ['All']
-        } else {
-          // Clicking a specific option
-          if (prev.includes(value)) {
-            // Deselecting a specific option
-            const newSelection = prev.filter(v => v !== value)
-            // If nothing left, default back to "All"
-            return newSelection.length === 0 ? ['All'] : newSelection
-          } else {
-            // Selecting a specific option - remove "All" if present
-            const withoutAll = prev.filter(v => v !== 'All')
-            return [...withoutAll, value]
-          }
+      if (value === 'All') {
+        newSelection = ['All'];
+      } else {
+        const selectionsWithoutAll = currentSelection.filter(v => v !== 'All');
+        newSelection = selectionsWithoutAll.includes(value)
+          ? selectionsWithoutAll.filter(v => v !== value)
+          : [...selectionsWithoutAll, value];
+        if (newSelection.length === 0) {
+            newSelection = ['All'];
         }
-      })
+      }
     }
-  }, [mode, autoCloseOnSelect, onApply, onClose])
-
-  const handleApply = useCallback(() => {
-    onApply(tempSelectedValues)
-    onClose()
-  }, [tempSelectedValues, onApply, onClose])
-
-  const handleCancel = useCallback(() => {
-    setTempSelectedValues(selectedValues)
-    onClose()
-  }, [selectedValues, onClose])
-
-  const getIcon = () => {
-    switch (icon) {
-      case 'tag':
-        return (
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-          </svg>
-        )
-      case 'building':
-        return (
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-        )
-      case 'calendar':
-        return (
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        )
-      case 'clock':
-        return (
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        )
-      case 'sort':
-        return (
-          <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-          </svg>
-        )
-      default:
-        return null
+    setCurrentSelection(newSelection);
+    if (autoCloseOnSelect && mode === 'single') {
+      onApply(newSelection);
     }
-  }
+  };
+
+  const filteredOptions = useMemo(() => {
+    return currentOptions.filter(option =>
+      option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [currentOptions, searchTerm]);
+
+  const handleApplyClick = () => {
+    onApply(currentSelection);
+  };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-x-0 bottom-0 flex items-center justify-center p-6 backdrop-blur-sm" style={{ top: 'var(--header-height, 0px)', zIndex: 40 }}>
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-            animate={{ opacity: 1, backdropFilter: 'blur(20px)' }}
-            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="absolute inset-0 bg-black/20 backdrop-blur-xl"
-            onClick={handleCancel}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="absolute inset-0 bg-slate-900/50"
+            onClick={onClose}
           />
 
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{
-              type: 'spring',
-              damping: 25,
-              stiffness: 300,
-              duration: 0.3
+              duration: 0.2,
+              ease: [0.4, 0.0, 0.2, 1] // Custom easing for smooth feel
             }}
-            className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[85vh] flex flex-col border border-gray-200"
+            className="relative bg-white w-full max-w-xl rounded-2xl shadow-2xl flex flex-col max-h-[75vh]"
+            style={{ zIndex: 50 }}
+            onClick={e => e.stopPropagation()}
           >
-            {/* Fixed Header */}
-            <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 flex-shrink-0">
-              {/* Left: Icon + Title */}
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center bg-gray-100 border border-gray-200 flex-shrink-0">
-                  {getIcon()}
-                </div>
-                <h3 className="text-sm sm:text-base font-bold text-gray-900">
-                  {title}
-                </h3>
+            <header className="flex items-center justify-between p-4 border-b border-slate-200 flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <Icon name={icon} className="w-6 h-6 text-slate-500" />
+                <h2 className="text-lg font-bold text-slate-900">{title}</h2>
               </div>
+              <button
+                onClick={onClose}
+                className="w-9 h-9 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+              >
+                <Icon name="x" className="w-6 h-6" />
+              </button>
+            </header>
 
-              {/* Right: Action Buttons */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {showApplyButton && mode === 'multi' && (
-                  <>
-                    <button
-                      onClick={handleApply}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                    >
-                      Apply
-                    </button>
-                    <button
-                      onClick={handleCancel}
-                      className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                )}
-                {!showApplyButton && (
-                  <button
-                    onClick={handleCancel}
-                    className="text-gray-400 hover:text-gray-600 cursor-pointer p-2"
-                  >
-                    <IconPack.Cancel size="default" />
-                  </button>
-                )}
+            <div className="p-4 border-b border-slate-200 flex-shrink-0">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Icon name="search" className="w-5 h-5 text-slate-400" />
+                </div>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  placeholder="Search options..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white focus:border-slate-300 transition"
+                />
               </div>
             </div>
 
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-              {/* Options Grid - responsive columns for colored items (like statuses) */}
-              <div className={`grid gap-2 ${options.length > 0 && options[0].color ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                {options.map((option) => {
-                  const isSelected = tempSelectedValues.includes(option.value)
-                  // Gray out "All" when it's the only selection (default state) in multi-select mode
-                  const isDefaultAll = mode === 'multi' && option.value === 'All' && tempSelectedValues.length === 1 && tempSelectedValues[0] === 'All'
-
-                  return (
-                    <div
-                      key={option.value}
-                      className={`w-full px-3 sm:px-4 py-2 sm:py-3 hover:bg-gray-50 transition-colors rounded-lg flex items-center gap-2 sm:gap-3 cursor-pointer border border-gray-200 ${isDefaultAll ? 'opacity-50' : ''}`}
-                      onClick={() => handleToggle(option.value)}
-                    >
-                      <input
-                        type={mode === 'multi' ? 'checkbox' : 'radio'}
-                        checked={isSelected}
-                        onChange={() => {}}
-                        className="w-4 h-4 rounded border-gray-300 pointer-events-none flex-shrink-0"
-                      />
-                      {option.color ? (
-                        <Pill
-                          label={option.label}
-                          color={option.color}
-                          variant="default"
-                        />
-                      ) : (
-                        <span className={`text-xs sm:text-sm ${isDefaultAll ? 'text-gray-400' : 'text-gray-700'}`}>{option.label}</span>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-
-              {options.length === 0 && (
-                <div className="text-center py-8 text-gray-500 text-sm">
-                  No options available.
-                </div>
+            <main className="flex-1 overflow-y-auto p-2">
+              {isLoading ? (
+                <div className="flex items-center justify-center h-full text-slate-500 py-8">Loading...</div>
+              ) : (
+                <ul className="space-y-1">
+                  {filteredOptions.map(option => {
+                    const isSelected = currentSelection.includes(option.value);
+                    return (
+                      <li key={option.value}>
+                        <button
+                          onClick={() => handleSelect(option.value)}
+                          className={`w-full text-left flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                            isSelected ? 'bg-blue-50 text-blue-700 font-semibold' : 'hover:bg-slate-50'
+                          }`}
+                        >
+                          {option.color && <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: option.color }}></span>}
+                          <span className="flex-1">{option.label}</span>
+                          {isSelected && <Icon name="check" className="w-5 h-5 text-blue-600 flex-shrink-0" />}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
               )}
-            </div>
+            </main>
+
+            {showApplyButton && (
+              <footer className="p-4 border-t border-slate-200 bg-white flex-shrink-0">
+                <button
+                  onClick={handleApplyClick}
+                  className="w-full py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Apply
+                </button>
+              </footer>
+            )}
           </motion.div>
         </div>
       )}
     </AnimatePresence>
-  )
+  );
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
 import PersonDetailForm from '@/components/PersonDetailForm'
+import CommunicationBubble from '@/components/ChatBubble'
 import LoadingScreen from '@/components/LoadingScreen'
 import { fadeIn } from '@/lib/animations/variants'
 
@@ -126,21 +127,28 @@ export default function PersonDetailPage({ params }: PageProps) {
 
   if (!person || !personId) return null
 
+  const personName = `${person.firstName} ${person.lastName}`
+
   return (
-    <PersonDetailForm
-      mode="edit"
-      initialData={{
-        firstName: person.firstName,
-        lastName: person.lastName,
-        email: person.email || '',
-        phone: person.phone || '',
-        status: person.status
-      }}
-      personId={personId}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      onDelete={handleDelete}
-      showDeleteButton={true}
-    />
+    <>
+      <PersonDetailForm
+        mode="edit"
+        initialData={{
+          firstName: person.firstName,
+          lastName: person.lastName,
+          email: person.email || '',
+          phone: person.phone || '',
+          status: person.status
+        }}
+        personId={personId}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        onDelete={handleDelete}
+        showDeleteButton={true}
+      />
+
+      {/* Communication Bubble - Fixed position, doesn't affect layout */}
+      <CommunicationBubble personId={personId} personName={personName} />
+    </>
   )
 }

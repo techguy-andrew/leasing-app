@@ -29,7 +29,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const property = await prisma.property.findUnique({
-      where: { id: propertyId }
+      where: { id: propertyId },
+      include: {
+        units: {
+          orderBy: {
+            unitNumber: 'asc'
+          }
+        }
+      }
     })
 
     if (!property) {

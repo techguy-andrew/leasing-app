@@ -48,7 +48,7 @@ export default function ToDoListPage() {
 
   if (!isLoaded || isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full px-6 py-8">
         <h1 className="text-2xl font-bold mb-6">My To-Do List</h1>
         <p className="text-gray-600">Loading...</p>
       </div>
@@ -57,7 +57,7 @@ export default function ToDoListPage() {
 
   if (!userId) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full px-6 py-8">
         <h1 className="text-2xl font-bold mb-6">My To-Do List</h1>
         <p className="text-gray-600">Please sign in to view your to-do list.</p>
       </div>
@@ -66,7 +66,7 @@ export default function ToDoListPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="w-full px-6 py-8">
         <h1 className="text-2xl font-bold mb-6">My To-Do List</h1>
         <p className="text-red-600">Error: {error}</p>
       </div>
@@ -74,10 +74,10 @@ export default function ToDoListPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="w-full px-6 py-8">
       <h1 className="text-2xl font-bold mb-6">My To-Do List</h1>
 
-      <div className="max-w-2xl">
+      <div className="w-full">
         <TasksList
           initialTasks={tasks}
           onTasksChange={setTasks}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { SignIn } from '@clerk/nextjs'
@@ -62,6 +62,7 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
   const pathname = usePathname()
   const isApplicationsPage = pathname === '/applications'
   const isAppDetailPage = pathname.startsWith('/applications/') && pathname !== '/applications'
+  const headerRef = useRef<HTMLElement>(null)
 
   const {
     statusFilter,
@@ -81,6 +82,20 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen)
   const closeSidebar = () => setIsSidebarOpen(false)
 
+  // Set CSS variable for header height to help center modals in content area
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      if (headerRef.current) {
+        const height = headerRef.current.offsetHeight
+        document.documentElement.style.setProperty('--header-height', `${height}px`)
+      }
+    }
+
+    updateHeaderHeight()
+    window.addEventListener('resize', updateHeaderHeight)
+    return () => window.removeEventListener('resize', updateHeaderHeight)
+  }, [isApplicationsPage, isAppDetailPage]) // Re-measure when page changes (header content changes)
+
   return (
     <div className="flex flex-col h-screen">
       {/*
@@ -99,7 +114,7 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
         NO CSS custom properties
         NO JavaScript measurements
       */}
-      <header className="flex-shrink-0 flex flex-col">
+      <header ref={headerRef} className="flex-shrink-0 flex flex-col">
         {/* Top Bar - Always visible */}
         <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
 
@@ -166,24 +181,14 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
       <main className="flex-1 overflow-y-auto">
         {/*
           Content container
-          - Applications page: full width (no max-width constraint)
-          - Other pages: centered with max-w-4xl and padding
-          - Responsive breakpoints: sm (640px), md (768px)
-          - NO top/bottom padding calculations needed
+          - ALL pages: 100% full width, fluid and adaptable
+          - NO max-width constraints anywhere
+          - Pages handle their own internal layout
+          - Responsive and adapts to any screen size
         */}
-        {isApplicationsPage || isAppDetailPage ? (
-          // Full width for applications pages (list and detail)
-          <div className="w-full h-full">
-            {children}
-          </div>
-        ) : (
-          // Centered with max-width for other pages
-          <div className="w-full h-full flex flex-col items-center justify-start">
-            <div className="max-w-4xl w-full p-4 sm:p-6 md:p-8">
-              {children}
-            </div>
-          </div>
-        )}
+        <div className="w-full h-full">
+          {children}
+        </div>
       </main>
     </div>
   )

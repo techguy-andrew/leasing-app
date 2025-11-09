@@ -137,6 +137,7 @@ model Person {
 
   // Relationships
   applications    ApplicationPerson[] // Many-to-many with applications (supports co-applicants)
+  communications  Communication[]     // One-to-many with communications (texts/emails)
 
   @@index([userId])
   @@index([status])
@@ -165,6 +166,7 @@ model Unit {
 
   // Status
   status       String   @default("Vacant") // Vacant, Occupied, Under Maintenance, etc.
+  availableOn  DateTime? // Date when unit becomes available
 
   // Timestamps
   createdAt    DateTime @default(now())
@@ -197,4 +199,30 @@ model ApplicationPerson {
   @@unique([applicationId, personId]) // Each person can only be on an application once
   @@index([applicationId])
   @@index([personId])
+}
+
+// NEW: Communication Model - Track texts and emails with people
+model Communication {
+  id              String   @id @default(cuid())
+  userId          String?  // Clerk user ID (who owns this data)
+  personId        Int      // Links to Person
+
+  // Communication Details
+  type            String   // "TEXT" or "EMAIL"
+  content         String   @db.Text
+  direction       String   // "SENT" or "RECEIVED"
+
+  // Sender Information
+  senderName      String
+  senderImageUrl  String?
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+
+  // Relationships
+  person          Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId])
+  @@index([userId])
+  @@index([createdAt])
 }
