@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useUnitsFilter } from '@/contexts/UnitsFilterContext'
 import FilterDropdown, { FilterOption } from '@/components/FilterDropdown'
-import PriceRangeFilterModal from '@/components/PriceRangeFilterModal'
-import DateFilterModal from '@/components/DateFilterModal'
+import PriceRangeInputDropdown from '@/components/PriceRangeInputDropdown'
+import DateInputDropdown from '@/components/DateInputDropdown'
 
 const bedroomsOptions: FilterOption[] = [
   { value: 'All', label: 'All' },
@@ -183,7 +183,7 @@ export default function UnitsFilterBar() {
   return (
     <div
       data-unitsfilterbar
-      className="w-full flex items-center gap-2 px-6 py-3 bg-white border-b border-gray-200"
+      className="w-full flex items-center gap-2 flex-wrap px-6 py-3 bg-white border-b border-gray-200"
     >
       {/* Property Filter Pill */}
       <button
@@ -305,23 +305,26 @@ export default function UnitsFilterBar() {
         autoCloseOnSelect={true}
       />
 
-      {/* Price Range Modal */}
-      <PriceRangeFilterModal
+      {/* Price Range Dropdown */}
+      <PriceRangeInputDropdown
         isOpen={priceModalOpen}
         onClose={() => setPriceModalOpen(false)}
+        triggerRef={pricePillRef}
         minPrice={minPrice}
         maxPrice={maxPrice}
         onApply={handlePriceApply}
+        showApplyButton={true}
       />
 
-      {/* Available By Date Modal */}
-      <DateFilterModal
+      {/* Available By Date Dropdown */}
+      <DateInputDropdown
         isOpen={availableByModalOpen}
         onClose={() => setAvailableByModalOpen(false)}
-        title="Filter by Available Date"
+        triggerRef={availableByPillRef}
         label="Show units available by:"
         date={availableByDate}
         onApply={handleAvailableByApply}
+        showApplyButton={true}
       />
     </div>
   )

@@ -1,13 +1,11 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { motion } from 'motion/react'
-import PropertiesList from '@/components/PropertiesList'
+import PropertiesTable from '@/components/PropertiesTable'
 import LoadingScreen from '@/components/LoadingScreen'
 import GenericSearchBar from '@/components/GenericSearchBar'
 import PropertiesFilterBar from '@/components/PropertiesFilterBar'
 import { PropertiesFilterProvider, usePropertiesFilter } from '@/contexts/PropertiesFilterContext'
-import { fadeIn } from '@/lib/animations/variants'
 
 interface Property {
   id: number
@@ -107,27 +105,17 @@ function PropertiesPageContent() {
 
   if (error) {
     return (
-      <motion.div
-        variants={fadeIn}
-        initial="initial"
-        animate="animate"
-        className="flex flex-col flex-1 w-full items-center justify-center"
-      >
+      <div className="flex flex-col flex-1 w-full items-center justify-center">
         <div className="text-base text-red-600 px-4 text-center">
           Error: {error}
         </div>
-      </motion.div>
+      </div>
     )
   }
 
   return (
-    <motion.div
-      variants={fadeIn}
-      initial="initial"
-      animate="animate"
-      className="flex flex-col flex-1 w-full"
-    >
-      {/* Search Bar */}
+    <div className="flex flex-col w-full h-full">
+      {/* Search Bar - Fixed */}
       <GenericSearchBar<Property>
         apiEndpoint="/api/properties"
         placeholder="Search by property name, address, or city..."
@@ -148,7 +136,7 @@ function PropertiesPageContent() {
         getItemId={(property) => property.id}
       />
 
-      {/* Filter Bar */}
+      {/* Filter Bar - Fixed */}
       <PropertiesFilterBar
         cities={cities}
         states={states}
@@ -162,9 +150,18 @@ function PropertiesPageContent() {
         onSortDirectionChange={setSortDirection}
       />
 
-      {/* Properties List */}
-      <PropertiesList properties={filteredProperties} />
-    </motion.div>
+      {/* Results Count - Fixed */}
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+        <p className="text-sm text-gray-600">
+          {filteredProperties.length} {filteredProperties.length === 1 ? 'property' : 'properties'}
+        </p>
+      </div>
+
+      {/* Table with Fixed Headers - Scrollable Body */}
+      <div className="flex-1 overflow-y-auto bg-white">
+        <PropertiesTable properties={filteredProperties} stickyHeader={true} />
+      </div>
+    </div>
   )
 }
 

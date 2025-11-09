@@ -1,13 +1,11 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { motion } from 'motion/react'
 import { UnitsFilterProvider, useUnitsFilter } from '@/contexts/UnitsFilterContext'
 import UnitsFilterBar from '@/components/UnitsFilterBar'
 import UnitsTable from '@/components/UnitsTable'
 import GenericSearchBar from '@/components/GenericSearchBar'
 import LoadingScreen from '@/components/LoadingScreen'
-import { fadeIn } from '@/lib/animations/variants'
 
 interface Property {
   id: number
@@ -148,22 +146,17 @@ function UnitsPageContent() {
 
   if (error) {
     return (
-      <motion.div
-        variants={fadeIn}
-        initial="initial"
-        animate="animate"
-        className="flex flex-col flex-1 w-full items-center justify-center"
-      >
+      <div className="flex flex-col flex-1 w-full items-center justify-center">
         <div className="text-base text-red-600 px-4 text-center">
           Error: {error}
         </div>
-      </motion.div>
+      </div>
     )
   }
 
   return (
-    <>
-      {/* Search Bar */}
+    <div className="flex flex-col w-full h-full">
+      {/* Search Bar - Fixed */}
       <GenericSearchBar<Unit>
         apiEndpoint="/api/units"
         placeholder="Search by unit number or property name..."
@@ -186,20 +179,21 @@ function UnitsPageContent() {
         getItemId={(unit) => unit.id}
       />
 
-      {/* Filter Bar */}
+      {/* Filter Bar - Fixed */}
       <UnitsFilterBar />
 
-      {/* Page Content */}
-      <motion.div
-        variants={fadeIn}
-        initial="initial"
-        animate="animate"
-        className="flex flex-col flex-1 w-full"
-      >
-        {/* Units Table */}
-        <UnitsTable units={filteredAndSortedUnits} />
-      </motion.div>
-    </>
+      {/* Results Count - Fixed */}
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+        <p className="text-sm text-gray-600">
+          {filteredAndSortedUnits.length} {filteredAndSortedUnits.length === 1 ? 'unit' : 'units'}
+        </p>
+      </div>
+
+      {/* Table with Fixed Headers - Scrollable Body */}
+      <div className="flex-1 overflow-y-auto bg-white">
+        <UnitsTable units={filteredAndSortedUnits} stickyHeader={true} />
+      </div>
+    </div>
   )
 }
 

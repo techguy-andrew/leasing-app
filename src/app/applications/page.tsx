@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { useFilter } from '@/contexts/FilterContext'
 import ApplicationsList from '@/components/ApplicationsList'
 import GenericSearchBar from '@/components/GenericSearchBar'
+import FilterBar from '@/components/FilterBar'
 
 interface Application {
   id: number
@@ -23,7 +24,7 @@ function ApplicationsContent() {
   const [applications, setApplications] = useState<Application[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const searchParams = useSearchParams()
-  const { statusFilter, setStatusFilter, dateType, calendarFilter, propertyFilter, sortDirection } = useFilter()
+  const { statusFilter, setStatusFilter, dateType, setDateType, calendarFilter, setCalendarFilter, propertyFilter, setPropertyFilter, sortDirection, setSortDirection } = useFilter()
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Set status filter from URL params on mount
@@ -163,8 +164,8 @@ function ApplicationsContent() {
   }, [applications, statusFilter, propertyFilter, calendarFilter, dateType, sortDirection, parseMoveInDate, getStartOfWeek, getEndOfWeek, getStartOfMonth, getEndOfMonth])
 
   return (
-    <>
-      {/* Search Bar */}
+    <div className="flex flex-col w-full h-full">
+      {/* Search Bar - Fixed */}
       <GenericSearchBar<Application>
         apiEndpoint="/api/applications"
         placeholder="Search by name or unit number..."
@@ -186,7 +187,29 @@ function ApplicationsContent() {
         getItemId={(app) => app.id}
       />
 
-      <div ref={scrollContainerRef} className="w-full h-full overflow-y-auto">
+      {/* Filter Bar - Fixed */}
+      <FilterBar
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        dateType={dateType}
+        onDateTypeChange={setDateType}
+        calendarFilter={calendarFilter}
+        onCalendarChange={setCalendarFilter}
+        propertyFilter={propertyFilter}
+        onPropertyChange={setPropertyFilter}
+        sortDirection={sortDirection}
+        onSortDirectionChange={setSortDirection}
+      />
+
+      {/* Results Count - Fixed */}
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+        <p className="text-sm text-gray-600">
+          {filteredApplications.length} {filteredApplications.length === 1 ? 'application' : 'applications'}
+        </p>
+      </div>
+
+      {/* List - Scrollable */}
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
         <ApplicationsList
           applications={filteredApplications}
           isLoading={isLoading}
@@ -195,7 +218,7 @@ function ApplicationsContent() {
           dateType={dateType}
         />
       </div>
-    </>
+    </div>
   )
 }
 

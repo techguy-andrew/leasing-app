@@ -95,6 +95,7 @@ export default function PeopleFilterBar({
           options={statusOptions}
           selectedValues={statusFilter}
           onApply={(values) => onStatusChange(values)}
+          showApplyButton={true}
         />
 
         {/* Sort Field */}

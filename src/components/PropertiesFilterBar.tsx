@@ -116,6 +116,7 @@ export default function PropertiesFilterBar({
           options={cityOptions}
           selectedValues={cityFilter}
           onApply={(values) => onCityChange(values)}
+          showApplyButton={true}
         />
 
         {/* State Filter */}
@@ -134,6 +135,7 @@ export default function PropertiesFilterBar({
           options={stateOptions}
           selectedValues={stateFilter}
           onApply={(values) => onStateChange(values)}
+          showApplyButton={true}
         />
 
         {/* Sort Field */}

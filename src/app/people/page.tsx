@@ -2,13 +2,11 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'motion/react'
 import PeopleList from '@/components/PeopleList'
 import LoadingScreen from '@/components/LoadingScreen'
 import GenericSearchBar from '@/components/GenericSearchBar'
 import PeopleFilterBar from '@/components/PeopleFilterBar'
 import { PeopleFilterProvider, usePeopleFilter } from '@/contexts/PeopleFilterContext'
-import { fadeIn } from '@/lib/animations/variants'
 
 interface Person {
   id: number
@@ -57,10 +55,6 @@ function PeoplePageContent() {
     fetchPeople()
   }, [])
 
-  const handleNewPerson = () => {
-    router.push('/people/new')
-  }
-
   // Get unique statuses for filter options
   const statuses = useMemo(() => {
     const uniqueStatuses = Array.from(new Set(people.map(p => p.status)))
@@ -102,27 +96,17 @@ function PeoplePageContent() {
 
   if (error) {
     return (
-      <motion.div
-        variants={fadeIn}
-        initial="initial"
-        animate="animate"
-        className="flex flex-col flex-1 w-full items-center justify-center"
-      >
+      <div className="flex flex-col flex-1 w-full items-center justify-center">
         <div className="text-base text-red-600 px-4 text-center">
           Error: {error}
         </div>
-      </motion.div>
+      </div>
     )
   }
 
   return (
-    <motion.div
-      variants={fadeIn}
-      initial="initial"
-      animate="animate"
-      className="flex flex-col flex-1 w-full"
-    >
-      {/* Search Bar */}
+    <div className="flex flex-col w-full h-full">
+      {/* Search Bar - Fixed */}
       <GenericSearchBar<Person>
         apiEndpoint="/api/people"
         placeholder="Search by name, email, or phone..."
@@ -147,7 +131,7 @@ function PeoplePageContent() {
         getItemId={(person) => person.id}
       />
 
-      {/* Filter Bar */}
+      {/* Filter Bar - Fixed */}
       <PeopleFilterBar
         statuses={statuses}
         statusFilter={statusFilter}
@@ -158,25 +142,18 @@ function PeoplePageContent() {
         onSortDirectionChange={setSortDirection}
       />
 
-      {/* Header with Add Button */}
-      <div className="flex items-center justify-between px-6 md:px-8 py-6 border-b border-gray-200 bg-white">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">People</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            {filteredPeople.length} {filteredPeople.length === 1 ? 'person' : 'people'}
-          </p>
-        </div>
-        <button
-          onClick={handleNewPerson}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
-        >
-          + Add Person
-        </button>
+      {/* Results Count - Fixed */}
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+        <p className="text-sm text-gray-600">
+          {filteredPeople.length} {filteredPeople.length === 1 ? 'person' : 'people'}
+        </p>
       </div>
 
-      {/* People List */}
-      <PeopleList people={filteredPeople} />
-    </motion.div>
+      {/* List - Scrollable */}
+      <div className="flex-1 overflow-y-auto">
+        <PeopleList people={filteredPeople} />
+      </div>
+    </div>
   )
 }
 

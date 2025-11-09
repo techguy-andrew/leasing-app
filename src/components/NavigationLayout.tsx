@@ -6,9 +6,8 @@ import { useUser } from '@clerk/nextjs'
 import { SignIn } from '@clerk/nextjs'
 import TopBar from '@/components/TopBar'
 import SideBar from '@/components/SideBar'
-import FilterBar from '@/components/FilterBar'
 import ToolBar from '@/components/ToolBar'
-import { FilterProvider, useFilter } from '@/contexts/FilterContext'
+import { FilterProvider } from '@/contexts/FilterContext'
 import { ToolBarProvider, useToolBar } from '@/contexts/ToolBarContext'
 
 interface NavigationLayoutProps {
@@ -59,22 +58,8 @@ interface NavigationLayoutProps {
 function AuthenticatedLayout({ children }: NavigationLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const pathname = usePathname()
-  const isApplicationsPage = pathname === '/applications'
   const isAppDetailPage = pathname.startsWith('/applications/') && pathname !== '/applications'
   const headerRef = useRef<HTMLElement>(null)
-
-  const {
-    statusFilter,
-    setStatusFilter,
-    dateType,
-    setDateType,
-    calendarFilter,
-    setCalendarFilter,
-    propertyFilter,
-    setPropertyFilter,
-    sortDirection,
-    setSortDirection,
-  } = useFilter()
 
   const { onSendStatusMessage, onSendWelcomeMessage, onUpdateStatus } = useToolBar()
 
@@ -93,7 +78,7 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
     updateHeaderHeight()
     window.addEventListener('resize', updateHeaderHeight)
     return () => window.removeEventListener('resize', updateHeaderHeight)
-  }, [isApplicationsPage, isAppDetailPage]) // Re-measure when page changes (header content changes)
+  }, [isAppDetailPage]) // Re-measure when page changes (header content changes)
 
   return (
     <div className="flex flex-col h-screen">
@@ -116,22 +101,6 @@ function AuthenticatedLayout({ children }: NavigationLayoutProps) {
       <header ref={headerRef} className="flex-shrink-0 flex flex-col">
         {/* Top Bar - Always visible */}
         <TopBar isOpen={isSidebarOpen} onToggle={toggleSidebar} />
-
-        {/* Applications Page Filter Bar - Conditionally rendered */}
-        {isApplicationsPage && (
-          <FilterBar
-            statusFilter={statusFilter}
-            onStatusChange={setStatusFilter}
-            dateType={dateType}
-            onDateTypeChange={setDateType}
-            calendarFilter={calendarFilter}
-            onCalendarChange={setCalendarFilter}
-            propertyFilter={propertyFilter}
-            onPropertyChange={setPropertyFilter}
-            sortDirection={sortDirection}
-            onSortDirectionChange={setSortDirection}
-          />
-        )}
 
         {/* Application Detail Page Toolbar - Conditionally rendered */}
         {isAppDetailPage && onSendStatusMessage && onSendWelcomeMessage && onUpdateStatus && (

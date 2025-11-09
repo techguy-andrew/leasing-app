@@ -165,7 +165,7 @@ export default function FilterBar({
   return (
     <div
       data-filterbar
-      className="w-full flex items-center gap-2 px-6 py-3 bg-white border-b border-gray-200"
+      className="w-full flex items-center gap-2 flex-wrap px-6 py-3 bg-white border-b border-gray-200"
     >
       {/* Status Filter Pill */}
       <button

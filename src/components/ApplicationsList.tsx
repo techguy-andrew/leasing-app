@@ -134,9 +134,10 @@ export default function ApplicationsList({
   }, [fetchStatuses])
 
   return (
-    <div className="flex flex-col w-full bg-white p-4 sm:p-6 md:p-8">
-      <AnimatePresence mode="wait">
-        {isLoading ? (
+    <div className="flex flex-col w-full bg-white">
+      <div className="p-4 sm:p-6 md:p-8">
+        <AnimatePresence mode="wait">
+          {isLoading ? (
           <LoadingScreen key="loading" />
         ) : applications.length === 0 ? (
           <motion.div
@@ -180,6 +181,7 @@ export default function ApplicationsList({
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </div>
   )
 }
