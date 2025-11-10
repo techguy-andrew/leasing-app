@@ -284,36 +284,42 @@ export class SmartExtractor {
    * Extract property name
    */
   private extractProperty(): { value: string | null; confidence: number } {
-    // PDFs use double spaces to separate fields: "Donna Exline  Prairie Village - 3A"
-    // Split by double spaces and find the part right before " - [unit]"
-    const searchText = this.text.substring(0, 1500)
+    // Convert to lowercase for case-insensitive matching
+    const textLower = this.text.toLowerCase()
 
-    // Find " - [unit]" pattern
-    const unitPattern = /\s+-\s+[A-Za-z0-9-]+/g
-    let match
+    // DEBUG: Check if Prairie Village is even in the text
+    console.log('[Property Debug] Text contains "prairie":', textLower.includes('prairie'))
+    console.log('[Property Debug] Text contains "village":', textLower.includes('village'))
+    console.log('[Property Debug] Text contains "prairie village":', textLower.includes('prairie village'))
 
-    while ((match = unitPattern.exec(searchText)) !== null) {
-      // Get 100 chars before the " - "
-      const startPos = Math.max(0, match.index - 100)
-      const textBefore = searchText.substring(startPos, match.index)
+    // If it's not there, let's see what IS there in the first 500 chars
+    console.log('[Property Debug] First 500 chars of text:', this.text.substring(0, 500))
 
-      // Split by 2+ spaces (field separator in PDFs)
-      const parts = textBefore.split(/\s{2,}/)
+    // Known properties from database
+    const properties = [
+      'Burbank Village Apartments',
+      'Carlisle Apartments',
+      'Clover Hills Apartments',
+      'Legacy Meadows',
+      'Norwalk Village Estates',
+      'NW Pine Apartments',
+      'Orchard Meadows Apartments',
+      'Parkside Luxury Apartments',
+      'Prairie Village',
+      'West Glen Apartments'
+    ]
 
-      // Take the last part (closest to " - ")
-      if (parts.length > 0) {
-        const lastPart = parts[parts.length - 1].trim()
-
-        // Validate: should be 1-3 title case words
-        const propertyPattern = /^[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2}$/
-        if (propertyPattern.test(lastPart) &&
-            lastPart.length >= 5 &&
-            lastPart.length <= 30) {
-          return { value: lastPart, confidence: 0.9 }
-        }
+    // Check each property (case-insensitive)
+    for (const property of properties) {
+      if (textLower.includes(property.toLowerCase())) {
+        console.log('[Property Debug] FOUND property:', property)
+        return { value: property, confidence: 0.95 }
       }
     }
 
+    console.log('[Property Debug] No known property found in text')
+
+    // If no known property found, return null
     return { value: null, confidence: 0 }
   }
 
