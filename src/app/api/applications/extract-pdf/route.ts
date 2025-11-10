@@ -27,7 +27,7 @@ async function extractWithPdfJs(buffer: Buffer): Promise<string | null> {
 
       // Combine text items
       const pageText = textContent.items
-        .map((item: any) => item.str)
+        .map((item: { str: string }) => item.str)
         .join(' ')
 
       fullText += pageText + '\n'
@@ -47,6 +47,7 @@ async function extractWithPdfJs(buffer: Buffer): Promise<string | null> {
 async function extractWithPdfParse(buffer: Buffer): Promise<string | null> {
   try {
     console.log('Attempting pdf-parse extraction...')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pdfParseModule = await import('pdf-parse') as any
 
     const pdfParse = pdfParseModule.default || pdfParseModule
@@ -69,7 +70,7 @@ async function extractWithPdfParse(buffer: Buffer): Promise<string | null> {
  * Extracts data using AppFolio's specific document structure
  * Returns structured data directly (bypasses SmartExtractor for better accuracy)
  */
-function extractAppFolio(buffer: Buffer): { text: string; data: any } | null {
+function extractAppFolio(buffer: Buffer): { text: string; data: Record<string, string | null> } | null {
   try {
     // Try to extract any readable text from the buffer
     const text = buffer.toString('utf8')
@@ -79,7 +80,7 @@ function extractAppFolio(buffer: Buffer): { text: string; data: any } | null {
     console.log(text.substring(0, 1000))
     console.log('===== END RAW BUFFER =====')
 
-    let extractedData: { [key: string]: string | null } = {
+    const extractedData: Record<string, string | null> = {
       name: null,
       email: null,
       phone: null,
@@ -105,7 +106,7 @@ function extractAppFolio(buffer: Buffer): { text: string; data: any } | null {
     const propertyMatch = text.match(propertyPattern)
     console.log('Property pattern match:', propertyMatch)
     if (propertyMatch && propertyMatch[1]) {
-      let property = propertyMatch[1].trim()
+      const property = propertyMatch[1].trim()
       console.log('Property extracted (before length check):', property, 'length:', property.length)
       if (property.length > 3 && property.length < 100) {
         extractedData.property = property
@@ -320,7 +321,7 @@ export async function POST(request: NextRequest) {
     // 3-Tier extraction strategy with fallback
     let extractedText = ''
     let extractionMethod: 'pdfjs-dist' | 'pdf-parse' | 'appfolio' = 'pdfjs-dist'
-    let appFolioDirectData: any = null
+    let appFolioDirectData: Record<string, string | null> | null = null
 
     // Tier 1: Try pdfjs-dist (most reliable for text-based PDFs)
     extractedText = await extractWithPdfJs(buffer) || ''
@@ -403,7 +404,7 @@ export async function POST(request: NextRequest) {
           overall: overallConfidence
         },
         metadata: {
-          extractionMethod: 'appfolio' as any,
+          extractionMethod: 'appfolio' as 'pdf-parse' | 'ocr' | 'appfolio' | 'pdfjs-dist',
           processingTime: Date.now() - startTime
         }
       }
@@ -411,7 +412,7 @@ export async function POST(request: NextRequest) {
       // Use SmartExtractor for pdfjs-dist and pdf-parse results
       const extractor = new SmartExtractor(extractedText, 'pdf-parse')
       extractedData = extractor.extract()
-      extractedData.metadata.extractionMethod = extractionMethod as any
+      extractedData.metadata.extractionMethod = extractionMethod as 'pdf-parse' | 'ocr' | 'appfolio' | 'pdfjs-dist'
       extractedData.metadata.processingTime = Date.now() - startTime
     }
 

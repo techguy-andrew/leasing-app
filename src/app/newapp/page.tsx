@@ -106,7 +106,8 @@ export default function NewApplicationPage() {
       moveInDate: data.moveInDate || '',
       property: data.property || '',
       unitNumber: data.unitNumber || '',
-      rent: data.rent || ''
+      rent: data.rent || '',
+      createdAt: data.createdAt || ''
     }
     setPrefillData(formData)
     setShowPreviewModal(false)
