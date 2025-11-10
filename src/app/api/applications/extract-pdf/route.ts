@@ -1,41 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { SmartExtractor } from '@/lib/pdf/smartExtractor'
-import PDFParser from 'pdf2json'
+import { extractText, getDocumentProxy } from 'unpdf'
 
 /**
- * Extract text using pdf2json (serverless-compatible)
+ * Extract text using unpdf (serverless-compatible)
  */
-async function extractWithPdf2Json(buffer: Buffer): Promise<string | null> {
-  return new Promise((resolve) => {
-    try {
-      console.log('Attempting pdf2json extraction...')
-      const pdfParser = new PDFParser()
-
-      pdfParser.on('pdfParser_dataError', (errData: Error) => {
-        console.error('pdf2json extraction failed:', errData)
-        resolve(null)
-      })
-
-      pdfParser.on('pdfParser_dataReady', () => {
-        try {
-          // Get raw text from all pages
-          const rawText = pdfParser.getRawTextContent()
-          console.log(`pdf2json extracted ${rawText.length} characters`)
-          resolve(rawText)
-        } catch (error) {
-          console.error('pdf2json text extraction failed:', error)
-          resolve(null)
-        }
-      })
-
-      // Parse the PDF buffer
-      pdfParser.parseBuffer(buffer)
-    } catch (error) {
-      console.error('pdf2json setup failed:', error)
-      resolve(null)
-    }
-  })
+async function extractWithUnpdf(buffer: Buffer): Promise<string | null> {
+  try {
+    console.log('Attempting unpdf extraction...')
+    const pdf = await getDocumentProxy(new Uint8Array(buffer))
+    const { text, totalPages } = await extractText(pdf, { mergePages: true })
+    console.log(`unpdf extracted ${text.length} characters from ${totalPages} pages`)
+    return text
+  } catch (error) {
+    console.error('unpdf extraction failed:', error)
+    return null
+  }
 }
 
 /**
@@ -291,31 +272,31 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer)
     console.log('Buffer size:', buffer.length)
 
-    // 2-Tier extraction strategy with fallback (using pdf2json for serverless compatibility)
+    // 2-Tier extraction strategy with fallback (using unpdf for serverless compatibility)
     let extractedText = ''
-    let extractionMethod: 'pdf2json' | 'appfolio' = 'pdf2json'
+    let extractionMethod: 'unpdf' | 'appfolio' = 'unpdf'
     let appFolioDirectData: Record<string, string | null> | null = null
 
-    // Tier 1: Try pdf2json first (serverless-compatible, pure JavaScript)
-    extractedText = await extractWithPdf2Json(buffer) || ''
-    console.log(`[DEBUG] pdf2json extracted ${extractedText.length} characters`)
+    // Tier 1: Try unpdf first (serverless-optimized PDF.js build)
+    extractedText = await extractWithUnpdf(buffer) || ''
+    console.log(`[DEBUG] unpdf extracted ${extractedText.length} characters`)
 
     if (extractedText.length > 50) {
-      console.log('✓ pdf2json extraction successful')
-      extractionMethod = 'pdf2json'
+      console.log('✓ unpdf extraction successful')
+      extractionMethod = 'unpdf'
     } else {
       // Tier 2: AppFolio-specific pattern extraction (direct buffer parsing)
-      console.log('pdf2json insufficient, using AppFolio-specific extraction...')
+      console.log('unpdf insufficient, using AppFolio-specific extraction...')
       const appFolioResult = extractAppFolio(buffer)
 
       if (!appFolioResult || appFolioResult.text.length < 10) {
         console.log('All extraction methods failed')
-        console.log('[DEBUG] pdf2json length:', extractedText.length)
+        console.log('[DEBUG] unpdf length:', extractedText.length)
         console.log('[DEBUG] AppFolio result:', appFolioResult ? `text length: ${appFolioResult.text.length}` : 'null')
         return NextResponse.json(
           {
             error: 'Could not extract text from PDF. The file may be a scanned image, corrupted, or in an unsupported format.',
-            details: process.env.NODE_ENV === 'development' ? 'All extraction methods (pdf2json, appfolio) failed' : undefined
+            details: process.env.NODE_ENV === 'development' ? 'All extraction methods (unpdf, appfolio) failed' : undefined
           },
           { status: 422 }
         )
@@ -378,7 +359,7 @@ export async function POST(request: NextRequest) {
         }
       }
     } else {
-      // Use SmartExtractor for pdf2json results
+      // Use SmartExtractor for unpdf results
       console.log('[DEBUG] Using SmartExtractor with method:', extractionMethod)
       const extractor = new SmartExtractor(extractedText, 'pdf-parse')
       extractedData = extractor.extract()
