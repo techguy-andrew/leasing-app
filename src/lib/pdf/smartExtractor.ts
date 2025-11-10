@@ -147,7 +147,8 @@ export class SmartExtractor {
 
     if (matches && matches.length > 0) {
       // AppFolio-specific: Look for email with "Type Financially" label (applicant's email)
-      const applicantEmailPattern = /Email\s+([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}).*?Type\s+Financially/s
+      // Using [\s\S] instead of /s flag for ES2017 compatibility
+      const applicantEmailPattern = /Email\s+([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})[\s\S]*?Type\s+Financially/
       const applicantMatch = this.text.match(applicantEmailPattern)
       if (applicantMatch && applicantMatch[1]) {
         return { value: applicantMatch[1].toLowerCase(), confidence: 0.95 }
