@@ -47,7 +47,7 @@ async function extractWithPdfJs(buffer: Buffer): Promise<string | null> {
 async function extractWithPdfParse(buffer: Buffer): Promise<string | null> {
   try {
     console.log('Attempting pdf-parse extraction...')
-    const pdfParseModule = await import('pdf-parse')
+    const pdfParseModule = await import('pdf-parse') as any
 
     const pdfParse = pdfParseModule.default || pdfParseModule
     if (typeof pdfParse !== 'function') {
