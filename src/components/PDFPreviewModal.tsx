@@ -187,6 +187,27 @@ export default function PDFPreviewModal({
                   />
                 </div>
 
+                {/* Application Date Field */}
+                {editedData.createdAt !== undefined && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-semibold text-gray-700">Application Date</label>
+                      {editedData.confidence.createdAt !== undefined && (
+                        <span className={`text-xs font-medium px-2 py-1 rounded border ${getConfidenceColor(editedData.confidence.createdAt)}`}>
+                          {Math.round(editedData.confidence.createdAt * 100)}%
+                        </span>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={editedData.createdAt || ''}
+                      onChange={(e) => handleFieldChange('createdAt', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="MM/DD/YYYY"
+                    />
+                  </div>
+                )}
+
                 {/* Property Field */}
                 {editedData.property !== undefined && (
                   <div className="space-y-2">
