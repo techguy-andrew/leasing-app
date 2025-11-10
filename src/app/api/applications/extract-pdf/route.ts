@@ -1,68 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { SmartExtractor } from '@/lib/pdf/smartExtractor'
+import PDFParser from 'pdf2json'
 
 /**
- * Extract text using pdfjs-dist legacy build (Tier 1 - most reliable)
+ * Extract text using pdf2json (serverless-compatible)
  */
-async function extractWithPdfJs(buffer: Buffer): Promise<string | null> {
-  try {
-    console.log('Attempting pdfjs-dist extraction...')
-    // Use the legacy build for Node.js compatibility
-    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs')
+async function extractWithPdf2Json(buffer: Buffer): Promise<string | null> {
+  return new Promise((resolve) => {
+    try {
+      console.log('Attempting pdf2json extraction...')
+      const pdfParser = new PDFParser()
 
-    // Load the PDF document
-    const loadingTask = pdfjsLib.getDocument({
-      data: new Uint8Array(buffer),
-      verbosity: 0
-    })
+      pdfParser.on('pdfParser_dataError', (errData: Error) => {
+        console.error('pdf2json extraction failed:', errData)
+        resolve(null)
+      })
 
-    const pdf = await loadingTask.promise
-    let fullText = ''
+      pdfParser.on('pdfParser_dataReady', () => {
+        try {
+          // Get raw text from all pages
+          const rawText = pdfParser.getRawTextContent()
+          console.log(`pdf2json extracted ${rawText.length} characters`)
+          resolve(rawText)
+        } catch (error) {
+          console.error('pdf2json text extraction failed:', error)
+          resolve(null)
+        }
+      })
 
-    // Extract text from each page
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      const page = await pdf.getPage(pageNum)
-      const textContent = await page.getTextContent()
-
-      // Combine text items
-      const pageText = textContent.items
-        .map((item) => ('str' in item ? item.str : ''))
-        .join(' ')
-
-      fullText += pageText + '\n'
+      // Parse the PDF buffer
+      pdfParser.parseBuffer(buffer)
+    } catch (error) {
+      console.error('pdf2json setup failed:', error)
+      resolve(null)
     }
-
-    console.log(`pdfjs-dist extracted ${fullText.length} characters from ${pdf.numPages} pages`)
-    return fullText.trim()
-  } catch (error) {
-    console.error('pdfjs-dist extraction failed:', error)
-    return null
-  }
-}
-
-/**
- * Extract text using pdf-parse (Tier 2 - fallback)
- */
-async function extractWithPdfParse(buffer: Buffer): Promise<string | null> {
-  try {
-    console.log('Attempting pdf-parse extraction...')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pdfParseModule = await import('pdf-parse') as any
-
-    const pdfParse = pdfParseModule.default || pdfParseModule
-    if (typeof pdfParse !== 'function') {
-      console.error('pdf-parse not a function')
-      return null
-    }
-
-    const pdfData = await pdfParse(buffer)
-    console.log(`pdf-parse extracted ${pdfData.text?.length || 0} characters`)
-    return pdfData.text || null
-  } catch (error) {
-    console.error('pdf-parse extraction failed:', error)
-    return null
-  }
+  })
 }
 
 /**
@@ -318,31 +291,31 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer)
     console.log('Buffer size:', buffer.length)
 
-    // 2-Tier extraction strategy with fallback (pdfjs-dist removed - doesn't work in serverless)
+    // 2-Tier extraction strategy with fallback (using pdf2json for serverless compatibility)
     let extractedText = ''
-    let extractionMethod: 'pdf-parse' | 'appfolio' = 'pdf-parse'
+    let extractionMethod: 'pdf2json' | 'appfolio' = 'pdf2json'
     let appFolioDirectData: Record<string, string | null> | null = null
 
-    // Tier 1: Try pdf-parse first (works best in serverless environments)
-    extractedText = await extractWithPdfParse(buffer) || ''
-    console.log(`[DEBUG] pdf-parse extracted ${extractedText.length} characters`)
+    // Tier 1: Try pdf2json first (serverless-compatible, pure JavaScript)
+    extractedText = await extractWithPdf2Json(buffer) || ''
+    console.log(`[DEBUG] pdf2json extracted ${extractedText.length} characters`)
 
     if (extractedText.length > 50) {
-      console.log('✓ pdf-parse extraction successful')
-      extractionMethod = 'pdf-parse'
+      console.log('✓ pdf2json extraction successful')
+      extractionMethod = 'pdf2json'
     } else {
       // Tier 2: AppFolio-specific pattern extraction (direct buffer parsing)
-      console.log('pdf-parse insufficient, using AppFolio-specific extraction...')
+      console.log('pdf2json insufficient, using AppFolio-specific extraction...')
       const appFolioResult = extractAppFolio(buffer)
 
       if (!appFolioResult || appFolioResult.text.length < 10) {
         console.log('All extraction methods failed')
-        console.log('[DEBUG] pdf-parse length:', extractedText.length)
+        console.log('[DEBUG] pdf2json length:', extractedText.length)
         console.log('[DEBUG] AppFolio result:', appFolioResult ? `text length: ${appFolioResult.text.length}` : 'null')
         return NextResponse.json(
           {
             error: 'Could not extract text from PDF. The file may be a scanned image, corrupted, or in an unsupported format.',
-            details: process.env.NODE_ENV === 'development' ? 'All extraction methods (pdf-parse, appfolio) failed' : undefined
+            details: process.env.NODE_ENV === 'development' ? 'All extraction methods (pdf2json, appfolio) failed' : undefined
           },
           { status: 422 }
         )
@@ -405,11 +378,11 @@ export async function POST(request: NextRequest) {
         }
       }
     } else {
-      // Use SmartExtractor for pdfjs-dist and pdf-parse results
+      // Use SmartExtractor for pdf2json results
       console.log('[DEBUG] Using SmartExtractor with method:', extractionMethod)
       const extractor = new SmartExtractor(extractedText, 'pdf-parse')
       extractedData = extractor.extract()
-      extractedData.metadata.extractionMethod = extractionMethod as 'pdf-parse' | 'ocr' | 'appfolio'
+      extractedData.metadata.extractionMethod = extractionMethod as 'pdf-parse' | 'ocr' | 'appfolio' | 'pdfjs-dist'
       extractedData.metadata.processingTime = Date.now() - startTime
       console.log('[DEBUG] SmartExtractor results:', JSON.stringify(extractedData, null, 2))
     }
