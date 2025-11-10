@@ -84,6 +84,8 @@ interface ApplicationFormProps {
   onDelete?: (id: number) => Promise<void>
   showDeleteButton?: boolean
   onStatusChange?: (status: string[]) => Promise<void>
+  onExtractPDF?: () => void
+  extractedData?: Partial<FormData> | null
 }
 
 const defaultFormData: FormData = {
@@ -116,7 +118,9 @@ export default function ApplicationForm({
   onCancel,
   onDelete,
   showDeleteButton = true,
-  onStatusChange
+  onStatusChange,
+  onExtractPDF,
+  extractedData
 }: ApplicationFormProps) {
   const [isEditMode, setIsEditMode] = useState(mode === 'create')
   const [isSaving, setIsSaving] = useState(false)
@@ -135,6 +139,18 @@ export default function ApplicationForm({
     ...defaultFormData,
     ...initialData
   }))
+
+  // Apply extracted PDF data when it changes
+  useEffect(() => {
+    if (extractedData) {
+      setFormData(prev => ({
+        ...prev,
+        ...extractedData
+      }))
+      setToastMessage('PDF data extracted successfully!')
+      setToastType('success')
+    }
+  }, [extractedData])
 
   // Fetch properties from database
   useEffect(() => {
@@ -520,6 +536,18 @@ export default function ApplicationForm({
                   transition={{ duration: 0.2 }}
                   className="flex items-center gap-2"
                 >
+                  {mode === 'create' && onExtractPDF && (
+                    <button
+                      onClick={onExtractPDF}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <span className="hidden sm:inline">Extract from PDF</span>
+                      <span className="sm:hidden">PDF</span>
+                    </button>
+                  )}
                   <CancelButton onClick={handleCancel} />
                   <SaveButton onClick={handleSave} disabled={isSaving} />
                 </motion.div>

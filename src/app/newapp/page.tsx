@@ -1,9 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ApplicationForm from '@/components/ApplicationForm'
+import PDFUploadModal from '@/components/PDFUploadModal'
+import PDFPreviewModal from '@/components/PDFPreviewModal'
 import { getDefaultTasks } from '@/lib/applicantDefaultTasks'
 import { getDefaultAgentTasks } from '@/lib/agentDefaultTasks'
+import { ExtractedData } from '@/lib/pdf/smartExtractor'
 
 interface FormData {
   status: string[]
@@ -23,6 +27,10 @@ interface FormData {
 
 export default function NewApplicationPage() {
   const router = useRouter()
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [showPreviewModal, setShowPreviewModal] = useState(false)
+  const [extractedData, setExtractedData] = useState<ExtractedData | null>(null)
+  const [prefillData, setPrefillData] = useState<Partial<FormData> | null>(null)
 
   const handleSave = async (formData: FormData) => {
     // Normalize date to ensure MM/DD/YYYY format with leading zeros
@@ -79,11 +87,53 @@ export default function NewApplicationPage() {
     router.push('/')
   }
 
+  const handleExtractClick = () => {
+    setShowUploadModal(true)
+  }
+
+  const handleDataExtracted = (data: ExtractedData) => {
+    setExtractedData(data)
+    setShowUploadModal(false)
+    setShowPreviewModal(true)
+  }
+
+  const handleUseData = (data: ExtractedData) => {
+    // Convert extracted data to form data format
+    const formData: Partial<FormData> = {
+      applicant: data.name || '',
+      email: data.email || '',
+      phone: data.phone || '',
+      moveInDate: data.moveInDate || '',
+      property: data.property || '',
+      unitNumber: data.unitNumber || '',
+      rent: data.rent || ''
+    }
+    setPrefillData(formData)
+    setShowPreviewModal(false)
+  }
+
   return (
-    <ApplicationForm
-      mode="create"
-      onSave={handleSave}
-      onCancel={handleCancel}
-    />
+    <>
+      <ApplicationForm
+        mode="create"
+        onSave={handleSave}
+        onCancel={handleCancel}
+        onExtractPDF={handleExtractClick}
+        extractedData={prefillData}
+      />
+
+      <PDFUploadModal
+        isOpen={showUploadModal}
+        onClose={() => setShowUploadModal(false)}
+        onDataExtracted={handleDataExtracted}
+      />
+
+      <PDFPreviewModal
+        isOpen={showPreviewModal}
+        extractedData={extractedData}
+        onClose={() => setShowPreviewModal(false)}
+        onUseData={handleUseData}
+      />
+    </>
   )
 }

@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   // Optimize production builds
   productionBrowserSourceMaps: false,
 
+  // Exclude CommonJS packages from bundling (for API routes)
+  serverExternalPackages: ['pdf-parse', 'pdfjs-dist'],
+
   // Image optimization (if needed in future)
   images: {
     formats: ['image/avif', 'image/webp'],
