@@ -361,12 +361,14 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Extracted ${extractedText.length} characters using ${extractionMethod}`)
+    console.log('[DEBUG] First 500 chars of extracted text:', extractedText.substring(0, 500))
 
     let extractedData
 
     // If AppFolio extraction was used, use its direct data (more accurate)
     if (extractionMethod === 'appfolio' && appFolioDirectData) {
       console.log('Using AppFolio direct extraction (bypassing SmartExtractor)')
+      console.log('[DEBUG] AppFolio data:', JSON.stringify(appFolioDirectData, null, 2))
 
       // Calculate field count for confidence
       const fieldsFound = [
@@ -410,10 +412,12 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // Use SmartExtractor for pdfjs-dist and pdf-parse results
+      console.log('[DEBUG] Using SmartExtractor with method:', extractionMethod)
       const extractor = new SmartExtractor(extractedText, 'pdf-parse')
       extractedData = extractor.extract()
       extractedData.metadata.extractionMethod = extractionMethod as 'pdf-parse' | 'ocr' | 'appfolio' | 'pdfjs-dist'
       extractedData.metadata.processingTime = Date.now() - startTime
+      console.log('[DEBUG] SmartExtractor results:', JSON.stringify(extractedData, null, 2))
     }
 
     console.log('Extraction complete:', {
@@ -421,6 +425,7 @@ export async function POST(request: NextRequest) {
       fieldsFound: Object.keys(extractedData).filter(k => extractedData[k as keyof typeof extractedData] && k !== 'metadata' && k !== 'confidence').length,
       confidence: extractedData.confidence.overall
     })
+    console.log('[DEBUG] Final extracted data:', JSON.stringify(extractedData, null, 2))
 
     // Return extracted data
     return NextResponse.json(
