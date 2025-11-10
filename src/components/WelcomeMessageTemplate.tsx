@@ -152,7 +152,8 @@ export function generateWelcomeTemplate(data: ApplicationData): string {
   // ---- WELCOME MESSAGE ----
   template += `Welcome to ${config.companyName} at ${data.property}!\n\n`
 
-  // ---- PROPERTY ADDRESS ----
+  // ---- UNIT/PROPERTY ADDRESS ----
+  // This will show the unit's specific address if available, otherwise the property address
   if (config.showPropertyDetails && data.propertyAddress) {
     template += `Address:\n${data.propertyAddress}\n\n`
   }
@@ -201,7 +202,7 @@ export function generateWelcomeTemplate(data: ApplicationData): string {
   }
 
   // ---- WARNING AND SUPPORT MESSAGE ----
-  template += `These items are required and must be completed prior to move-in. Failure to complete them may result in a delay or rescheduling of your move-in date. If you have any questions, please call Coves Living at 515-207-3878.\n\n`
+  template += `These items are required and must be completed prior to move-in. Failure to complete them may result in a delay or rescheduling of your move-in date.\n\n`
 
   // ---- CONTACT INFORMATION ----
   template += `If you have any questions, please call ${config.companyName} at ${config.companyPhone}.\n\n`

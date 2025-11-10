@@ -91,6 +91,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Convert empty strings to null/undefined for optional numeric fields
     const processedBody = {
       ...body,
+      street: body.street === '' ? null : body.street,
+      city: body.city === '' ? null : body.city,
+      state: body.state === '' ? null : body.state,
+      zip: body.zip === '' ? null : body.zip,
       bedrooms: body.bedrooms === '' ? undefined : body.bedrooms,
       bathrooms: body.bathrooms === '' ? undefined : body.bathrooms,
       squareFeet: body.squareFeet === '' ? undefined : body.squareFeet,
@@ -117,7 +121,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { propertyId, unitNumber, bedrooms, bathrooms, squareFeet, floor, baseRent, status, availableOn } = validationResult.data
+    const { propertyId, unitNumber, street, city, state, zip, bedrooms, bathrooms, squareFeet, floor, baseRent, status, availableOn } = validationResult.data
 
     // Verify the unit exists
     const existingUnit = await prisma.unit.findUnique({
@@ -137,6 +141,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       data: {
         propertyId,
         unitNumber,
+        street: street || null,
+        city: city || null,
+        state: state || null,
+        zip: zip || null,
         bedrooms: bedrooms || null,
         bathrooms: bathrooms || null,
         squareFeet: squareFeet || null,

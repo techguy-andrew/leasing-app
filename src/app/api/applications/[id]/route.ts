@@ -35,6 +35,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           orderBy: {
             order: 'asc'
           }
+        },
+        unit: {
+          include: {
+            property: true  // Include property through unit
+          }
         }
       }
     })
@@ -46,20 +51,30 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    // Try to fetch property details if the property name matches
+    // Try to fetch property details
+    // Prioritize property from linked unit, then fall back to property name lookup
     let propertyDetails = null
-    if (application.property) {
+    if (application.unit?.property) {
+      propertyDetails = application.unit.property
+    } else if (application.property) {
       propertyDetails = await prisma.property.findFirst({
         where: { name: application.property }
       })
     }
 
-    // Add property details to the response if found
+    // Determine address to use: Unit address (if available) > Property address
     // Format: Street Apartment #Unit
     //         City, State ZIP
-    const propertyAddress = propertyDetails
-      ? `${propertyDetails.street}${application.unitNumber ? ` Apartment #${application.unitNumber}` : ''}\n${propertyDetails.city}, ${propertyDetails.state} ${propertyDetails.zip}`
-      : null
+    let propertyAddress = null
+
+    // Check if application has a linked unit with its own address
+    if (application.unit && application.unit.street && application.unit.city && application.unit.state && application.unit.zip) {
+      // Use unit's address
+      propertyAddress = `${application.unit.street}${application.unitNumber ? ` Apartment #${application.unitNumber}` : ''}\n${application.unit.city}, ${application.unit.state} ${application.unit.zip}`
+    } else if (propertyDetails) {
+      // Fall back to property address
+      propertyAddress = `${propertyDetails.street}${application.unitNumber ? ` Apartment #${application.unitNumber}` : ''}\n${propertyDetails.city}, ${propertyDetails.state} ${propertyDetails.zip}`
+    }
 
     const responseData = {
       ...application,

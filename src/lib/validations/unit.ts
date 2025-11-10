@@ -4,6 +4,10 @@ import { z } from 'zod'
 export const unitCreateSchema = z.object({
   propertyId: z.number().int().positive('Property ID is required'),
   unitNumber: z.string().trim().min(1, 'Unit number is required'),
+  street: z.string().trim().optional().or(z.literal('')),
+  city: z.string().trim().optional().or(z.literal('')),
+  state: z.string().trim().optional().or(z.literal('')),
+  zip: z.string().trim().optional().or(z.literal('')),
   bedrooms: z.number().int().min(0).optional().or(z.literal('')),
   bathrooms: z.number().min(0).optional().or(z.literal('')),
   squareFeet: z.number().int().min(0).optional().or(z.literal('')),
@@ -17,6 +21,10 @@ export const unitCreateSchema = z.object({
 export const unitUpdateSchema = z.object({
   propertyId: z.number().int().positive('Property ID is required'),
   unitNumber: z.string().trim().min(1, 'Unit number is required'),
+  street: z.string().trim().optional().or(z.literal('')),
+  city: z.string().trim().optional().or(z.literal('')),
+  state: z.string().trim().optional().or(z.literal('')),
+  zip: z.string().trim().optional().or(z.literal('')),
   bedrooms: z.number().int().min(0).optional().or(z.literal('')),
   bathrooms: z.number().min(0).optional().or(z.literal('')),
   squareFeet: z.number().int().min(0).optional().or(z.literal('')),

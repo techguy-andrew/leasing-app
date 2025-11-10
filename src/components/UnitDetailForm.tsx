@@ -14,6 +14,10 @@ import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animation
 interface FormData {
   propertyId: number
   unitNumber: string
+  street: string
+  city: string
+  state: string
+  zip: string
   bedrooms: string
   bathrooms: string
   squareFeet: string
@@ -42,6 +46,10 @@ interface UnitDetailFormProps {
 const defaultFormData: FormData = {
   propertyId: 0,
   unitNumber: '',
+  street: '',
+  city: '',
+  state: '',
+  zip: '',
   bedrooms: '',
   bathrooms: '',
   squareFeet: '',
@@ -251,6 +259,59 @@ export default function UnitDetailForm({
                 isEditMode={isEditMode}
               />
             </motion.div>
+
+            {/* Street Address Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                Street Address
+              </span>
+              <InlineTextField
+                value={formData.street}
+                onChange={(value) => handleFieldChange('street', value)}
+                isEditMode={isEditMode}
+                placeholder="N/A"
+              />
+            </motion.div>
+
+            {/* City Field */}
+            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
+              <span className="text-xs font-semibold text-gray-500">
+                City
+              </span>
+              <InlineTextField
+                value={formData.city}
+                onChange={(value) => handleFieldChange('city', value)}
+                isEditMode={isEditMode}
+                placeholder="N/A"
+              />
+            </motion.div>
+
+            {/* State and ZIP Fields - Side by side */}
+            <div className="flex gap-4">
+              <motion.div className="flex flex-col gap-1 flex-1" variants={formFieldItem}>
+                <span className="text-xs font-semibold text-gray-500">
+                  State
+                </span>
+                <InlineTextField
+                  value={formData.state}
+                  onChange={(value) => handleFieldChange('state', value)}
+                  isEditMode={isEditMode}
+                  placeholder="N/A"
+                />
+              </motion.div>
+
+              <motion.div className="flex flex-col gap-1 flex-1" variants={formFieldItem}>
+                <span className="text-xs font-semibold text-gray-500">
+                  ZIP Code
+                </span>
+                <InlineTextField
+                  value={formData.zip}
+                  onChange={(value) => handleFieldChange('zip', value)}
+                  isEditMode={isEditMode}
+                  placeholder="N/A"
+                />
+              </motion.div>
+            </div>
 
             {/* Unit Number and Status Fields - Side by side */}
             <div className="flex gap-4">

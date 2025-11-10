@@ -156,6 +156,12 @@ model Unit {
   property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   unitNumber   String   // e.g., "101", "2A", "Building B-205"
 
+  // Unit Address (optional - separate from property address)
+  street       String?  // Street address
+  city         String?  // City
+  state        String?  // State
+  zip          String?  // ZIP code
+
   // Unit Specifications
   bedrooms     Int?     // Number of bedrooms
   bathrooms    Float?   // Number of bathrooms (1.5, 2.0, etc.)

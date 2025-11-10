@@ -16,6 +16,10 @@ interface Unit {
   id: number
   propertyId: number
   unitNumber: string
+  street: string | null
+  city: string | null
+  state: string | null
+  zip: string | null
   bedrooms: number | null
   bathrooms: number | null
   squareFeet: number | null
@@ -29,6 +33,10 @@ interface Unit {
 interface FormData {
   propertyId: number
   unitNumber: string
+  street: string
+  city: string
+  state: string
+  zip: string
   bedrooms: string
   bathrooms: string
   squareFeet: string
