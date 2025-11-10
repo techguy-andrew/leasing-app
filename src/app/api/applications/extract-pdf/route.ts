@@ -318,46 +318,40 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(arrayBuffer)
     console.log('Buffer size:', buffer.length)
 
-    // 3-Tier extraction strategy with fallback
+    // 2-Tier extraction strategy with fallback (pdfjs-dist removed - doesn't work in serverless)
     let extractedText = ''
-    let extractionMethod: 'pdfjs-dist' | 'pdf-parse' | 'appfolio' = 'pdf-parse'
+    let extractionMethod: 'pdf-parse' | 'appfolio' = 'pdf-parse'
     let appFolioDirectData: Record<string, string | null> | null = null
 
     // Tier 1: Try pdf-parse first (works best in serverless environments)
     extractedText = await extractWithPdfParse(buffer) || ''
+    console.log(`[DEBUG] pdf-parse extracted ${extractedText.length} characters`)
 
     if (extractedText.length > 50) {
       console.log('✓ pdf-parse extraction successful')
       extractionMethod = 'pdf-parse'
     } else {
-      // Tier 2: Try pdfjs-dist as fallback
-      console.log('pdf-parse insufficient, trying pdfjs-dist...')
-      extractedText = await extractWithPdfJs(buffer) || ''
+      // Tier 2: AppFolio-specific pattern extraction (direct buffer parsing)
+      console.log('pdf-parse insufficient, using AppFolio-specific extraction...')
+      const appFolioResult = extractAppFolio(buffer)
 
-      if (extractedText.length > 50) {
-        console.log('✓ pdfjs-dist extraction successful')
-        extractionMethod = 'pdfjs-dist'
-      } else {
-        // Tier 3: AppFolio-specific pattern extraction
-        console.log('pdfjs-dist insufficient, using AppFolio-specific extraction...')
-        const appFolioResult = extractAppFolio(buffer)
-
-        if (!appFolioResult || appFolioResult.text.length < 10) {
-          console.log('All extraction methods failed')
-          return NextResponse.json(
-            {
-              error: 'Could not extract text from PDF. The file may be a scanned image, corrupted, or in an unsupported format.',
-              details: process.env.NODE_ENV === 'development' ? 'All three extraction methods (pdfjs-dist, pdf-parse, appfolio) failed' : undefined
-            },
-            { status: 422 }
-          )
-        }
-
-        extractedText = appFolioResult.text
-        appFolioDirectData = appFolioResult.data
-        extractionMethod = 'appfolio'
-        console.log('✓ AppFolio extraction successful')
+      if (!appFolioResult || appFolioResult.text.length < 10) {
+        console.log('All extraction methods failed')
+        console.log('[DEBUG] pdf-parse length:', extractedText.length)
+        console.log('[DEBUG] AppFolio result:', appFolioResult ? `text length: ${appFolioResult.text.length}` : 'null')
+        return NextResponse.json(
+          {
+            error: 'Could not extract text from PDF. The file may be a scanned image, corrupted, or in an unsupported format.',
+            details: process.env.NODE_ENV === 'development' ? 'All extraction methods (pdf-parse, appfolio) failed' : undefined
+          },
+          { status: 422 }
+        )
       }
+
+      extractedText = appFolioResult.text
+      appFolioDirectData = appFolioResult.data
+      extractionMethod = 'appfolio'
+      console.log('✓ AppFolio extraction successful')
     }
 
     console.log(`Extracted ${extractedText.length} characters using ${extractionMethod}`)
@@ -406,7 +400,7 @@ export async function POST(request: NextRequest) {
           overall: overallConfidence
         },
         metadata: {
-          extractionMethod: 'appfolio' as 'pdf-parse' | 'ocr' | 'appfolio' | 'pdfjs-dist',
+          extractionMethod: 'appfolio' as 'pdf-parse' | 'ocr' | 'appfolio',
           processingTime: Date.now() - startTime
         }
       }
@@ -415,7 +409,7 @@ export async function POST(request: NextRequest) {
       console.log('[DEBUG] Using SmartExtractor with method:', extractionMethod)
       const extractor = new SmartExtractor(extractedText, 'pdf-parse')
       extractedData = extractor.extract()
-      extractedData.metadata.extractionMethod = extractionMethod as 'pdf-parse' | 'ocr' | 'appfolio' | 'pdfjs-dist'
+      extractedData.metadata.extractionMethod = extractionMethod as 'pdf-parse' | 'ocr' | 'appfolio'
       extractedData.metadata.processingTime = Date.now() - startTime
       console.log('[DEBUG] SmartExtractor results:', JSON.stringify(extractedData, null, 2))
     }
