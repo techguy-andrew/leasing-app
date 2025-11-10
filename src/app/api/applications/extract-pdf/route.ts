@@ -146,7 +146,7 @@ function extractAppFolio(buffer: Buffer): { text: string; data: Record<string, s
     }
 
     // AppFolio-specific pattern: Application/creation date from "Submitted Via ... on MM/DD/YYYY"
-    const createdAtPattern = /Submitted\s+Via[^o]+on\s+(\d{1,2}\/\d{1,2}\/\d{4})/i
+    const createdAtPattern = /Submitted\s+Via\s+.+?\s+on\s+(\d{1,2}\/\d{1,2}\/\d{4})/i
     const createdAtMatch = text.match(createdAtPattern)
     if (createdAtMatch && createdAtMatch[1]) {
       extractedData.createdAt = createdAtMatch[1]

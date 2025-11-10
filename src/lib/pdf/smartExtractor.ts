@@ -367,7 +367,7 @@ export class SmartExtractor {
    */
   private extractCreatedAt(): { value: string | null; confidence: number } {
     // AppFolio-specific: "Submitted Via ... on MM/DD/YYYY"
-    const submittedPattern = /Submitted\s+Via[^o]+on\s+(\d{1,2}\/\d{1,2}\/\d{4})/i
+    const submittedPattern = /Submitted\s+Via\s+.+?\s+on\s+(\d{1,2}\/\d{1,2}\/\d{4})/i
     const submittedMatch = this.text.match(submittedPattern)
     if (submittedMatch && submittedMatch[1]) {
       return { value: submittedMatch[1], confidence: 0.95 }
