@@ -27,7 +27,7 @@ async function extractWithPdfJs(buffer: Buffer): Promise<string | null> {
 
       // Combine text items
       const pageText = textContent.items
-        .map((item: { str: string }) => item.str)
+        .map((item) => ('str' in item ? item.str : ''))
         .join(' ')
 
       fullText += pageText + '\n'
