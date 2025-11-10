@@ -320,26 +320,26 @@ export async function POST(request: NextRequest) {
 
     // 3-Tier extraction strategy with fallback
     let extractedText = ''
-    let extractionMethod: 'pdfjs-dist' | 'pdf-parse' | 'appfolio' = 'pdfjs-dist'
+    let extractionMethod: 'pdfjs-dist' | 'pdf-parse' | 'appfolio' = 'pdf-parse'
     let appFolioDirectData: Record<string, string | null> | null = null
 
-    // Tier 1: Try pdfjs-dist (most reliable for text-based PDFs)
-    extractedText = await extractWithPdfJs(buffer) || ''
+    // Tier 1: Try pdf-parse first (works best in serverless environments)
+    extractedText = await extractWithPdfParse(buffer) || ''
 
     if (extractedText.length > 50) {
-      console.log('✓ pdfjs-dist extraction successful')
-      extractionMethod = 'pdfjs-dist'
+      console.log('✓ pdf-parse extraction successful')
+      extractionMethod = 'pdf-parse'
     } else {
-      // Tier 2: Try pdf-parse
-      console.log('pdfjs-dist insufficient, trying pdf-parse...')
-      extractedText = await extractWithPdfParse(buffer) || ''
+      // Tier 2: Try pdfjs-dist as fallback
+      console.log('pdf-parse insufficient, trying pdfjs-dist...')
+      extractedText = await extractWithPdfJs(buffer) || ''
 
       if (extractedText.length > 50) {
-        console.log('✓ pdf-parse extraction successful')
-        extractionMethod = 'pdf-parse'
+        console.log('✓ pdfjs-dist extraction successful')
+        extractionMethod = 'pdfjs-dist'
       } else {
         // Tier 3: AppFolio-specific pattern extraction
-        console.log('pdf-parse insufficient, using AppFolio-specific extraction...')
+        console.log('pdfjs-dist insufficient, using AppFolio-specific extraction...')
         const appFolioResult = extractAppFolio(buffer)
 
         if (!appFolioResult || appFolioResult.text.length < 10) {
