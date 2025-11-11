@@ -41,6 +41,37 @@ export default function PDFPreviewModal({
     }
   }
 
+  // Handler for combined property-unit field
+  const handleCombinedUnitChange = (value: string) => {
+    if (!editedData) return
+
+    // Split on " - " to extract property and unit number
+    // Handle formats like "Prairie Village - 6C", "Legacy Meadows - 4600-15"
+    const lastDashIndex = value.lastIndexOf(' - ')
+
+    if (lastDashIndex !== -1) {
+      const property = value.substring(0, lastDashIndex).trim()
+      const unitNumber = value.substring(lastDashIndex + 3).trim()
+
+      setEditedData({
+        ...editedData,
+        property,
+        unitNumber
+      })
+    } else {
+      // If no " - " separator, treat whole string as property
+      setEditedData({
+        ...editedData,
+        property: value.trim(),
+        unitNumber: ''
+      })
+    }
+
+    // Clear resolved unit and errors
+    setResolvedUnit(null)
+    setResolveError(null)
+  }
+
   const handleUseData = async () => {
     if (!editedData) return
 
@@ -262,24 +293,37 @@ export default function PDFPreviewModal({
                   </div>
                 )}
 
-                {/* Property Field */}
-                {editedData.property !== undefined && (
+                {/* Combined Unit Field (Property - Unit Number) */}
+                {(editedData.property !== undefined || editedData.unitNumber !== undefined) && (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-sm font-semibold text-gray-700">Property</label>
-                      {editedData.confidence.property !== undefined && (
-                        <span className={`text-xs font-medium px-2 py-1 rounded border ${getConfidenceColor(editedData.confidence.property)}`}>
-                          {Math.round(editedData.confidence.property * 100)}%
+                      <label className="text-sm font-semibold text-gray-700">Unit</label>
+                      {(editedData.confidence.property !== undefined || editedData.confidence.unitNumber !== undefined) && (
+                        <span className={`text-xs font-medium px-2 py-1 rounded border ${
+                          editedData.confidence.property !== undefined && editedData.confidence.unitNumber !== undefined
+                            ? getConfidenceColor(Math.min(editedData.confidence.property, editedData.confidence.unitNumber))
+                            : editedData.confidence.property !== undefined
+                            ? getConfidenceColor(editedData.confidence.property)
+                            : getConfidenceColor(editedData.confidence.unitNumber!)
+                        }`}>
+                          {editedData.confidence.property !== undefined && editedData.confidence.unitNumber !== undefined
+                            ? Math.round(Math.min(editedData.confidence.property, editedData.confidence.unitNumber) * 100)
+                            : editedData.confidence.property !== undefined
+                            ? Math.round(editedData.confidence.property * 100)
+                            : Math.round(editedData.confidence.unitNumber! * 100)}%
                         </span>
                       )}
                     </div>
                     <input
                       type="text"
-                      value={editedData.property || ''}
-                      onChange={(e) => handleFieldChange('property', e.target.value)}
+                      value={editedData.property && editedData.unitNumber
+                        ? `${editedData.property} - ${editedData.unitNumber}`
+                        : editedData.property || editedData.unitNumber || ''}
+                      onChange={(e) => handleCombinedUnitChange(e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Not found"
+                      placeholder="Property Name - Unit Number"
                     />
+                    <p className="text-xs text-gray-500">Format: Property Name - Unit Number (e.g., "Prairie Village - 6C")</p>
                   </div>
                 )}
 
@@ -298,27 +342,6 @@ export default function PDFPreviewModal({
                       type="text"
                       value={editedData.rent || ''}
                       onChange={(e) => handleFieldChange('rent', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Not found"
-                    />
-                  </div>
-                )}
-
-                {/* Unit Number Field */}
-                {editedData.unitNumber !== undefined && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-semibold text-gray-700">Unit Number</label>
-                      {editedData.confidence.unitNumber !== undefined && (
-                        <span className={`text-xs font-medium px-2 py-1 rounded border ${getConfidenceColor(editedData.confidence.unitNumber)}`}>
-                          {Math.round(editedData.confidence.unitNumber * 100)}%
-                        </span>
-                      )}
-                    </div>
-                    <input
-                      type="text"
-                      value={editedData.unitNumber || ''}
-                      onChange={(e) => handleFieldChange('unitNumber', e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Not found"
                     />

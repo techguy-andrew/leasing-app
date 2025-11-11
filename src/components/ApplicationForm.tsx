@@ -600,13 +600,23 @@ export default function ApplicationForm({
               <span className="text-xs font-semibold text-gray-500">
                 Unit
               </span>
-              <InlineSelectField
-                value={formData.unitId}
-                onChange={(value) => handleFieldChange('unitId', value)}
-                options={unitOptions}
-                isEditMode={isEditMode}
-                placeholder="Select unit"
-              />
+              {isEditMode ? (
+                <InlineSelectField
+                  value={formData.unitId}
+                  onChange={(value) => handleFieldChange('unitId', value)}
+                  options={unitOptions}
+                  isEditMode={isEditMode}
+                  placeholder="Select unit"
+                />
+              ) : (
+                formData.unitId ? (
+                  <span className="text-base sm:text-lg font-sans text-gray-900">
+                    {unitOptions.find(opt => opt.value === formData.unitId)?.label || formData.unitId}
+                  </span>
+                ) : (
+                  <span className="text-base sm:text-lg font-sans text-gray-400">No unit selected</span>
+                )
+              )}
             </motion.div>
 
             {/* Move-in Date Field */}
