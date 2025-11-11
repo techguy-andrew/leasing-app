@@ -21,9 +21,6 @@ import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animation
  * Required fields:
  * - Applicant Name
  * - Application Date (MM/DD/YYYY format)
- * - Move-in Date (MM/DD/YYYY format)
- * - Property
- * - Unit Number
  *
  * All other fields are optional and flexible, as they are subject to change.
  *
@@ -59,8 +56,7 @@ import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animation
 interface FormData {
   status: string[]
   moveInDate: string
-  property: string
-  unitNumber: string
+  unitId: string
   applicant: string
   email: string
   phone: string
@@ -94,8 +90,7 @@ interface ApplicationFormProps {
 const defaultFormData: FormData = {
   status: ['New'],
   moveInDate: '',
-  property: '',
-  unitNumber: '',
+  unitId: '',
   applicant: '',
   email: '',
   phone: '',
@@ -131,7 +126,7 @@ export default function ApplicationForm({
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [toastType, setToastType] = useState<ToastType>('success')
-  const [propertyOptions, setPropertyOptions] = useState<{ value: string; label: string }[]>([])
+  const [unitOptions, setUnitOptions] = useState<{ value: string; label: string }[]>([])
 
   const [formData, setFormData] = useState<FormData>(() => ({
     ...defaultFormData,
@@ -155,28 +150,28 @@ export default function ApplicationForm({
     }
   }, [extractedData])
 
-  // Fetch properties from database
+  // Fetch units from database (with property info)
   useEffect(() => {
-    async function fetchProperties() {
+    async function fetchUnits() {
       try {
-        const response = await fetch('/api/properties')
+        const response = await fetch('/api/units')
         const data = await response.json()
 
         if (response.ok && data.success) {
-          const options = data.data.map((property: { name: string }) => ({
-            value: property.name,
-            label: property.name
+          const options = data.data.map((unit: { id: number; unitNumber: string; property: { name: string } }) => ({
+            value: unit.id.toString(),
+            label: `${unit.property.name} - ${unit.unitNumber}`
           }))
-          setPropertyOptions(options)
+          setUnitOptions(options)
         }
       } catch (error) {
-        console.error('Failed to fetch properties:', error)
+        console.error('Failed to fetch units:', error)
         // Fallback to empty array if fetch fails
-        setPropertyOptions([])
+        setUnitOptions([])
       }
     }
 
-    fetchProperties()
+    fetchUnits()
   }, [])
 
   // Format phone as XXX-XXX-XXXX
@@ -315,7 +310,28 @@ export default function ApplicationForm({
 
   // Format initial data for display
   const formatInitialData = useCallback((data: Partial<FormData>): FormData => {
-    const formatted = { ...defaultFormData, ...data }
+    // Start with defaults and merge data, converting null to empty strings
+    const formatted: FormData = { ...defaultFormData }
+
+    // Explicitly handle each field to maintain type safety
+    if (data.status !== undefined) formatted.status = data.status ?? []
+    if (data.moveInDate !== undefined) formatted.moveInDate = data.moveInDate ?? ''
+    if (data.unitId !== undefined) formatted.unitId = data.unitId ?? ''
+    if (data.applicant !== undefined) formatted.applicant = data.applicant ?? ''
+    if (data.email !== undefined) formatted.email = data.email ?? ''
+    if (data.phone !== undefined) formatted.phone = data.phone ?? ''
+    if (data.createdAt !== undefined) formatted.createdAt = data.createdAt ?? ''
+    if (data.deposit !== undefined) formatted.deposit = data.deposit ?? ''
+    if (data.rent !== undefined) formatted.rent = data.rent ?? ''
+    if (data.petFee !== undefined) formatted.petFee = data.petFee ?? ''
+    if (data.petRent !== undefined) formatted.petRent = data.petRent ?? ''
+    if (data.proratedRent !== undefined) formatted.proratedRent = data.proratedRent ?? ''
+    if (data.concession !== undefined) formatted.concession = data.concession ?? ''
+    if (data.rentersInsurance !== undefined) formatted.rentersInsurance = data.rentersInsurance ?? ''
+    if (data.adminFee !== undefined) formatted.adminFee = data.adminFee ?? ''
+    if (data.initialPayment !== undefined) formatted.initialPayment = data.initialPayment ?? ''
+    if (data.amountPaid !== undefined) formatted.amountPaid = data.amountPaid ?? ''
+    if (data.remainingBalance !== undefined) formatted.remainingBalance = data.remainingBalance ?? ''
 
     // Format phone if present
     if (formatted.phone) {
@@ -435,7 +451,7 @@ export default function ApplicationForm({
 
   // Save button handler
   const handleSave = async () => {
-    // Validate required fields: applicant name, application date, move-in date, property, and unit number
+    // Validate required fields: applicant name and application date
     if (!formData.applicant.trim()) {
       setToastType('error')
       setToastMessage('Applicant name is required')
@@ -456,27 +472,10 @@ export default function ApplicationForm({
       return
     }
 
-    if (!formData.moveInDate.trim()) {
-      setToastType('error')
-      setToastMessage('Move-in date is required')
-      return
-    }
-
-    if (!dateRegex.test(formData.moveInDate)) {
+    // Optional: Validate move-in date format if provided
+    if (formData.moveInDate.trim() && !dateRegex.test(formData.moveInDate)) {
       setToastType('error')
       setToastMessage('Move-in date must be in MM/DD/YYYY format')
-      return
-    }
-
-    if (!formData.property.trim()) {
-      setToastType('error')
-      setToastMessage('Property is required')
-      return
-    }
-
-    if (!formData.unitNumber.trim()) {
-      setToastType('error')
-      setToastMessage('Unit number is required')
       return
     }
 
@@ -596,37 +595,24 @@ export default function ApplicationForm({
               />
             </motion.div>
 
-            {/* Property Field */}
+            {/* Unit Field (combines property + unit number) */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Property <span className="text-red-500">*</span>
+                Unit
               </span>
               <InlineSelectField
-                value={formData.property}
-                onChange={(value) => handleFieldChange('property', value)}
-                options={propertyOptions}
+                value={formData.unitId}
+                onChange={(value) => handleFieldChange('unitId', value)}
+                options={unitOptions}
                 isEditMode={isEditMode}
-                placeholder="Property"
-              />
-            </motion.div>
-
-            {/* Unit Number Field */}
-            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
-              <span className="text-xs font-semibold text-gray-500">
-                Unit Number <span className="text-red-500">*</span>
-              </span>
-              <InlineTextField
-                value={formData.unitNumber}
-                onChange={(value) => handleFieldChange('unitNumber', value)}
-                isEditMode={isEditMode}
-                placeholder="Unit Number"
+                placeholder="Select unit"
               />
             </motion.div>
 
             {/* Move-in Date Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Move-in Date <span className="text-red-500">*</span>
+                Move-in Date
               </span>
               <InlineTextField
                 value={formData.moveInDate}

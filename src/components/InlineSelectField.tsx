@@ -34,7 +34,7 @@ import { AnimatePresence, motion } from 'motion/react'
  */
 
 interface InlineSelectFieldProps {
-  value: string
+  value: string | null | undefined
   onChange: (value: string) => void
   options: { value: string; label: string }[]
   isEditMode: boolean
@@ -43,13 +43,16 @@ interface InlineSelectFieldProps {
 }
 
 export default function InlineSelectField({
-  value,
+  value: valueProp,
   onChange,
   options,
   isEditMode,
   placeholder = 'Select',
   className = ''
 }: InlineSelectFieldProps) {
+  // Normalize null/undefined to empty string
+  const value = valueProp ?? ''
+
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 

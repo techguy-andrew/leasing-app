@@ -12,15 +12,15 @@ model Application {
   id               Int      @id @default(autoincrement())
   userId           String?  // Clerk user ID (optional for backward compatibility)
   status           String[] @default([])
-  moveInDate       String
+  moveInDate       String?
 
   // NEW: Unit relationship (optional - backward compatible)
   unitId           Int?
   unit             Unit?    @relation(fields: [unitId], references: [id], onDelete: SetNull)
 
   // LEGACY: Keep original text fields for backward compatibility
-  property         String   // Can still be used if unitId is null
-  unitNumber       String   // Can still be used if unitId is null
+  property         String?  // Can still be used if unitId is null
+  unitNumber       String?  // Can still be used if unitId is null
   applicant        String   // Can still be used if no persons linked
   email            String?
   phone            String?

@@ -20,12 +20,36 @@ interface Task {
   updatedAt: string
 }
 
+interface Unit {
+  id: number
+  unitNumber: string
+  property: {
+    id: number
+    name: string
+    street: string
+    city: string
+    state: string
+    zip: string
+  }
+}
+
+interface UnitOption {
+  id: number
+  unitNumber: string
+  property: {
+    name: string
+  }
+}
+
 interface Application {
   id: number
   status: string[]
   moveInDate: string
-  property: string
-  unitNumber: string
+  unitId: number | null
+  unit?: Unit  // Unit with property relation from API
+  personId?: number | null  // Primary applicant's person ID
+  property: string  // Legacy field - kept for backward compatibility
+  unitNumber: string  // Legacy field - kept for backward compatibility
   applicant: string
   email: string | null
   phone: string | null
@@ -50,8 +74,7 @@ interface Application {
 interface FormData {
   status: string[]
   moveInDate: string
-  property: string
-  unitNumber: string
+  unitId: string
   applicant: string
   email: string
   phone: string
@@ -76,6 +99,7 @@ interface PageProps {
 export default function ApplicationDetailPage({ params }: PageProps) {
   const router = useRouter()
   const [application, setApplication] = useState<Application | null>(null)
+  const [units, setUnits] = useState<UnitOption[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [appId, setAppId] = useState<number | null>(null)
@@ -134,7 +158,26 @@ export default function ApplicationDetailPage({ params }: PageProps) {
         }
 
         setAppId(id)
-        await loadApplication(id)
+
+        // Fetch application and units in parallel
+        const [applicationResponse, unitsResponse] = await Promise.all([
+          fetch(`/api/applications/${id}`),
+          fetch('/api/units')
+        ])
+
+        const applicationData = await applicationResponse.json()
+        const unitsData = await unitsResponse.json()
+
+        if (!applicationResponse.ok) {
+          throw new Error(applicationData.error || 'Failed to fetch application')
+        }
+
+        if (!unitsResponse.ok) {
+          throw new Error(unitsData.error || 'Failed to fetch units')
+        }
+
+        setApplication(applicationData.data)
+        setUnits(unitsData.data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')
       } finally {
@@ -149,7 +192,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     if (!appId) throw new Error('No application ID')
 
     // Normalize date to ensure MM/DD/YYYY format with leading zeros
-    const normalizeDate = (dateStr: string): string => {
+    const normalizeDate = (dateStr: string): string | null => {
+      if (!dateStr || dateStr.trim() === '') return null
       const digits = dateStr.replace(/\D/g, '')
       if (digits.length === 8) {
         return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`
@@ -164,6 +208,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
 
     const payload = {
       ...formData,
+      unitId: formData.unitId ? parseInt(formData.unitId, 10) : null,
       moveInDate: normalizeDate(formData.moveInDate),
       email: formData.email.trim() || null,
       phone: formData.phone.trim() || null,
@@ -213,7 +258,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
     if (!appId || !application) throw new Error('No application ID')
 
     // Normalize date to ensure MM/DD/YYYY format with leading zeros
-    const normalizeDate = (dateStr: string): string => {
+    const normalizeDate = (dateStr: string | null): string | null => {
+      if (!dateStr || dateStr.trim() === '') return null
       const digits = dateStr.replace(/\D/g, '')
       if (digits.length === 8) {
         return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4, 8)}`
@@ -230,8 +276,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
       applicant: application.applicant,
       createdAt: normalizeDate(application.createdAt),
       moveInDate: normalizeDate(application.moveInDate),
-      property: application.property,
-      unitNumber: application.unitNumber,
+      unitId: application.unitId,
       email: application.email?.trim() || null,
       phone: application.phone?.trim() || null,
       status,
@@ -312,8 +357,7 @@ export default function ApplicationDetailPage({ params }: PageProps) {
         initialData={{
           status: application.status,
           moveInDate: application.moveInDate,
-          property: application.property,
-          unitNumber: application.unitNumber,
+          unitId: application.unitId?.toString() || '',
           applicant: application.applicant,
           email: application.email || '',
           phone: application.phone || '',
@@ -331,6 +375,8 @@ export default function ApplicationDetailPage({ params }: PageProps) {
           remainingBalance: application.remainingBalance || ''
         }}
         initialTasks={application.tasks || []}
+        units={units}
+        personId={application.personId}
         applicationId={appId}
         onSave={handleSave}
         onCancel={handleCancel}

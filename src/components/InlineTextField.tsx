@@ -34,7 +34,7 @@ import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 're
  */
 
 interface InlineTextFieldProps {
-  value: string
+  value: string | null | undefined
   onChange: (value: string) => void
   isEditMode: boolean
   placeholder?: string
@@ -47,7 +47,7 @@ interface InlineTextFieldProps {
 }
 
 const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(function InlineTextField({
-  value,
+  value: valueProp,
   onChange,
   isEditMode,
   placeholder = '',
@@ -58,6 +58,9 @@ const InlineTextField = forwardRef<HTMLDivElement, InlineTextFieldProps>(functio
   formatType = 'text',
   allowNA = false
 }, ref) {
+  // Normalize null/undefined to empty string
+  const value = valueProp ?? ''
+
   const contentRef = useRef<HTMLDivElement>(null)
   const isTypingRef = useRef(false)
   const lastValueRef = useRef<string>(value)

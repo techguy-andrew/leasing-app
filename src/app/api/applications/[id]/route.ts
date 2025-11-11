@@ -40,6 +40,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           include: {
             property: true  // Include property through unit
           }
+        },
+        persons: {
+          include: {
+            person: true  // Include person details through ApplicationPerson junction
+          }
         }
       }
     })
@@ -76,8 +81,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       propertyAddress = `${propertyDetails.street}${application.unitNumber ? ` Apartment #${application.unitNumber}` : ''}\n${propertyDetails.city}, ${propertyDetails.state} ${propertyDetails.zip}`
     }
 
+    // Find primary applicant's personId
+    const primaryApplicant = application.persons?.find(ap => ap.isPrimary)
+    const personId = primaryApplicant?.personId || null
+
     const responseData = {
       ...application,
+      personId,  // Add personId to response
       propertyAddress,
       energyProvider: propertyDetails?.energyProvider || null
     }
@@ -136,7 +146,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const { applicant, createdAt, moveInDate, property, unitNumber, email, phone, status, tasks, deposit, rent, petFee, petRent, proratedRent, concession, rentersInsurance, adminFee, initialPayment, amountPaid, remainingBalance } = validationResult.data
+    const { applicant, createdAt, moveInDate, unitId, email, phone, status, tasks, deposit, rent, petFee, petRent, proratedRent, concession, rentersInsurance, adminFee, initialPayment, amountPaid, remainingBalance } = validationResult.data
 
     // Verify the application exists
     const existingApplication = await prisma.application.findUnique({
@@ -157,9 +167,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const updateData: {
       status: string[]
       createdAt: string
-      moveInDate: string
-      property: string
-      unitNumber: string
+      moveInDate: string | null | undefined
+      unitId: number | null | undefined
       applicant: string
       email: string | null
       phone: string | null
@@ -182,9 +191,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     } = {
       status: status || existingApplication.status,
       createdAt,
-      moveInDate,
-      property,
-      unitNumber,
+      moveInDate: moveInDate || null,
+      unitId: unitId || null,
       applicant,
       email,
       phone,
@@ -248,6 +256,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         tasks: {
           orderBy: {
             order: 'asc'
+          }
+        },
+        unit: {
+          include: {
+            property: true
           }
         }
       }

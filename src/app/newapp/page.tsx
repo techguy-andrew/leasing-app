@@ -12,8 +12,7 @@ import { ExtractedData } from '@/lib/pdf/smartExtractor'
 interface FormData {
   status: string[]
   moveInDate: string
-  property: string
-  unitNumber: string
+  unitId: string
   applicant: string
   email: string
   phone: string
@@ -51,9 +50,8 @@ export default function NewApplicationPage() {
     const payload = {
       name: formData.applicant,
       status: formData.status,
-      moveInDate: normalizeDate(formData.moveInDate),
-      property: formData.property,
-      unitNumber: formData.unitNumber,
+      moveInDate: formData.moveInDate.trim() ? normalizeDate(formData.moveInDate) : null,
+      unitId: formData.unitId ? parseInt(formData.unitId, 10) : null,
       email: formData.email.trim() || null,
       phone: formData.phone.trim() || null,
       createdAt: normalizeDate(formData.createdAt),
@@ -99,13 +97,13 @@ export default function NewApplicationPage() {
 
   const handleUseData = (data: ExtractedData) => {
     // Convert extracted data to form data format
+    // unitId is now automatically resolved by PDFPreviewModal if property + unitNumber provided
     const formData: Partial<FormData> = {
       applicant: data.name || '',
       email: data.email || '',
       phone: data.phone || '',
       moveInDate: data.moveInDate || '',
-      property: data.property || '',
-      unitNumber: data.unitNumber || '',
+      unitId: data.unitId || '',  // Resolved by PDFPreviewModal or empty for manual selection
       rent: data.rent || '',
       createdAt: data.createdAt || ''
     }

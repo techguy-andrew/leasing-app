@@ -33,9 +33,9 @@ import { listStagger, slideUp, scaleIn } from '@/lib/animations/variants'
 interface Application {
   id: number
   status: string[]
-  moveInDate: string
-  property: string
-  unitNumber: string
+  moveInDate: string | null
+  property: string | null
+  unitNumber: string | null
   applicant: string
   email: string | null
   phone: string | null

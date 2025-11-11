@@ -10,9 +10,9 @@ import FilterBar from '@/components/FilterBar'
 interface Application {
   id: number
   status: string[]
-  moveInDate: string
-  property: string
-  unitNumber: string
+  moveInDate: string | null
+  property: string | null
+  unitNumber: string | null
   applicant: string
   email: string | null
   phone: string | null
@@ -88,7 +88,11 @@ function ApplicationsContent() {
     return new Date(now.getFullYear(), now.getMonth() + 1, 0)
   }, [])
 
-  const parseMoveInDate = useCallback((dateString: string) => {
+  const parseMoveInDate = useCallback((dateString: string | null) => {
+    // Handle null or empty dates - return far future date so they sort to the end
+    if (!dateString || dateString.trim() === '') {
+      return new Date(9999, 11, 31)
+    }
     // Parse MM/DD/YYYY format
     const parts = dateString.split('/')
     if (parts.length === 3) {
@@ -116,7 +120,7 @@ function ApplicationsContent() {
 
     // Then filter by property
     if (propertyFilter.length > 0 && !propertyFilter.includes('All')) {
-      filtered = filtered.filter(app => propertyFilter.includes(app.property))
+      filtered = filtered.filter(app => app.property && propertyFilter.includes(app.property))
     }
 
     // Then apply calendar filter based on selected date type
@@ -130,6 +134,9 @@ function ApplicationsContent() {
       endOfWeek.setHours(23, 59, 59, 999)
 
       filtered = filtered.filter(app => {
+        // Skip apps with null dates when filtering by moveIn
+        if (dateType === 'moveIn' && !app.moveInDate) return false
+
         const date = dateType === 'moveIn'
           ? parseMoveInDate(app.moveInDate)
           : parseMoveInDate(app.createdAt)
@@ -142,6 +149,9 @@ function ApplicationsContent() {
       endOfMonth.setHours(23, 59, 59, 999)
 
       filtered = filtered.filter(app => {
+        // Skip apps with null dates when filtering by moveIn
+        if (dateType === 'moveIn' && !app.moveInDate) return false
+
         const date = dateType === 'moveIn'
           ? parseMoveInDate(app.moveInDate)
           : parseMoveInDate(app.createdAt)
@@ -171,7 +181,7 @@ function ApplicationsContent() {
         placeholder="Search by name or unit number..."
         searchFields={(app, term) =>
           app.applicant.toLowerCase().includes(term) ||
-          app.unitNumber.toLowerCase().includes(term)
+          (app.unitNumber?.toLowerCase().includes(term) ?? false)
         }
         filterResults={(app) => !app.status.includes('Archived')}
         renderResult={(app) => (

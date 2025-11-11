@@ -35,16 +35,17 @@ import Pill from '@/components/Pill'
 interface ApplicationListItemProps {
   id: number
   applicant: string
-  property: string
-  unitNumber: string
+  property?: string | null
+  unitNumber?: string | null
   status: string[]
-  moveInDate: string
+  moveInDate: string | null
   createdAt: string
   statusColors?: Record<string, string>
   statusOrder?: Record<string, number>
+  showPropertyUnit?: boolean // Control whether to show property/unit info
 }
 
-const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, property, unitNumber, status, moveInDate, statusColors = {}, statusOrder = {} }: ApplicationListItemProps) {
+const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, property, unitNumber, status, moveInDate, statusColors = {}, statusOrder = {}, showPropertyUnit = true }: ApplicationListItemProps) {
   // Sort statuses by custom order from settings
   const sortedStatuses = [...status].sort((a, b) => {
     const orderA = statusOrder[a] ?? 9999 // Put unknown statuses at the end
@@ -77,20 +78,24 @@ const ApplicationListItem = memo(function ApplicationListItem({ id, applicant, p
           })}
         </div>
 
-        {/* Property */}
-        <span className="truncate font-medium text-gray-900">
-          {property}
-        </span>
-
-        {/* Unit */}
-        <span className="text-gray-500 text-sm">
-          Unit {unitNumber}
-        </span>
+        {/* Property & Unit (conditionally shown) */}
+        {showPropertyUnit && property && (
+          <span className="truncate font-medium text-gray-900">
+            {property}
+          </span>
+        )}
+        {showPropertyUnit && unitNumber && (
+          <span className="text-gray-500 text-sm">
+            Unit {unitNumber}
+          </span>
+        )}
 
         {/* Move-in Date */}
-        <span className="text-gray-500 text-sm">
-          Move-in: {moveInDate}
-        </span>
+        {moveInDate && (
+          <span className="text-gray-500 text-sm">
+            Move-in: {moveInDate}
+          </span>
+        )}
       </div>
 
       <motion.div

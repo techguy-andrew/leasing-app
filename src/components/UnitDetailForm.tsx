@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { AnimatePresence, motion } from 'motion/react'
 import InlineTextField from '@/components/InlineTextField'
 import InlineSelectField from '@/components/InlineSelectField'
@@ -252,12 +253,25 @@ export default function UnitDetailForm({
               <span className="text-xs font-semibold text-gray-500">
                 Property
               </span>
-              <InlineSelectField
-                value={formData.propertyId.toString()}
-                onChange={(value) => handleFieldChange('propertyId', parseInt(value, 10))}
-                options={propertyOptions}
-                isEditMode={isEditMode}
-              />
+              {isEditMode ? (
+                <InlineSelectField
+                  value={formData.propertyId.toString()}
+                  onChange={(value) => handleFieldChange('propertyId', parseInt(value, 10))}
+                  options={propertyOptions}
+                  isEditMode={isEditMode}
+                />
+              ) : (
+                formData.propertyId ? (
+                  <Link
+                    href={`/properties/${formData.propertyId}`}
+                    className="text-base sm:text-lg font-sans text-blue-600 underline hover:text-blue-800 transition-colors"
+                  >
+                    {propertyOptions.find(opt => opt.value === formData.propertyId.toString())?.label || formData.propertyId}
+                  </Link>
+                ) : (
+                  <span className="text-base sm:text-lg font-sans text-gray-400">No property selected</span>
+                )
+              )}
             </motion.div>
 
             {/* Street Address Field */}

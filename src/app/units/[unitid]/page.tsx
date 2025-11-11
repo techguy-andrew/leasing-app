@@ -2,14 +2,23 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'motion/react'
+import { motion, AnimatePresence } from 'motion/react'
 import UnitDetailForm from '@/components/UnitDetailForm'
+import ApplicationListItem from '@/components/ApplicationListItem'
 import LoadingScreen from '@/components/LoadingScreen'
-import { fadeIn } from '@/lib/animations/variants'
+import { fadeIn, listStagger, staggerItem } from '@/lib/animations/variants'
 
 interface Property {
   id: number
   name: string
+}
+
+interface Application {
+  id: number
+  name: string
+  status: string[]
+  moveInDate: string | null
+  createdAt: string
 }
 
 interface Unit {
@@ -28,6 +37,7 @@ interface Unit {
   status: string
   availableOn: Date | string | null
   property: Property
+  applications?: Application[]
 }
 
 interface FormData {
@@ -178,26 +188,99 @@ export default function UnitDetailPage({ params }: PageProps) {
     return d.toISOString().split('T')[0]
   }
 
+  const applications = unit.applications || []
+
   return (
-    <UnitDetailForm
-      mode="edit"
-      initialData={{
-        propertyId: unit.propertyId,
-        unitNumber: unit.unitNumber,
-        bedrooms: unit.bedrooms?.toString() || '',
-        bathrooms: unit.bathrooms?.toString() || '',
-        squareFeet: unit.squareFeet?.toString() || '',
-        floor: unit.floor?.toString() || '',
-        baseRent: unit.baseRent || '',
-        status: unit.status,
-        availableOn: formatDateForInput(unit.availableOn)
-      }}
-      unitId={unitId}
-      properties={properties}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      onDelete={handleDelete}
-      showDeleteButton={true}
-    />
+    <div className="flex flex-col flex-1 w-full">
+      <UnitDetailForm
+        mode="edit"
+        initialData={{
+          propertyId: unit.propertyId,
+          unitNumber: unit.unitNumber,
+          bedrooms: unit.bedrooms?.toString() || '',
+          bathrooms: unit.bathrooms?.toString() || '',
+          squareFeet: unit.squareFeet?.toString() || '',
+          floor: unit.floor?.toString() || '',
+          baseRent: unit.baseRent || '',
+          status: unit.status,
+          availableOn: formatDateForInput(unit.availableOn)
+        }}
+        unitId={unitId}
+        properties={properties}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        onDelete={handleDelete}
+        showDeleteButton={true}
+      />
+
+      {/* Applications Section */}
+      <div className="flex flex-col w-full bg-white border-t border-gray-200 p-4 sm:p-6 md:p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Applications</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              {applications.length} {applications.length === 1 ? 'application' : 'applications'} for this unit
+            </p>
+          </div>
+          <button
+            onClick={() => router.push(`/newapp?unitId=${unitId}`)}
+            className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+          >
+            + Add Application
+          </button>
+        </div>
+
+        {applications.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-12 sm:py-16 px-4 text-center border-2 border-dashed border-gray-300 rounded-lg"
+          >
+            <svg className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No applications yet</h3>
+            <p className="text-sm sm:text-base text-gray-500 max-w-md mb-4">
+              Get started by adding the first application for this unit.
+            </p>
+            <button
+              onClick={() => router.push(`/newapp?unitId=${unitId}`)}
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+            >
+              + Add First Application
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div
+            variants={listStagger}
+            initial="hidden"
+            animate="visible"
+            className="flex flex-col border border-gray-200 rounded-lg overflow-hidden"
+          >
+            <AnimatePresence mode="popLayout">
+              {applications.map((application) => (
+                <motion.div
+                  key={application.id}
+                  variants={staggerItem}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <ApplicationListItem
+                    id={application.id}
+                    applicant={application.name}
+                    status={application.status}
+                    moveInDate={application.moveInDate}
+                    createdAt={application.createdAt}
+                    showPropertyUnit={false}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </div>
+    </div>
   )
 }

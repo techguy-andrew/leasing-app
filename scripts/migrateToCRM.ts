@@ -131,6 +131,12 @@ async function migrateToCRM() {
         continue
       }
 
+      // Skip if property is not set
+      if (!app.property) {
+        console.log(`   ⏭️  Skipping app ${app.id} - no property set`)
+        continue
+      }
+
       // Find the property ID
       const propertyId = propertyMap.get(app.property.toLowerCase())
 
@@ -138,6 +144,12 @@ async function migrateToCRM() {
         const error = `   ⚠️  Warning: Property "${app.property}" not found for app ${app.id}`
         console.log(error)
         stats.errors.push(error)
+        continue
+      }
+
+      // Skip if unit number is not set
+      if (!app.unitNumber) {
+        console.log(`   ⏭️  Skipping app ${app.id} - no unit number set`)
         continue
       }
 
@@ -203,9 +215,9 @@ async function migrateToCRM() {
       const personKey = app.email ? app.email.toLowerCase() : app.applicant.toLowerCase()
       const personId = personMap.get(personKey)
 
-      // Get unit ID
-      const propertyId = propertyMap.get(app.property.toLowerCase())
-      const unitKey = propertyId ? `${propertyId}|${app.unitNumber}` : null
+      // Get unit ID (if property and unitNumber are set)
+      const propertyId = app.property ? propertyMap.get(app.property.toLowerCase()) : null
+      const unitKey = propertyId && app.unitNumber ? `${propertyId}|${app.unitNumber}` : null
       const unitId = unitKey ? unitMap.get(unitKey) : null
 
       if (!personId) {

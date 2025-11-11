@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import Link from 'next/link'
 import { AnimatePresence, motion } from 'motion/react'
 import InlineTextField from '@/components/InlineTextField'
 import InlineSelectField from '@/components/InlineSelectField'
@@ -58,8 +59,7 @@ import { useToolBar } from '@/contexts/ToolBarContext'
 interface FormData {
   status: string[]
   moveInDate: string
-  property: string
-  unitNumber: string
+  unitId: string  // Changed from property/unitNumber to unitId
   applicant: string
   email: string
   phone: string
@@ -87,10 +87,20 @@ interface Task {
   updatedAt: string
 }
 
+interface Unit {
+  id: number
+  unitNumber: string
+  property: {
+    name: string
+  }
+}
+
 interface ApplicationDetailFormProps {
   mode: 'create' | 'edit'
   initialData?: Partial<FormData>
   initialTasks?: Task[]
+  units: Unit[]  // Pre-loaded units from parent
+  personId?: number | null  // Primary applicant's person ID for linking
   applicationId?: number
   onSave: (data: FormData) => Promise<void>
   onCancel: () => void
@@ -103,8 +113,7 @@ interface ApplicationDetailFormProps {
 const defaultFormData: FormData = {
   status: ['New'],
   moveInDate: '',
-  property: '',
-  unitNumber: '',
+  unitId: '',
   applicant: '',
   email: '',
   phone: '',
@@ -126,6 +135,8 @@ export default function ApplicationDetailForm({
   mode,
   initialData,
   initialTasks = [],
+  units,
+  personId,
   applicationId,
   onSave,
   onCancel,
@@ -140,7 +151,6 @@ export default function ApplicationDetailForm({
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
   const [toastType, setToastType] = useState<ToastType>('success')
-  const [propertyOptions, setPropertyOptions] = useState<{ value: string; label: string }[]>([])
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false)
 
   const { setOnUpdateStatus } = useToolBar()
@@ -155,29 +165,13 @@ export default function ApplicationDetailForm({
     ...initialData
   }))
 
-  // Fetch properties from database
-  useEffect(() => {
-    async function fetchProperties() {
-      try {
-        const response = await fetch('/api/properties')
-        const data = await response.json()
-
-        if (response.ok && data.success) {
-          const options = data.data.map((property: { name: string }) => ({
-            value: property.name,
-            label: property.name
-          }))
-          setPropertyOptions(options)
-        }
-      } catch (error) {
-        console.error('Failed to fetch properties:', error)
-        // Fallback to empty array if fetch fails
-        setPropertyOptions([])
-      }
-    }
-
-    fetchProperties()
-  }, [])
+  // Transform units prop into dropdown options
+  const unitOptions = useMemo(() => {
+    return units.map((unit) => ({
+      value: unit.id.toString(),
+      label: `${unit.property.name} - ${unit.unitNumber}`
+    }))
+  }, [units])
 
   // Register toolbar callback to open status modal
   useEffect(() => {
@@ -580,32 +574,31 @@ export default function ApplicationDetailForm({
               />
             </motion.div>
 
-            {/* Property Field */}
+            {/* Unit Field (combines property + unit number) */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Property
+                Unit
               </span>
-              <InlineSelectField
-                value={formData.property}
-                onChange={(value) => handleFieldChange('property', value)}
-                options={propertyOptions}
-                isEditMode={isEditMode}
-                placeholder="Property"
-              />
-            </motion.div>
-
-            {/* Unit Number Field */}
-            <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
-              <span className="text-xs font-semibold text-gray-500">
-                Unit Number
-              </span>
-              <InlineTextField
-                value={formData.unitNumber}
-                onChange={(value) => handleFieldChange('unitNumber', value)}
-                isEditMode={isEditMode}
-                placeholder="Unit Number"
-                onEnterPress={handleSave}
-              />
+              {isEditMode ? (
+                <InlineSelectField
+                  value={formData.unitId}
+                  onChange={(value) => handleFieldChange('unitId', value)}
+                  options={unitOptions}
+                  isEditMode={isEditMode}
+                  placeholder="Select unit"
+                />
+              ) : (
+                formData.unitId ? (
+                  <Link
+                    href={`/units/${formData.unitId}`}
+                    className="text-base sm:text-lg font-sans text-blue-600 underline hover:text-blue-800 transition-colors"
+                  >
+                    {unitOptions.find(opt => opt.value === formData.unitId)?.label || formData.unitId}
+                  </Link>
+                ) : (
+                  <span className="text-base sm:text-lg font-sans text-gray-400">No unit selected</span>
+                )
+              )}
             </motion.div>
 
             {/* Move-in Date Field */}
@@ -643,13 +636,28 @@ export default function ApplicationDetailForm({
               <span className="text-xs font-semibold text-gray-500">
                 Applicant Name
               </span>
-              <InlineTextField
-                value={formData.applicant}
-                onChange={(value) => handleFieldChange('applicant', value)}
-                isEditMode={isEditMode}
-                placeholder="Applicant Name"
-                onEnterPress={handleSave}
-              />
+              {isEditMode ? (
+                <InlineTextField
+                  value={formData.applicant}
+                  onChange={(value) => handleFieldChange('applicant', value)}
+                  isEditMode={isEditMode}
+                  placeholder="Applicant Name"
+                  onEnterPress={handleSave}
+                />
+              ) : (
+                personId ? (
+                  <Link
+                    href={`/people/${personId}`}
+                    className="text-base sm:text-lg font-sans text-blue-600 underline hover:text-blue-800 transition-colors"
+                  >
+                    {formData.applicant || 'No name'}
+                  </Link>
+                ) : (
+                  <div className="text-base sm:text-lg font-sans text-gray-900">
+                    {formData.applicant || 'No name'}
+                  </div>
+                )
+              )}
             </motion.div>
 
             {/* Email Field */}
