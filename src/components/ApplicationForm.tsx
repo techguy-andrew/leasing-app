@@ -21,6 +21,9 @@ import { pageTransition, formFieldStagger, formFieldItem } from '@/lib/animation
  * Required fields:
  * - Applicant Name
  * - Application Date (MM/DD/YYYY format)
+ * - Move-in Date (MM/DD/YYYY format)
+ * - Property
+ * - Unit Number
  *
  * All other fields are optional and flexible, as they are subject to change.
  *
@@ -432,7 +435,7 @@ export default function ApplicationForm({
 
   // Save button handler
   const handleSave = async () => {
-    // Validate required fields: applicant name and application date
+    // Validate required fields: applicant name, application date, move-in date, property, and unit number
     if (!formData.applicant.trim()) {
       setToastType('error')
       setToastMessage('Applicant name is required')
@@ -450,6 +453,30 @@ export default function ApplicationForm({
     if (!dateRegex.test(formData.createdAt)) {
       setToastType('error')
       setToastMessage('Application date must be in MM/DD/YYYY format')
+      return
+    }
+
+    if (!formData.moveInDate.trim()) {
+      setToastType('error')
+      setToastMessage('Move-in date is required')
+      return
+    }
+
+    if (!dateRegex.test(formData.moveInDate)) {
+      setToastType('error')
+      setToastMessage('Move-in date must be in MM/DD/YYYY format')
+      return
+    }
+
+    if (!formData.property.trim()) {
+      setToastType('error')
+      setToastMessage('Property is required')
+      return
+    }
+
+    if (!formData.unitNumber.trim()) {
+      setToastType('error')
+      setToastMessage('Unit number is required')
       return
     }
 
@@ -572,7 +599,7 @@ export default function ApplicationForm({
             {/* Property Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Property
+                Property <span className="text-red-500">*</span>
               </span>
               <InlineSelectField
                 value={formData.property}
@@ -586,7 +613,7 @@ export default function ApplicationForm({
             {/* Unit Number Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Unit Number
+                Unit Number <span className="text-red-500">*</span>
               </span>
               <InlineTextField
                 value={formData.unitNumber}
@@ -599,7 +626,7 @@ export default function ApplicationForm({
             {/* Move-in Date Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Move-in Date
+                Move-in Date <span className="text-red-500">*</span>
               </span>
               <InlineTextField
                 value={formData.moveInDate}
@@ -613,7 +640,7 @@ export default function ApplicationForm({
             {/* Application Date Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Application Date
+                Application Date <span className="text-red-500">*</span>
               </span>
               <InlineTextField
                 value={formData.createdAt}
@@ -627,7 +654,7 @@ export default function ApplicationForm({
             {/* Applicant Name Field */}
             <motion.div className="flex flex-col gap-1" variants={formFieldItem}>
               <span className="text-xs font-semibold text-gray-500">
-                Applicant Name
+                Applicant Name <span className="text-red-500">*</span>
               </span>
               <InlineTextField
                 value={formData.applicant}
