@@ -323,7 +323,7 @@ export default function PDFPreviewModal({
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Property Name - Unit Number"
                     />
-                    <p className="text-xs text-gray-500">Format: Property Name - Unit Number (e.g., "Prairie Village - 6C")</p>
+                    <p className="text-xs text-gray-500">Format: Property Name - Unit Number (e.g., &quot;Prairie Village - 6C&quot;)</p>
                   </div>
                 )}
 
