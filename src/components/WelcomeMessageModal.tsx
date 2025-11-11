@@ -58,7 +58,8 @@ export default function WelcomeMessageModal({
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6"
+          style={{ top: 'var(--header-height, 0px)' }}
         >
           {/* Backdrop */}
           <motion.div
@@ -81,7 +82,7 @@ export default function WelcomeMessageModal({
               stiffness: 300,
               duration: 0.3
             }}
-            className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[calc(100%-3rem)] flex flex-col border border-gray-200"
+            className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[calc(100vh-var(--header-height,0px)-3rem)] flex flex-col border border-gray-200"
           >
 
             {/* Fixed Header */}

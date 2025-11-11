@@ -107,7 +107,10 @@ export default function PDFPreviewModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center p-4 sm:p-6"
+          style={{ top: 'var(--header-height, 0px)' }}
+        >
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
@@ -129,7 +132,7 @@ export default function PDFPreviewModal({
               stiffness: 300,
               duration: 0.3
             }}
-            className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[calc(100%-3rem)] flex flex-col border border-gray-200"
+            className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[calc(100vh-var(--header-height,0px)-3rem)] flex flex-col border border-gray-200"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
