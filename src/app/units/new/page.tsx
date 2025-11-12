@@ -13,6 +13,10 @@ interface Property {
 interface FormData {
   propertyId: number
   unitNumber: string
+  street: string
+  city: string
+  state: string
+  zip: string
   bedrooms: string
   bathrooms: string
   squareFeet: string
@@ -61,17 +65,21 @@ export default function NewUnitPage() {
   }, [searchParams])
 
   const handleSave = async (formData: FormData) => {
-    // Convert string values to proper types for API
+    // Convert empty strings to null for API (matching application creation pattern)
     const payload = {
       propertyId: formData.propertyId,
       unitNumber: formData.unitNumber,
-      bedrooms: formData.bedrooms === '' ? '' : Number(formData.bedrooms),
-      bathrooms: formData.bathrooms === '' ? '' : Number(formData.bathrooms),
-      squareFeet: formData.squareFeet === '' ? '' : Number(formData.squareFeet),
-      floor: formData.floor === '' ? '' : Number(formData.floor),
-      baseRent: formData.baseRent,
+      street: formData.street.trim() || null,
+      city: formData.city.trim() || null,
+      state: formData.state.trim() || null,
+      zip: formData.zip.trim() || null,
+      bedrooms: formData.bedrooms === '' ? null : Number(formData.bedrooms),
+      bathrooms: formData.bathrooms === '' ? null : Number(formData.bathrooms),
+      squareFeet: formData.squareFeet === '' ? null : Number(formData.squareFeet),
+      floor: formData.floor === '' ? null : Number(formData.floor),
+      baseRent: formData.baseRent.trim() || null,
       status: formData.status,
-      availableOn: formData.availableOn
+      availableOn: formData.availableOn.trim() || null
     }
 
     const response = await fetch('/api/units', {

@@ -59,19 +59,15 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
 
-    // Convert empty strings to null/undefined for optional numeric fields
+    // Convert empty strings and null to undefined for optional numeric fields
     const processedBody = {
       ...body,
-      street: body.street === '' ? null : body.street,
-      city: body.city === '' ? null : body.city,
-      state: body.state === '' ? null : body.state,
-      zip: body.zip === '' ? null : body.zip,
-      bedrooms: body.bedrooms === '' ? undefined : body.bedrooms,
-      bathrooms: body.bathrooms === '' ? undefined : body.bathrooms,
-      squareFeet: body.squareFeet === '' ? undefined : body.squareFeet,
-      floor: body.floor === '' ? undefined : body.floor,
-      baseRent: body.baseRent === '' ? null : body.baseRent,
-      availableOn: body.availableOn === '' ? null : body.availableOn ? new Date(body.availableOn) : null
+      bedrooms: body.bedrooms === '' || body.bedrooms === null ? undefined : body.bedrooms,
+      bathrooms: body.bathrooms === '' || body.bathrooms === null ? undefined : body.bathrooms,
+      squareFeet: body.squareFeet === '' || body.squareFeet === null ? undefined : body.squareFeet,
+      floor: body.floor === '' || body.floor === null ? undefined : body.floor,
+      baseRent: body.baseRent === '' || body.baseRent === null ? null : body.baseRent,
+      availableOn: body.availableOn === '' || body.availableOn === null ? null : body.availableOn ? new Date(body.availableOn) : null
     }
 
     // Validate request body with Zod
@@ -100,10 +96,10 @@ export async function POST(request: NextRequest) {
         userId,
         propertyId,
         unitNumber,
-        street: street || null,
-        city: city || null,
-        state: state || null,
-        zip: zip || null,
+        street: street === '' ? null : street || null,
+        city: city === '' ? null : city || null,
+        state: state === '' ? null : state || null,
+        zip: zip === '' ? null : zip || null,
         bedrooms: bedrooms || null,
         bathrooms: bathrooms || null,
         squareFeet: squareFeet || null,

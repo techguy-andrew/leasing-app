@@ -114,17 +114,21 @@ export default function UnitDetailPage({ params }: PageProps) {
   const handleSave = async (formData: FormData) => {
     if (!unitId) throw new Error('No unit ID')
 
-    // Convert string values to proper types for API
+    // Convert empty strings to null for API (matching application update pattern)
     const payload = {
       propertyId: formData.propertyId,
       unitNumber: formData.unitNumber,
-      bedrooms: formData.bedrooms === '' ? '' : Number(formData.bedrooms),
-      bathrooms: formData.bathrooms === '' ? '' : Number(formData.bathrooms),
-      squareFeet: formData.squareFeet === '' ? '' : Number(formData.squareFeet),
-      floor: formData.floor === '' ? '' : Number(formData.floor),
-      baseRent: formData.baseRent,
+      street: formData.street.trim() || null,
+      city: formData.city.trim() || null,
+      state: formData.state.trim() || null,
+      zip: formData.zip.trim() || null,
+      bedrooms: formData.bedrooms === '' ? null : Number(formData.bedrooms),
+      bathrooms: formData.bathrooms === '' ? null : Number(formData.bathrooms),
+      squareFeet: formData.squareFeet === '' ? null : Number(formData.squareFeet),
+      floor: formData.floor === '' ? null : Number(formData.floor),
+      baseRent: formData.baseRent.trim() || null,
       status: formData.status,
-      availableOn: formData.availableOn
+      availableOn: formData.availableOn.trim() || null
     }
 
     const response = await fetch(`/api/units/${unitId}`, {
@@ -197,6 +201,10 @@ export default function UnitDetailPage({ params }: PageProps) {
         initialData={{
           propertyId: unit.propertyId,
           unitNumber: unit.unitNumber,
+          street: unit.street || '',
+          city: unit.city || '',
+          state: unit.state || '',
+          zip: unit.zip || '',
           bedrooms: unit.bedrooms?.toString() || '',
           bathrooms: unit.bathrooms?.toString() || '',
           squareFeet: unit.squareFeet?.toString() || '',
